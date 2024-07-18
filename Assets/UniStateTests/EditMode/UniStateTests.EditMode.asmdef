@@ -1,0 +1,11 @@
+{
+  "name": "UniStateTests.EditMode",
+  "references": [
+    "UniState",
+    "UniTask",
+    "VContainer"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}
