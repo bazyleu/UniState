@@ -1,3 +1,5 @@
+#if UNISTATE_VCONTAINER_SUPPORT
+
 using VContainer;
 using VContainer.Unity;
 
@@ -11,3 +13,5 @@ namespace UniState
         }
     }
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if UNISTATE_VCONTAINER_SUPPORT
+
 using System;
 using VContainer;
 
@@ -15,3 +17,5 @@ namespace UniState
         public Object Resolve(Type type) => _resolver.Resolve(type);
     }
 }
+
+#endif

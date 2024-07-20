@@ -19,9 +19,10 @@ namespace UniState
             where TSateMachine : class, IStateMachine =>
             StateMachineHelper.CreateStateMachine<TSateMachine>(_currentResolver);
 
-        //TODO: Move under compilation flags
+#if UNISTATE_VCONTAINER_SUPPORT
         public IExecutableStateMachine Create<TSateMachine>(VContainer.IObjectResolver objectResolver)
             where TSateMachine : class, IStateMachine =>
             StateMachineHelper.CreateStateMachine<TSateMachine>(new VContainerTypeResolver(objectResolver));
+#endif
     }
 }

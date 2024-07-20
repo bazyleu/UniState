@@ -8,8 +8,9 @@ namespace UniState
         IExecutableStateMachine Create<TSateMachine>()
             where TSateMachine : class, IStateMachine;
 
-        //TODO: Move under compilation flags
+#if UNISTATE_VCONTAINER_SUPPORT
         IExecutableStateMachine Create<TSateMachine>(VContainer.IObjectResolver objectResolver)
             where TSateMachine : class, IStateMachine;
+#endif
     }
 }
