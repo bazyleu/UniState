@@ -19,8 +19,5 @@
     "async"
   ],
   "license": "MIT",
-  "category": "Task",
-  "dependencies": {
-    "com.cysharp.unitask": "2.3.1"
-  }
+  "category": "Task"
 }
