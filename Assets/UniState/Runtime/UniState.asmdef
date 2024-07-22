@@ -17,6 +17,11 @@
       "name": "jp.hadashikick.vcontainer",
       "expression": "",
       "define": "UNISTATE_VCONTAINER_SUPPORT"
+    },
+    {
+      "name": "com.svermeulen.extenject",
+      "expression": "",
+      "define": "UNISTATE_EXTENJECT_SUPPORT"
     }
   ],
   "noEngineReferences": false

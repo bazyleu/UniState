@@ -5,7 +5,8 @@
     "UniTask",
     "UnityEditor.TestRunner",
     "UnityEngine.TestRunner",
-    "VContainer"
+    "VContainer",
+    "Zenject"
   ],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
