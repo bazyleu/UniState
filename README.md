@@ -115,6 +115,7 @@ Here is how to bind these state classes using VContainer.
         protected override void Configure(IContainerBuilder builder)
         {
             builder.Register<MainStateMachine>(Lifetime.Scoped);
+            builder.Register<GameLoadingState>(Lifetime.Scoped);
             builder.Register<MainMenuState>(Lifetime.Scoped);
             builder.Register<ConfirmationExitPopupState>(Lifetime.Scoped);
             builder.Register<GameplayState>(Lifetime.Scoped);
@@ -133,7 +134,7 @@ Following code demonstrates how to run the state machine.
             CancellationTokenSource cts = new CancellationTokenSource();
 
             var stateMachine =  StateMachineHelper.CreateStateMachine<MainStateMachine>(_objectResolver.ToTypeResolver());
-            await stateMachine.Execute<Test1State>(cts.Token);
+            await stateMachine.Execute<GameLoadingState>(cts.Token);
         }
     }
 ```
