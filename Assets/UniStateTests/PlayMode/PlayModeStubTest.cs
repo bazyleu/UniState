@@ -35,21 +35,16 @@ namespace UniStateTests.PlayMode.States
         [UnityTest]
         public IEnumerator SuccessTest() => UniTask.ToCoroutine(async () =>
         {
-            //TODO: new VContainerTypeResolver???
-
              CancellationTokenSource cts = new CancellationTokenSource();
 
              using var slim = cts.CancelAfterSlim(TimeSpan.FromSeconds(5), DelayType.UnscaledDeltaTime);
 
-             var stateMachine = new SimpleStateMachine();
-             stateMachine.Initialize(new VContainerTypeResolver(_objectResolver));
+             var stateMachine =  StateMachineHelper.CreateStateMachine<SimpleStateMachine>(_objectResolver.ToTypeResolver());
 
              await stateMachine.Execute<Test1State>(cts.Token);
 
             Assert.Pass();
         });
-
-
 
         [UnityTest]
         public IEnumerator FailTest() => UniTask.ToCoroutine(async () =>

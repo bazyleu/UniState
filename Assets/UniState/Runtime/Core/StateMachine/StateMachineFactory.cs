@@ -1,5 +1,3 @@
-using UniState;
-
 namespace UniState
 {
     public class StateMachineFactory : IStateMachineFactory
@@ -18,11 +16,5 @@ namespace UniState
         public IExecutableStateMachine Create<TSateMachine>()
             where TSateMachine : class, IStateMachine =>
             StateMachineHelper.CreateStateMachine<TSateMachine>(_currentResolver);
-
-#if UNISTATE_VCONTAINER_SUPPORT
-        public IExecutableStateMachine Create<TSateMachine>(VContainer.IObjectResolver objectResolver)
-            where TSateMachine : class, IStateMachine =>
-            StateMachineHelper.CreateStateMachine<TSateMachine>(new VContainerTypeResolver(objectResolver));
-#endif
     }
 }

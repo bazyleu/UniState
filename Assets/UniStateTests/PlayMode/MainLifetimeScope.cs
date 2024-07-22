@@ -9,9 +9,7 @@ namespace UniStateTests
     {
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.Register<ITypeResolver, VContainerTypeResolver>(Lifetime.Singleton);
-
-            // Temp:
+            builder.Register<SimpleStateMachine>(Lifetime.Scoped);
             builder.Register<Test1State>(Lifetime.Scoped);
             builder.Register<Test2State>(Lifetime.Scoped);
             builder.Register<Test3StateAbstract, Test3State>(Lifetime.Scoped);

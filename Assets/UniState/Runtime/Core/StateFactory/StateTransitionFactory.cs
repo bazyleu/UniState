@@ -9,7 +9,6 @@ namespace UniState
         private readonly IStateTransitionFacade _transitionFacade;
         private readonly IStateMachineFactory _stateMachineFactory;
 
-        //Change to factory
         public StateTransitionFactory(ITypeResolver resolver)
         {
             _resolver = resolver;
