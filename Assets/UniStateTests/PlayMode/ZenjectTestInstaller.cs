@@ -3,6 +3,7 @@ using Zenject;
 
 namespace UniStateTests.PlayMode
 {
+    //TODO: Remove?
     public class ZenjectTestInstaller : MonoInstaller
     {
         public override void InstallBindings()
