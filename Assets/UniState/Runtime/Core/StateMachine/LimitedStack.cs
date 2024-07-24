@@ -13,7 +13,7 @@ namespace UniState
 
         public T Push(T element)
         {
-            if (_list.Capacity <= _list.Count)
+            if (_list.Capacity == _list.Count)
             {
                 _list.RemoveAt(0);
             }
@@ -23,11 +23,11 @@ namespace UniState
             return element;
         }
 
-        public T Pick() => _list.Count > 0 ? _list[^1] : default;
+        public T Peek() => _list.Count > 0 ? _list[^1] : default;
 
         public T Pop()
         {
-            var result = Pick();
+            var result = Peek();
 
             if (_list.Count > 0)
             {
