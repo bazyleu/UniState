@@ -13,7 +13,7 @@ namespace UniState
 
         public T Push(T element)
         {
-            if (_list.Capacity <= _list.Count)
+            if (_list.Capacity == _list.Count)
             {
                 _list.RemoveAt(0);
             }
