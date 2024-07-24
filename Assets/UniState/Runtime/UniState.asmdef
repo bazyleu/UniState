@@ -3,7 +3,8 @@
   "rootNamespace": "",
   "references": [
     "UniTask",
-    "VContainer"
+    "VContainer",
+    "Zenject"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
@@ -17,6 +18,11 @@
       "name": "jp.hadashikick.vcontainer",
       "expression": "",
       "define": "UNISTATE_VCONTAINER_SUPPORT"
+    },
+    {
+      "name": "com.svermeulen.extenject",
+      "expression": "",
+      "define": "UNISTATE_ZENJECT_SUPPORT"
     }
   ],
   "noEngineReferences": false

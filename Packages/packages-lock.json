@@ -7,6 +7,13 @@
       "dependencies": {},
       "hash": "809d23edae0df58fd0f61b4b6f67855c59d1b2fb"
     },
+    "com.svermeulen.extenject": {
+      "version": "https://github.com/Mathijs-Bakker/Extenject.git?path=UnityProject/Assets/Plugins/Zenject/Source",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "76068b095fc32b89af0ff191114ba82d22a7d3d8"
+    },
     "com.unity.burst": {
       "version": "1.6.6",
       "depth": 1,
