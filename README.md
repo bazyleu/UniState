@@ -10,12 +10,12 @@ UniState is an architectural framework for Unity, designed around State pattern.
 
 Installation
 ---
-Requires a version of unity that supports path query parameter for git packages (Unity >= 2020.1a21). You can add `https://github.com/bazyleu/UniState.git?path=Assets/UniState#` to Package Manager
+Requires a version of unity that supports path query parameter for git packages (Unity >= 2020.1a21). You can add `https://github.com/bazyleu/UniState.git?path=Assets/UniState` to Package Manager
 
 ![image](https://github.com/user-attachments/assets/120e6750-1f33-44f7-99c8-a3e7fa166d21)
 ![image](https://github.com/user-attachments/assets/3fed7201-b748-4261-b4f8-7bdffdac072d)
 
-or add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState#"` to `Packages/manifest.json`.
+or add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState"` to `Packages/manifest.json`.
 
 If you want to set a target version, UniState uses the `*.*.*` release tag so you can specify a version like `#1.1.0`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`.
 
@@ -115,6 +115,7 @@ Here is how to bind these state classes using VContainer.
         protected override void Configure(IContainerBuilder builder)
         {
             builder.Register<MainStateMachine>(Lifetime.Scoped);
+            builder.Register<GameLoadingState>(Lifetime.Scoped);
             builder.Register<MainMenuState>(Lifetime.Scoped);
             builder.Register<ConfirmationExitPopupState>(Lifetime.Scoped);
             builder.Register<GameplayState>(Lifetime.Scoped);
@@ -133,7 +134,7 @@ Following code demonstrates how to run the state machine.
             CancellationTokenSource cts = new CancellationTokenSource();
 
             var stateMachine =  StateMachineHelper.CreateStateMachine<MainStateMachine>(_objectResolver.ToTypeResolver());
-            await stateMachine.Execute<Test1State>(cts.Token);
+            await stateMachine.Execute<GameLoadingState>(cts.Token);
         }
     }
 ```
