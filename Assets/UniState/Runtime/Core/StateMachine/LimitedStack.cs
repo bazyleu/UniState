@@ -2,18 +2,18 @@ namespace UniState
 {
     public class LimitedStack<T>
     {
-        private readonly  T[] _list;
-        private int _top = 0;
-        private int _bot = 0;
+        private readonly  T[] _items;
+        private int _topIndex = 0;
+        private int _bottomIndex = 0;
         private int _maxSize;
-        // count: (_top - _bot) % _maxSize
-        // top index: (_top - 1) % _maxSize
-        // isNotEmpty: _top != _bot
+        // count: (_topIndex - _bottomIndex) % _maxSize
+        // top index: (_topIndex - 1) % _maxSize
+        // isNotEmpty: _topIndex != _bottomIndex
 
         public LimitedStack(int maxSize)
         {
             _maxSize = maxSize;
-            _list = new T[_maxSize];
+            _items = new T[_maxSize];
         }
 
         public T Push(T element)
@@ -21,26 +21,26 @@ namespace UniState
             // If max capacity reached
             // remove one from bottom
             // no need to clear as it will be replaced right away
-            if (_top != _bot && (_top - _bot) % _maxSize == 0)
+            if (_topIndex != _bottomIndex && (_topIndex - _bottomIndex) % _maxSize == 0)
             {
-                _bot++;
+                _bottomIndex++;
             }
 
-            _top++;
-            _list[(_top-1)%_maxSize] = element;
+            _topIndex++;
+            _items[(_topIndex-1)%_maxSize] = element;
             return element;
         }
 
-        public T Peek() => _top != _bot ? _list[(_top-1)%_maxSize] : default(T);
+        public T Peek() => _topIndex != _bottomIndex ? _items[(_topIndex-1)%_maxSize] : default(T);
 
         public T Pop()
         {
             var result = Peek();
 
-            if (_top != _bot)
+            if (_topIndex != _bottomIndex)
             {
-                _list[(_top-1)%_maxSize] = default(T);
-                _top--;
+                _items[(_topIndex-1)%_maxSize] = default(T);
+                _topIndex--;
             }
 
             return result;
