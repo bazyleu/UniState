@@ -45,5 +45,38 @@ namespace UniState
 
             return result;
         }
+        
+        public T[] ToArray()
+        {
+            var res = new T[Count()];
+            if (_bottomIndex == _topIndex)
+            {
+                return [];
+            }
+            else if (_topIndex < _maxSize)
+            {
+                Array.Copy(_items, res, Count());
+            }
+            else
+            {
+                var remainderSize = _maxSize - (_bottomIndex % _maxSize);
+                Array.Copy(
+                    sourceArray: _items,
+                    sourceIndex: _bottomIndex % _maxSize,
+                    destinationArray: res,
+                    destinationIndex: 0,
+                    length: remainderSize
+                );
+                Array.Copy(
+                    sourceArray: _items,
+                    sourceIndex: 0,
+                    destinationArray: res,
+                    destinationIndex: remainderSize,
+                    length: _topIndex % _maxSize
+                );
+            }
+
+            return res;
+        }
     }
 }
