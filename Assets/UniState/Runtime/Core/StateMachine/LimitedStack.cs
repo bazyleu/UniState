@@ -1,40 +1,82 @@
-using System.Collections.Generic;
-
 namespace UniState
 {
     public class LimitedStack<T>
     {
-        private readonly List<T> _list;
+        private readonly  T[] _items;
+        private readonly int _maxSize;
+        private int _topIndex = 0;
+        private int _bottomIndex = 0;
+        // top list index: (_topIndex - 1) % _maxSize
+        // isNotEmpty: _topIndex != _bottomIndex
 
         public LimitedStack(int maxSize)
         {
-            _list = new List<T>(maxSize);
+            _maxSize = maxSize;
+            _items = new T[_maxSize];
         }
+        
+        public int Count() => _topIndex - _bottomIndex;
 
         public T Push(T element)
         {
-            if (_list.Capacity == _list.Count)
+            // If max capacity reached - remove one from bottom
+            // no need to clear as it will be replaced right away
+            if (Count() == _maxSize)
             {
-                _list.RemoveAt(0);
+                _bottomIndex++;
             }
 
-            _list.Add(element);
-
+            _topIndex++;
+            _items[(_topIndex-1)%_maxSize] = element;
             return element;
         }
 
-        public T Peek() => _list.Count > 0 ? _list[^1] : default;
+        public T Peek() => _topIndex != _bottomIndex ? _items[(_topIndex-1)%_maxSize] : default(T);
 
         public T Pop()
         {
             var result = Peek();
 
-            if (_list.Count > 0)
+            if (_topIndex != _bottomIndex)
             {
-                _list.RemoveAt(_list.Count - 1);
+                _items[(_topIndex-1)%_maxSize] = default(T);
+                _topIndex--;
             }
 
             return result;
+        }
+        
+        public T[] ToArray()
+        {
+            var res = new T[Count()];
+            if (_bottomIndex == _topIndex)
+            {
+                return [];
+            }
+            else if (_topIndex < _maxSize)
+            {
+                Array.Copy(_items, res, Count());
+            }
+            else
+            {
+                var remainderSize = _maxSize - (_bottomIndex % _maxSize);
+                Array.Copy(
+                    sourceArray: _items,
+                    sourceIndex: _bottomIndex % _maxSize,
+                    destinationArray: res,
+                    destinationIndex: 0,
+                    length: remainderSize
+                );
+                Array.Copy(
+                    sourceArray: _items,
+                    sourceIndex: 0,
+                    destinationArray: res,
+                    destinationIndex: remainderSize,
+                    length: _topIndex % _maxSize
+                );
+            }
+
+            return res;
         }
     }
 }
