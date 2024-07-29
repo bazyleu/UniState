@@ -16,18 +16,21 @@ Installation
  * Requires UniTask package installed. Guide regarding UniTask installation can be found on [Cysharp/UniTask README](https://github.com/Cysharp/UniTask/blob/master/README.md#upm-package).
  
 
-### Add package from git URL
+### Option 1: Add package from git URL
 
-You can add `https://github.com/bazyleu/UniState.git?path=Assets/UniState` to Package Manager
+You can add `https://github.com/bazyleu/UniState.git?path=Assets/UniState` to Package Manager.
+
+It is a good practice to specify target version, UniState uses the `*.*.*` release tag so you can specify a version like `#1.1.0`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`.
+You can find latest version number [here](https://github.com/bazyleu/UniState/releases). 
 
 ![image](https://github.com/user-attachments/assets/120e6750-1f33-44f7-99c8-a3e7fa166d21)
 ![image](https://github.com/user-attachments/assets/3fed7201-b748-4261-b4f8-7bdffdac072d)
 
-### _(Alternative)_ Add via manifest.json
+### Option 2: Add via manifest.json
 
-Alternatively you can add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState"` to `Packages/manifest.json`.
+You can add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState"` (or with version tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`) to `Packages/manifest.json`.
 
-If you want to set a target version, UniState uses the `*.*.*` release tag so you can specify a version like `#1.1.0`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`.
+
 
 
 Simple State Machine Example
