@@ -11,13 +11,13 @@ namespace UniState
 
     public abstract class StateBase<T> : IState<T>
     {
-        private List<IDisposable> _resources;
+        private List<IDisposable> _disposables;
 
         protected T Payload { get; private set; }
 
         protected IStateTransitionFacade Transition { get; private set; }
         protected IStateMachineFactory StateMachineFactory { get; private set; }
-        protected List<IDisposable> Resources => _resources ??= new(4);
+        protected List<IDisposable> Disposables => _disposables ??= new(4);
 
         public abstract UniTask<StateTransitionInfo> Execute(CancellationToken token);
 
@@ -43,14 +43,14 @@ namespace UniState
 
         public virtual void Dispose()
         {
-            if (_resources?.Count > 0)
+            if (_disposables?.Count > 0)
             {
-                foreach (var disposable in _resources)
+                foreach (var disposable in _disposables)
                 {
                     disposable?.Dispose();
                 }
 
-                _resources = null;
+                _disposables = null;
             }
         }
     }

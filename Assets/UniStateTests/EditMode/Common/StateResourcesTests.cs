@@ -15,8 +15,8 @@ namespace UniStateTests.EditMode.Common
 
             public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
             {
-                Resources.Add(Payload);
-                Resources.Add(() => DisposeCount++);
+                Disposables.Add(Payload);
+                Disposables.Add(() => DisposeCount++);
 
                 return default;
             }
