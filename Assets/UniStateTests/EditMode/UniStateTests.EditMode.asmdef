@@ -3,7 +3,8 @@
   "references": [
     "UniState",
     "UniTask",
-    "VContainer"
+    "VContainer",
+    "Zenject"
   ],
   "includePlatforms": [
     "Editor"

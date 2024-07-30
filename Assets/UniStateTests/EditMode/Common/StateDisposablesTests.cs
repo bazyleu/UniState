@@ -1,58 +1,52 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UniState;
+using Zenject;
 
 namespace UniStateTests.EditMode.Common
 {
     [TestFixture]
     internal class StateDisposablesTests
     {
-        private class ResourcesState : StateBase<IDisposable>
+        private class DisposablesState : StateBase<IList<IDisposable>>
         {
-            public int DisposeCount;
 
             public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
             {
-                Disposables.Add(Payload);
-                Disposables.Add(() => DisposeCount++);
+                Disposables.AddRange(Payload);
 
-                return default;
+                return UniTask.FromResult(Transition.GoToExit());
             }
         }
 
         [Test]
-        public void Dispose_DisposesResources()
+        public void Dispose_DisposesInternalList()
         {
-            var wasDisposed = false;
-            var state = SetUpStateForDisposal(new DisposableAction(() => wasDisposed = true));
+            var disposedObjects = 0;
+            var disposables = new List<IDisposable>
+            {
+                new DisposableAction(() => disposedObjects++),
+                () => disposedObjects++
+            };
 
-            Assert.IsFalse(wasDisposed);
-            state.Dispose();
-            Assert.IsTrue(wasDisposed);
+            ExecuteState(disposables);
+
+            Assert.AreEqual(disposedObjects, 2);
         }
 
-        [Test]
-        public void Dispose_Twice_DisposedOnce()
+        private static void ExecuteState(IList<IDisposable> disposables)
         {
-            var state = SetUpStateForDisposal(default);
+            var container = new DiContainer(StaticContext.Container);
+
+            container.Bind<StateMachine>().ToSelf().AsTransient();
+            container.Bind<DisposablesState>().ToSelf().AsTransient();
             
-            Assert.AreEqual(state.DisposeCount, 0);
-            state.Dispose();
-            Assert.AreEqual(state.DisposeCount, 1);
-            state.Dispose();
-            Assert.AreEqual(state.DisposeCount, 1);
-        }
+            var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(container.ToTypeResolver());
 
-        private static ResourcesState SetUpStateForDisposal(IDisposable disposable)
-        {
-            var state = new ResourcesState();
-
-            state.SetPayload(disposable);
-            state.Execute(default).GetAwaiter().GetResult();
-
-            return state;
+            stateMachine.Execute<DisposablesState, IList<IDisposable>>(disposables, default).GetAwaiter().GetResult();
         }
     }
 }
