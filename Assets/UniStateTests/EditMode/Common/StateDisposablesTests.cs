@@ -7,7 +7,7 @@ using UniState;
 namespace UniStateTests.EditMode.Common
 {
     [TestFixture]
-    internal class StateResourcesTests
+    internal class StateDisposablesTests
     {
         private class ResourcesState : StateBase<IDisposable>
         {
