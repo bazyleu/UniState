@@ -13,7 +13,6 @@ namespace UniStateTests.EditMode.Common
     {
         private class DisposablesState : StateBase<IList<IDisposable>>
         {
-
             public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
             {
                 Disposables.AddRange(Payload);
@@ -22,8 +21,24 @@ namespace UniStateTests.EditMode.Common
             }
         }
 
+        private class ExceptionDisposableState : DisposablesState
+        {
+            public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
+            {
+                _ = base.Execute(token);
+
+                throw new("Test exception");
+            }
+        }
+
         [Test]
-        public void Dispose_DisposesInternalList()
+        public void Dispose_DisposesInternalList() => CheckDisposeIsCalled<DisposablesState>();
+
+        [Test]
+        public void Execute_WithException_DisposesInternalList() => CheckDisposeIsCalled<ExceptionDisposableState>();
+
+        private static void CheckDisposeIsCalled<TState>()
+            where TState : DisposablesState
         {
             var disposedObjects = 0;
             var disposables = new List<IDisposable>
@@ -32,21 +47,22 @@ namespace UniStateTests.EditMode.Common
                 () => disposedObjects++
             };
 
-            ExecuteState(disposables);
+            ExecuteState<TState>(disposables);
 
             Assert.AreEqual(disposedObjects, 2);
         }
 
-        private static void ExecuteState(IList<IDisposable> disposables)
+        private static void ExecuteState<TState>(IList<IDisposable> disposables)
+            where TState: DisposablesState
         {
             var container = new DiContainer(StaticContext.Container);
 
             container.Bind<StateMachine>().ToSelf().AsTransient();
-            container.Bind<DisposablesState>().ToSelf().AsTransient();
-            
-            var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(container.ToTypeResolver());
+            container.Bind<TState>().ToSelf().AsTransient();
 
-            stateMachine.Execute<DisposablesState, IList<IDisposable>>(disposables, default).GetAwaiter().GetResult();
+            var stateMachine = StateMachineHelper.CreateStateMachine<StateMachine>(container.ToTypeResolver());
+
+            stateMachine.Execute<TState, IList<IDisposable>>(disposables, default).GetAwaiter().GetResult();
         }
     }
 }
