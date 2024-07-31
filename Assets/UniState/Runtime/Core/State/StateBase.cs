@@ -45,8 +45,9 @@ namespace UniState
         {
             if (_disposables?.Count > 0)
             {
-                foreach (var disposable in _disposables)
+                for (var i = _disposables.Count - 1; i >= 0; i--)
                 {
+                    var disposable = _disposables[i];
                     disposable?.Dispose();
                 }
 
