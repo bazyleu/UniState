@@ -6,25 +6,27 @@ UniState is an architectural framework for Unity, designed around State pattern.
 ## Table of Contents
 <!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
 
-- [UniState](#unistate)
-    * [Table of Contents](#table-of-contents)
-    * [Installation](#installation)
-        + [Requirements](#requirements)
-        + [Option 1: Add package from git URL](#option-1-add-package-from-git-url)
-        + [Option 2: Add via manifest.json](#option-2-add-via-manifestjson)
-    * [Simple State Machine Example](#simple-state-machine-example)
-    * [API Details and Usage](#api-details-and-usage)
-        + [1. States](#1-states)
-          * [State Creating](#state-creating)
-          * [Examples](#examples)
-            - [State Lifecycle](#state-lifecycle)
-            - [State Transitions](#state-transitions)
-        + [State Machine](#state-machine)
-            - [1. Creating a State Machine](#1-creating-a-state-machine)
-            - [2. Running a State Machine](#2-running-a-state-machine)
-            - [3. Creating and Running a State Machine Inside States](#3-creating-and-running-a-state-machine-inside-states)
-            - [4. State Machine Context](#4-state-machine-context)
-    * [License](#license)
+- [Installation](#installation)
+    * [Requirements](#requirements)
+    * [Option 1: Add package from git URL](#option-1-add-package-from-git-url)
+    * [Option 2: Add via manifest.json](#option-2-add-via-manifestjson)
+- [Simple State Machine Example](#simple-state-machine-example)
+- [API Details and Usage](#api-details-and-usage)
+    * [States](#states)
+      - [State Creating](#state-creating)
+      - [Examples](#examples)
+        + [State Lifecycle](#state-lifecycle)
+        + [State Transitions](#state-transitions)
+    * [State Machine](#state-machine)
+        + [Creating a State Machine](#creating-a-state-machine)
+        + [Running a State Machine](#running-a-state-machine)
+        + [Creating and Running a State Machine Inside States](#creating-and-running-a-state-machine-inside-states)
+        + [State Machine Context](#state-machine-context)
+    * [CompositeState](#compositestate)
+        + [Creating a CompositeState](#creating-a-compositestate)
+        + [SubState](#substate)
+        + [DefaultCompositeState](#defaultcompositestate)
+- [License](#license)
 
 <!-- TOC end -->
 
@@ -171,7 +173,7 @@ Following code demonstrates how to run the state machine.
 
 ## API Details and Usage
  
-### 1. States
+### States
 
 A state is a fundamental unit of logic in an application, often representing different screens or states, such as an idle scene, main menu, popup, or a specific state of a popup.
 
@@ -238,7 +240,7 @@ The lifecycle of a state consists of four stages, represented by the following m
     - Used for initializing resources, such as loading prefabs, subscribing to events, etc.
 
 2. **Execute**
-    - The only method that must be overridden in `StateBase`. It contains the main logic of the state and remains active until it returns a result with a transition to another state. For example, a state displaying a popup might wait for button presses and handle the result here. See the [Return Values](#return-values) section for more details.
+    - The only method that must be overridden in `StateBase`. It contains the main logic of the state and remains active until it returns a result with a transition to another state. For example, a state displaying a popup might wait for button presses and handle the result here. See the [State Transitions](#state-transitions) section for more details.
 
 3. **Exit**
     - Completes the state's work, such as unsubscribing from buttons and closing the popup (e.g., playing a closing animation).
@@ -263,7 +265,7 @@ The `Execute` method of a state should return a `StateTransitionInfo` object, wh
 
 The state machine is the entry point into the framework, responsible for running states.
 
-#### 1. Creating a State Machine
+#### Creating a State Machine
 
 To create the initial state machine, use the helper `StateMachineHelper.CreateStateMachine<TSateMachine>(ITypeResolver typeResolver)`.
 
@@ -271,7 +273,7 @@ To create the initial state machine, use the helper `StateMachineHelper.CreateSt
 
 - **ITypeResolver**: Used to create the state machine. It acts as a factory for creating states and other state machines. You can implement it yourself or use the provided implementation from DI frameworks like VContainer or Zenject via the `.ToTypeResolver()` extension.
 
-#### 2. Running a State Machine
+#### Running a State Machine
 
 After creating the state machine, you can run it with the specified state:
 
@@ -282,7 +284,7 @@ var payload = new BarPayload();
 await stateMachine.Execute<BarState>(payload, cts.Token);
 ```
 
-#### 3. Creating and Running a State Machine Inside States
+#### Creating and Running a State Machine Inside States
 
 Any state can create and run a state machine within itself using the `StateMachineFactory` property. This is the recommended method for creating a state machine inside a state.
 
@@ -300,7 +302,7 @@ await stateMachine.Execute<FooState>(cts.Token);
 }
 ```
 
-#### 4. State Machine Context
+#### State Machine Context
 
 UniState natively supports sub-containers and sub-contexts available in modern DI frameworks.
 
@@ -318,6 +320,22 @@ StateMachineFactory.Create<TSateMachine>();
 ```
 
 For larger projects using sub-containers/sub-contexts in your DI framework to manage resources more efficiently, you can pass them into `Create` to force the state machine to use them for creating states and dependencies. Thus, UniState supports this natively without additional actions required from you.
+
+### CompositeState
+
+CompositeState is essential for complex areas of an application likely to be worked on by multiple people simultaneously. They consist of various independent SubStates, each with its own logic.
+
+#### Creating a CompositeState
+
+To create a composite state, inherit from `CompositeStateBase` (or implement the `ICompositeState` interface for more detailed control). You can also use the ready-made implementation `DefaultCompositeState` (see the [DefaultCompositeState](#defaultcompositestate) section). No additional actions are needed.
+
+#### SubState
+
+SubStates are states tied to a CompositeState, created and run simultaneously with it. To create a SubState, inherit from `SubStateBase` or implement the `ISubState` interface for greater customization. When creating a SubState, specify the parent composite state as a generic parameter, e.g., `FooSubState : SubStateBase<BarCompositeState>`. In all other aspects, it functions like a regular state.
+
+#### DefaultCompositeState
+
+A ready-to-use implementation for a composite state that propagates `Initialize`, `Execute`, and `Exit` methods to all SubStates within it. The result of the `Execute` method will be the first completed `Execute` method among all SubStates.
 
 ## License
  
