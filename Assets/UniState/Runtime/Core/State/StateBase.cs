@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UniState;
 
 namespace UniState
 {
@@ -11,10 +11,13 @@ namespace UniState
 
     public abstract class StateBase<T> : IState<T>
     {
+        private List<IDisposable> _disposables;
+
         protected T Payload { get; private set; }
 
         protected IStateTransitionFacade Transition { get; private set; }
         protected IStateMachineFactory StateMachineFactory { get; private set; }
+        protected List<IDisposable> Disposables => _disposables ??= new(4);
 
         public abstract UniTask<StateTransitionInfo> Execute(CancellationToken token);
 
@@ -40,7 +43,16 @@ namespace UniState
 
         public virtual void Dispose()
         {
+            if (_disposables?.Count > 0)
+            {
+                for (var i = _disposables.Count - 1; i >= 0; i--)
+                {
+                    var disposable = _disposables[i];
+                    disposable?.Dispose();
+                }
 
+                _disposables = null;
+            }
         }
     }
 }
