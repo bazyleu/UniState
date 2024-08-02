@@ -13,19 +13,22 @@ UniState is an architectural framework for Unity, designed around State pattern.
 - [Simple State Machine Example](#simple-state-machine-example)
 - [API Details and Usage](#api-details-and-usage)
     * [States](#states)
-      - [State Creating](#state-creating)
-      - [Examples](#examples)
+        + [State Creating](#state-creating)
         + [State Lifecycle](#state-lifecycle)
         + [State Transitions](#state-transitions)
+        + [State Behavior Attribute](#state-behavior-attribute)
     * [State Machine](#state-machine)
         + [Creating a State Machine](#creating-a-state-machine)
         + [Running a State Machine](#running-a-state-machine)
         + [Creating and Running a State Machine Inside States](#creating-and-running-a-state-machine-inside-states)
         + [State Machine Context](#state-machine-context)
-    * [CompositeState](#compositestate)
-        + [Creating a CompositeState](#creating-a-compositestate)
+    * [Composite State](#composite-state)
+        + [Creating a Composite State](#creating-a-composite-state)
         + [SubState](#substate)
-        + [DefaultCompositeState](#defaultcompositestate)
+        + [Default Composite State](#default-composite-state)
+- [Integrations](#integrations)
+    * [VContainer](#vcontainer)
+    * [Zenject / Extenject](#zenject--extenject)
 - [License](#license)
 
 <!-- TOC end -->
@@ -50,9 +53,6 @@ You can find latest version number [here](https://github.com/bazyleu/UniState/re
 ### Option 2: Add via manifest.json
 
 You can add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState"` (or with version tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`) to `Packages/manifest.json`.
-
-
-
 
 ## Simple State Machine Example
 
@@ -177,13 +177,11 @@ Following code demonstrates how to run the state machine.
 
 A state is a fundamental unit of logic in an application, often representing different screens or states, such as an idle scene, main menu, popup, or a specific state of a popup.
 
-##### State Creating
+#### State Creating
 
 To create your custom state, you can inherit from `StateBase` or `StateBase<T>`. Use `StateBase<T>` if you need to pass parameters to the state.
 
 For highly customized states, you can manually implement the `IState<TPayload>` interface. However, in most cases, `StateBase` will suffice.
-
-##### Examples
 
 ```csharp
 
@@ -201,8 +199,10 @@ public class FooStateWithPayload : StateBase<FooPayload>
 {
     public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
     {
+        // Get payload
         FooPayload payload = Payload; 
-        // State logic here with payload
+        
+        // State logic with payload here
     }
 }
 
@@ -260,6 +260,76 @@ The `Execute` method of a state should return a `StateTransitionInfo` object, wh
 
 3. **GoToExit**
     - Exits the current state machine. See the [State Machine](#state-machine) section for more details.
+
+
+```csharp
+public class ExampleState : StateBase
+{
+    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    {
+        var transition = await DoSomeAsyncLogic(token);
+
+        switch (transition)
+        {
+            case TransitionExample.GoTo:
+                return Transition.GoTo<FooState>();
+
+            case TransitionExample.GoToWithPayload:
+                var payload = 42;
+                return Transition.GoTo<BarState, int>(payload);
+
+            case TransitionExample.GoToAbstract:
+                return Transition.GoTo<IFooState>();
+
+            case TransitionExample.GoBack:
+                return Transition.GoBack();
+
+            case TransitionExample.GoToExit:
+                return Transition.GoToExit();
+
+            default:
+                return Transition.GoToExit();
+        }
+    }
+
+    private UniTask<TransitionExample> DoSomeAsyncLogic(CancellationToken token)
+    {
+        // Some logic here
+        return UniTask.FromResult(TransitionExample.GoTo);
+    }
+}
+```
+
+#### State Behavior Attribute
+
+It is possible to customize the behavior of a specific state using the `StateBehaviour` attribute.
+
+This attribute has the following parameters:
+
+- **ProhibitReturnToState** (default value: false): When enabled, this state cannot be returned to via `Transition.GoBack()`. The state with this attribute will be skipped, and control will return to the state before it. This behavior can be useful for states that represent 'loading', there is no point of returning to loading.
+
+- **InitializeOnStateTransition** (default value: false): When enabled, the initialization of the state will begin before exiting the previous state. Technically, this means `Initialize()` of the state will be called before `Exit()` of the previous state. This behavior can be useful for seamless transitions in complex animations, where the state represents only part of the animation.
+
+```csharp
+[StateBehaviour(ProhibitReturnToState = true)]
+public class FooState: StateBase
+{
+    //...
+}
+
+[StateBehaviour(InitializeOnStateTransition = true)]
+public class BarState: StateBase
+{
+    //...
+}
+
+[StateBehaviour(InitializeOnStateTransition = true, ProhibitReturnToState = true)]
+public class BazState: StateBase
+{
+    //...
+}
+```
+
 
 ### State Machine
 
@@ -321,21 +391,57 @@ StateMachineFactory.Create<TSateMachine>();
 
 For larger projects using sub-containers/sub-contexts in your DI framework to manage resources more efficiently, you can pass them into `Create` to force the state machine to use them for creating states and dependencies. Thus, UniState supports this natively without additional actions required from you.
 
-### CompositeState
+### Composite State
 
-CompositeState is essential for complex areas of an application likely to be worked on by multiple people simultaneously. They consist of various independent SubStates, each with its own logic.
+Composite State is essential for complex areas of an application likely to be worked on by multiple people simultaneously. They consist of various independent sub states, each with its own logic.
 
-#### Creating a CompositeState
+#### Creating a Composite State
 
 To create a composite state, inherit from `CompositeStateBase` (or implement the `ICompositeState` interface for more detailed control). You can also use the ready-made implementation `DefaultCompositeState` (see the [DefaultCompositeState](#defaultcompositestate) section). No additional actions are needed.
 
 #### SubState
 
-SubStates are states tied to a CompositeState, created and run simultaneously with it. To create a SubState, inherit from `SubStateBase` or implement the `ISubState` interface for greater customization. When creating a SubState, specify the parent composite state as a generic parameter, e.g., `FooSubState : SubStateBase<BarCompositeState>`. In all other aspects, it functions like a regular state.
+SubStates are states tied to a composite state, created and run simultaneously with it. To create a SubState, inherit from `SubStateBase` or implement the `ISubState` interface for greater customization. When creating a sub state, specify the parent composite state as a generic parameter, e.g., `FooSubState : SubStateBase<BarCompositeState>`. In all other aspects, it functions like a regular state.
 
-#### DefaultCompositeState
+#### Default Composite State
 
-A ready-to-use implementation for a composite state that propagates `Initialize`, `Execute`, and `Exit` methods to all SubStates within it. The result of the `Execute` method will be the first completed `Execute` method among all SubStates.
+A ready-to-use implementation for a composite state that propagates `Initialize`, `Execute`, and `Exit` methods to all SubStates within it. The result of the `Execute` method will be the first completed `Execute` method among all sub states.
+
+## Integrations
+
+UniState supports integrations with the most popular DI containers. If these frameworks are installed via UPM, everything will work out of the box, and no additional actions are required.
+
+### VContainer
+GitHub: [VContainer](https://github.com/hadashiA/VContainer)
+
+To use it, convert `VContainer.IObjectResolver` to `UniState.ITypeResolver` by calling the extension `ToTypeResolver()` and pass it to the state machine.
+
+```csharp
+// Object resolver with main or child scope from VContainer
+VContainer.IObjectResolver _objectResolver;
+
+// Convert VContainer.IObjectResolver to ITypeResolver.TypeResolver
+var typeResolver = _objectResolver.ToTypeResolver();
+
+// Create state machine with VContainer support
+var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(typeResolver);
+```
+
+### Zenject / Extenject
+GitHub: [Extenject](https://github.com/Mathijs-Bakker/Extenject) or [Zenject](https://github.com/modesttree/Zenject)
+
+To use it, convert `Zenject.DiContainer` to `UniState.ITypeResolver` by calling the extension `ToTypeResolver()` and pass it to the state machine.
+
+```csharp
+// Zenject container / sub container
+Zenject.DiContainer container;
+
+// Convert Zenject.DiContainer to ITypeResolver.TypeResolver
+var typeResolver = container.ToTypeResolver();
+
+// Create state machine with Zenject support
+var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(typeResolver);
+```
 
 ## License
  
