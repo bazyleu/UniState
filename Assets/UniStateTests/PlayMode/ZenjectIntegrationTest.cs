@@ -15,7 +15,7 @@ namespace UniStateTests.PlayMode
     public class ZenjectIntegrationTest
     {
         [UnityTest]
-        public IEnumerator ZenjectTest() => UniTask.ToCoroutine(async () =>
+        public IEnumerator SimpleRun() => UniTask.ToCoroutine(async () =>
         {
             var container = new DiContainer(StaticContext.Container);
 

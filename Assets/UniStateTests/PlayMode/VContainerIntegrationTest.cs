@@ -4,16 +4,17 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UniState;
+using UniStateTests.PlayMode.States;
 using UnityEngine;
 using UnityEngine.TestTools;
 using VContainer;
 using Object = UnityEngine.Object;
 
 
-namespace UniStateTests.PlayMode.States
+namespace UniStateTests.PlayMode
 {
     [TestFixture]
-    public class PlayModeStubTest
+    public class VContainerIntegrationTest
     {
         private GameObject _containerHolder;
         private IObjectResolver _objectResolver;
@@ -33,7 +34,7 @@ namespace UniStateTests.PlayMode.States
         }
 
         [UnityTest]
-        public IEnumerator SuccessTest() => UniTask.ToCoroutine(async () =>
+        public IEnumerator SimpleRun() => UniTask.ToCoroutine(async () =>
         {
              CancellationTokenSource cts = new CancellationTokenSource();
 
@@ -44,15 +45,6 @@ namespace UniStateTests.PlayMode.States
              await stateMachine.Execute<Test1State>(cts.Token);
 
             Assert.Pass();
-        });
-
-        [UnityTest]
-        public IEnumerator FailTest() => UniTask.ToCoroutine(async () =>
-        {
-            Debug.Log("T1 " + Time.unscaledTime);
-            await UniTask.Delay(TimeSpan.FromSeconds(2));
-            Debug.Log("T2 " + Time.unscaledTime);
-            Assert.Fail();
         });
     }
 }
