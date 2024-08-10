@@ -419,6 +419,43 @@ SubStates are states tied to a composite state, created and run simultaneously w
 
 A ready-to-use implementation for a composite state that propagates `Initialize`, `Execute`, and `Exit` methods to all SubStates within it. The result of the `Execute` method will be the first completed `Execute` method among all sub states.
 
+### Disposables
+
+Disposables are a part of `StateBase` that allow users to tie `IDisposable` references and delegates to state's lifetime, guaranteeing disposal and delegate execution on state's `Dispose`, without overriding the method
+```csharp
+public class LoadingState : StateBase<ILoadingScreenView>
+{
+    private CancellationTokenSource _loadingCts;
+
+    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    {
+        // State's disposable references
+        _loadingCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+        Disposables.Add(_loadingCts);
+
+        // Handling of subscriptions with locality of behaviour
+        Payload.CancelClicked += OnCancelLoadingClicked;        
+        Disposables.Add(() => Payload.CancelClicked -= OnCancelLoadingClicked);
+
+        try
+        {
+            await Payload.PretendToWork(_loadingCts.Token);
+        }
+        catch (OperationCancelledException) when (!token.IsCancellationRequested)
+        {
+            return Transition.GoBack();
+        }
+
+        return Transition.GoTo<NextState>();
+    }
+    
+    private void OnCancelLoadingClicked()
+    {
+        _loadingCts.Cancel();
+    }
+}
+```
+
 ## Integrations
 
 UniState supports integrations with the most popular DI containers. If these frameworks are installed via UPM, everything will work out of the box, and no additional actions are required.
