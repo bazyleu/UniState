@@ -43,16 +43,8 @@ namespace UniState
 
         public virtual void Dispose()
         {
-            if (_disposables?.Count > 0)
-            {
-                for (var i = _disposables.Count - 1; i >= 0; i--)
-                {
-                    var disposable = _disposables[i];
-                    disposable?.Dispose();
-                }
-
-                _disposables = null;
-            }
+            _disposables.Dispose();
+            _disposables = null;
         }
     }
 }
