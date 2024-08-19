@@ -14,7 +14,7 @@ UniState is an architectural framework for Unity, designed around State pattern.
 - [Framework Philosophy](#framework-philosophy)
   + [Dependency Injection](#dependency-injection)
 - [API Details and Usage](#api-details-and-usage)
-    * [States](#states)
+    * [State](#state)
         + [State Creating](#state-creating)
         + [State Lifecycle](#state-lifecycle)
         + [State Transitions](#state-transitions)
@@ -186,7 +186,7 @@ Dependencies must be registered in your DI framework, and they will automaticall
 
 ## API Details and Usage
  
-### States
+### State
 
 A state is a fundamental unit of logic in an application, often representing different screens or states, such as an idle scene, main menu, popup, or a specific state of a popup.
 
