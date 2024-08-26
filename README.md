@@ -85,6 +85,11 @@ Here's an example of how the state classes can be implemented using UniState.
     {
         private ILoader _loader;
 
+        public GameLoadingState(ILoader loader)
+        {
+            _loader = loader;
+        }
+
         public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
         {
             await _loader.Loading();
@@ -96,6 +101,11 @@ Here's an example of how the state classes can be implemented using UniState.
     public class MainMenuState : StateBase
     {
         private IMainMenu _mainMenu;
+
+        public MainMenuState(IMainMenu mainMenu)
+        {
+            _mainMenu = mainMenu;
+        }
 
         public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
         {
@@ -118,6 +128,11 @@ Here's an example of how the state classes can be implemented using UniState.
     public class ConfirmationExitPopupState : StateBase
     {
         private IConfirmationPopup _confirmationPopup;
+
+        public ConfirmationExitPopupState(IConfirmationPopup confirmationPopup)
+        {
+            _confirmationPopup = _confirmationPopup;
+        }
 
         public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
         {
