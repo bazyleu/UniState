@@ -1,8 +1,5 @@
 # UniState
 
-
-
-
 [![Last Releases](https://img.shields.io/github/v/release/bazyleu/UniState.svg)](https://github.com/bazyleu/UniState/releases)
 ![Last Release Date](https://img.shields.io/github/release-date/bazyleu/UniState)
 ![Last Commit](https://img.shields.io/github/last-commit/bazyleu/UniState)
@@ -436,8 +433,8 @@ ITypeResolver _newContext;
 
 public UniTask<StateTransitionInfo> Execute(CancellationToken token)
 {
-var stateMachine = StateMachineFactory.Create<StateMachine>();
-await stateMachine.Execute<FooState>(cts.Token);
+    var stateMachine = StateMachineFactory.Create<StateMachine>();
+    await stateMachine.Execute<FooState>(cts.Token);
 
     var stateMachineWithNewContext = StateMachineFactory.Create<StateMachine>(_newContext);
     await stateMachineWithNewContext.Execute<FooState>(cts.Token);
