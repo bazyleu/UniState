@@ -1,7 +1,7 @@
 # UniState
 
-![All tests](https://github.com/bazyleu/UniState/actions/workflows//tests_all/badge.svg?branch=main)
-![All tests](https://github.com/bazyleu/UniState/actions/workflows//tests_all/badge.svg?event=push)
+![All tests](https://github.com/bazyleu/UniState/workflows/Run%20all%20tests/badge.svg?branch=main)
+![All tests](https://github.com/bazyleu/UniState/workflows/Run%20all%20tests/badge.svg?event=push)
 [![Releases](https://img.shields.io/github/v/release/bazyleu/UniState.svg)](https://github.com/bazyleu/UniState/releases)
 
 UniState is an architectural framework for Unity, designed around State pattern. Offers high performance and excellent scalability, ideal for complex Unity projects.
