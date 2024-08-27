@@ -58,4 +58,4 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          artifactsPath: ${{ matrix.testMode }}-${{ matrix.unityVersion }}-artifacts
+          artifactsPath: ${{ matrix.testMode }}-artifacts
