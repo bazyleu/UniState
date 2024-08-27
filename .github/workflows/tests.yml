@@ -6,6 +6,14 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  cancel-in-progress: true
+
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
 jobs:
   testRunner:
     name: ${{ matrix.testMode }} tests
@@ -47,17 +55,10 @@ jobs:
 
       - name: Run tests
         uses: game-ci/unity-test-runner@v4
-        id: testRunner
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: Artifacts for (${{ matrix.testMode }})
-          path: ${{ steps.testRunner.outputs.artifactsPath }}
-          overwrite: true
+          artifactsPath: ${{ matrix.testMode }}-${{ matrix.unityVersion }}-artifacts
