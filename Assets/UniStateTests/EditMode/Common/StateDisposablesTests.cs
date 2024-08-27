@@ -37,9 +37,6 @@ namespace UniStateTests.EditMode.Common
         [Test]
         public void Execute_WithException_DisposesInternalList() => CheckDisposeIsCalled<ExceptionDisposableState>();
 
-        [Test]
-        public void Execute_Temp_Test() => Assert.AreEqual(1, 2);
-
         private static void CheckDisposeIsCalled<TState>()
             where TState : DisposablesState
         {
