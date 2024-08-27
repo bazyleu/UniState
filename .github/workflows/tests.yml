@@ -1,5 +1,10 @@
-name: Run all tests
-on: workflow_dispatch
+name: tests
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   testRunner:
