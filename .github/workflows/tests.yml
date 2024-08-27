@@ -8,7 +8,7 @@ on:
 
 jobs:
   testRunner:
-    name: Test in ${{ matrix.testMode }} ✨
+    name: ${{ matrix.testMode }} tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -57,5 +57,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Test results
-          path: artifacts
+          name: Test results (${{ matrix.testMode }})
+          path: ${{ steps.allTests.outputs.artifactsPath }}
