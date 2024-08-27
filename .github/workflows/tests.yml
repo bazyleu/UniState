@@ -6,9 +6,6 @@ on:
       - main
   workflow_dispatch:
 
-concurrency:
-  cancel-in-progress: true
-
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
   UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
