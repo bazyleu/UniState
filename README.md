@@ -1,10 +1,10 @@
 # UniState
 
 [![Last Releases](https://img.shields.io/github/v/release/bazyleu/UniState.svg)](https://github.com/bazyleu/UniState/releases)
-![Last Release Date](https://img.shields.io/github/release-date/bazyleu/UniState)
+[![Last Release Date](https://img.shields.io/github/release-date/bazyleu/UniState)](https://github.com/bazyleu/UniState/releases)
 [![All Tests](https://github.com/bazyleu/UniState/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/bazyleu/UniState/actions)
-![Last Commit](https://img.shields.io/github/last-commit/bazyleu/UniState)
-![License](https://img.shields.io/github/license/bazyleu/UniState)
+[![Last Commit](https://img.shields.io/github/last-commit/bazyleu/UniState)](https://github.com/bazyleu/UniState/branches)
+[![License](https://img.shields.io/github/license/bazyleu/UniState)](LICENSE)
 
 UniState is an architectural framework for Unity, designed around State pattern. Offers high performance and excellent scalability, ideal for complex Unity projects.
 
@@ -36,7 +36,11 @@ UniState is an architectural framework for Unity, designed around State pattern.
         + [Default Composite State](#default-composite-state)
 - [Integrations](#integrations)
     * [VContainer](#vcontainer)
-    * [Zenject / Extenject](#zenject--extenject)
+        + [VContainer Preparation](#vcontainer-preparation)
+        + [VContainer Usage](#vcontainer-usage)
+    * [Zenject (Extenject)](#zenject-extenject)
+        + [Zenject Preparation](#zenject-preparation)
+        + [Zenject Usage](#zenject-usage)
 - [License](#license)
 
 <!-- TOC end -->
@@ -482,7 +486,15 @@ A ready-to-use implementation for a composite state that propagates `Initialize`
 UniState supports integrations with the most popular DI containers. If these frameworks are installed via UPM, everything will work out of the box, and no additional actions are required.
 
 ### VContainer
+
 GitHub: [VContainer](https://github.com/hadashiA/VContainer)
+
+#### VContainer Preparation
+
+If the VContainer is installed via UPM, you can skip this step and proceed to the [VContainer Usage](#vcontainer-usage) section.
+If the package is not installed via UPM, you need to manually add the `UNISTATE_VCONTAINER_SUPPORT` define symbol in Scripting Define Symbols (Player Settings -> Player -> Scripting Define Symbols).
+
+#### VContainer Usage
 
 To use it, convert `VContainer.IObjectResolver` to `UniState.ITypeResolver` by calling the extension `ToTypeResolver()` and pass it to the state machine.
 
@@ -497,9 +509,15 @@ var typeResolver = _objectResolver.ToTypeResolver();
 var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(typeResolver);
 ```
 
-### Zenject / Extenject
+### Zenject (Extenject)
 GitHub: [Extenject](https://github.com/Mathijs-Bakker/Extenject) or [Zenject](https://github.com/modesttree/Zenject)
 
+#### Zenject Preparation
+
+If the Zenject / Extenject is installed via UPM, you can skip this step and proceed to the [Zenject Usage](#zenject-usage) section.
+If the package is not installed via UPM, you need to manually add the `UNISTATE_ZENJECT_SUPPORT` define symbol in Scripting Define Symbols (Player Settings -> Player -> Scripting Define Symbols).
+
+#### Zenject Usage
 To use it, convert `Zenject.DiContainer` to `UniState.ITypeResolver` by calling the extension `ToTypeResolver()` and pass it to the state machine.
 
 ```csharp
