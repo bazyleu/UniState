@@ -56,7 +56,7 @@ State Machine is finished
             //TODO: Move to base class
             StaticContext.Clear();
 
-            Assert.AreEqual(actualLog, expectedLog);
+            Assert.AreEqual(expectedLog, actualLog);
         });
     }
 }
