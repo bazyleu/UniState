@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UniState;
 
 namespace UniState
 {
@@ -96,26 +95,23 @@ namespace UniState
         {
             stateWithMetadata.Clear();
 
-            if (nextTransition.Transition != TransitionType.Exit)
+            if (nextTransition.Transition == TransitionType.Exit)
             {
-                var item = nextTransition;
+                return;
+            }
 
-                if (nextTransition.Transition == TransitionType.State)
-                {
-                    if (previousTransition != null)
-                    {
-                        _history.Push(previousTransition);
-                    }
-                }
-                else
-                {
-                    item = GetInfoFromHistory();
-                }
+            var transitionToState = nextTransition.Transition == TransitionType.State;
 
-                if (item != null)
-                {
-                    stateWithMetadata.BuildState(item, item.StateBehaviourData);
-                }
+            var item = transitionToState ? nextTransition : GetInfoFromHistory();
+
+            if (transitionToState && previousTransition != null)
+            {
+                _history.Push(previousTransition);
+            }
+
+            if (item != null)
+            {
+                stateWithMetadata.BuildState(item, item.StateBehaviourData);
             }
         }
 
