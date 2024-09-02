@@ -5,7 +5,7 @@
     "name": "Dzmitry Bazyleu",
     "url": "https://www.linkedin.com/in/dzmitry-bazyleu/"
   },
-  "version": "0.7.2",
+  "version": "0.8.0",
   "unity": "2021.3",
   "description": "UniState is an architectural framework for Unity, designed around State pattern. Offers high performance and excellent scalability, ideal for complex Unity projects.",
   "keywords": [
