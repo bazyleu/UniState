@@ -12,7 +12,7 @@ using Zenject;
 namespace UniStateTests.PlayMode
 {
     [TestFixture]
-    public class ZenjectIntegrationTest
+    public class ZenjectIntegrationTests
     {
         [UnityTest]
         public IEnumerator SimpleRun() => UniTask.ToCoroutine(async () =>

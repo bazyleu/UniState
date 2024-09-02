@@ -14,7 +14,7 @@ using Object = UnityEngine.Object;
 namespace UniStateTests.PlayMode
 {
     [TestFixture]
-    public class VContainerIntegrationTest
+    public class VContainerIntegrationTests
     {
         private GameObject _containerHolder;
         private IObjectResolver _objectResolver;
