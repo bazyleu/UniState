@@ -32,7 +32,7 @@ namespace UniState
             var activeStateMetadata = new StateWithMetadata();
             var nextStateMetadata = new StateWithMetadata();
 
-            activeStateMetadata.SetData(initialTransition.Creator.Create(), initialTransition.StateBehaviourData);
+            activeStateMetadata.BuildState(initialTransition, initialTransition.StateBehaviourData);
 
             try
             {
@@ -40,7 +40,7 @@ namespace UniState
 
                 var transitionInfo = await ExecuteSafe(activeStateMetadata.State, token);
 
-                ProcessTransitionInfo(transitionInfo, ref nextStateMetadata);
+                ProcessTransitionInfo(transitionInfo, activeStateMetadata.TransitionInfo, nextStateMetadata);
 
                 while (!nextStateMetadata.IsEmpty && !token.IsCancellationRequested)
                 {
@@ -55,11 +55,11 @@ namespace UniState
                         await InitializeSafe(nextStateMetadata.State, token);
                     }
 
-                    activeStateMetadata.SetData(nextStateMetadata);
+                    activeStateMetadata.CopyData(nextStateMetadata);
 
                     transitionInfo = await ExecuteSafe(activeStateMetadata.State, token);
 
-                    ProcessTransitionInfo(transitionInfo, ref nextStateMetadata);
+                    ProcessTransitionInfo(transitionInfo, activeStateMetadata.TransitionInfo, nextStateMetadata);
                 }
 
                 await ExitAndDisposeSafe(activeStateMetadata.State, token);
@@ -90,19 +90,31 @@ namespace UniState
             //Call Handler
         }
 
-        private void ProcessTransitionInfo(StateTransitionInfo transitionInfo, ref StateWithMetadata stateWithMetadata)
+        private void ProcessTransitionInfo(StateTransitionInfo nextTransition,
+            StateTransitionInfo previousTransition,
+            StateWithMetadata stateWithMetadata)
         {
             stateWithMetadata.Clear();
 
-            if (transitionInfo.Transition != TransitionType.Exit)
+            if (nextTransition.Transition != TransitionType.Exit)
             {
-                var item = transitionInfo.Transition == TransitionType.State
-                    ? _history.Push(transitionInfo)
-                    : GetInfoFromHistory();
+                var item = nextTransition;
+
+                if (nextTransition.Transition == TransitionType.State)
+                {
+                    if (previousTransition != null)
+                    {
+                        _history.Push(previousTransition);
+                    }
+                }
+                else
+                {
+                    item = GetInfoFromHistory();
+                }
 
                 if (item != null)
                 {
-                    stateWithMetadata.SetData(item.Creator.Create(), item.StateBehaviourData);
+                    stateWithMetadata.BuildState(item, item.StateBehaviourData);
                 }
             }
         }
