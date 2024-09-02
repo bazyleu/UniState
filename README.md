@@ -30,6 +30,7 @@ UniState is an architectural framework for Unity, designed around State pattern.
         + [Running a State Machine](#running-a-state-machine)
         + [Creating and Running a State Machine Inside States](#creating-and-running-a-state-machine-inside-states)
         + [State Machine Context](#state-machine-context)
+        + [State Machine Error Handling](#state-machine-error-handling)
     * [Composite State](#composite-state)
         + [Creating a Composite State](#creating-a-composite-state)
         + [SubState](#substate)
@@ -464,6 +465,30 @@ StateMachineFactory.Create<TSateMachine>();
 ```
 
 For larger projects using sub-containers/sub-contexts in your DI framework to manage resources more efficiently, you can pass them into `Create` to force the state machine to use them for creating states and dependencies. Thus, UniState supports this natively without additional actions required from you.
+
+#### State Machine Error Handling
+
+If an exception occurs in a state, the state machine will catch and handle it. If the exception happens during the
+state's `Initialize()` or `Exit()` methods, the state machine will continue as if the exception did not occur. If an
+exception occurs in the state's `Execute()` method, the state machine will automatically perform a `GoBack` operation,
+as if the method had returned `Transition.GoBack()`.
+
+Exceptions will not be propagated further, except for `OperationCanceledException`. When an `OperationCanceledException`
+is encountered, the state machine will stop execution.
+
+To intercept exceptions and add custom handlers, you can override the `OnError()` method in your state machine that
+inherits from `StateMachine`. This method will be called whenever the state machine processes an exception.
+
+```csharp
+public class BarStateMachine : StateMachine
+{
+    protected override void OnError(Exception exception, StateMachineErrorType phase)
+    {
+        // Custom logic here
+        base.OnError(exception, phase);
+    }
+}
+```
 
 ### Composite State
 
