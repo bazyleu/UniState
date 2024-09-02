@@ -26,6 +26,13 @@ namespace UniState
             await ExecuteInternal(_transitionFactory.CreateStateTransition<TState, TPayload>(payload), token);
         }
 
+        protected virtual void OnError(Exception exception, StateMachineErrorType phase)
+        {
+            //Add Type (state type) to signature
+
+            //Call Handler
+        }
+
         private async UniTask ExecuteInternal(StateTransitionInfo initialTransition, CancellationToken token)
         {
             var activeStateMetadata = new StateWithMetadata();
@@ -80,13 +87,6 @@ namespace UniState
                 activeStateMetadata.Dispose();
                 activeStateMetadata.Clear();
             }
-        }
-
-        private void OnError(Exception exception, StateMachineErrorType phase)
-        {
-            //Add Type (state type) to signature
-
-            //Call Handler
         }
 
         private void ProcessTransitionInfo(StateTransitionInfo nextTransition,

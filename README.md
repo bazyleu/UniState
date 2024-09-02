@@ -6,9 +6,11 @@
 [![Last Commit](https://img.shields.io/github/last-commit/bazyleu/UniState)](https://github.com/bazyleu/UniState/branches)
 [![License](https://img.shields.io/github/license/bazyleu/UniState)](LICENSE)
 
-UniState is an architectural framework for Unity, designed around State pattern. Offers high performance and excellent scalability, ideal for complex Unity projects.
+UniState is an architectural framework for Unity, designed around State pattern. Offers high performance and excellent
+scalability, ideal for complex Unity projects.
 
 ## Table of Contents
+
 <!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
 
 - [Installation](#installation)
@@ -17,7 +19,7 @@ UniState is an architectural framework for Unity, designed around State pattern.
     * [Option 2: Add via manifest.json](#option-2-add-via-manifestjson)
 - [Getting Started](#getting-started)
 - [Framework Philosophy](#framework-philosophy)
-  + [Dependency Injection](#dependency-injection)
+    + [Dependency Injection](#dependency-injection)
 - [API Details and Usage](#api-details-and-usage)
     * [State](#state)
         + [State Creating](#state-creating)
@@ -30,6 +32,7 @@ UniState is an architectural framework for Unity, designed around State pattern.
         + [Running a State Machine](#running-a-state-machine)
         + [Creating and Running a State Machine Inside States](#creating-and-running-a-state-machine-inside-states)
         + [State Machine Context](#state-machine-context)
+        + [State Machine Error Handling](#state-machine-error-handling)
     * [Composite State](#composite-state)
         + [Creating a Composite State](#creating-a-composite-state)
         + [SubState](#substate)
@@ -48,23 +51,26 @@ UniState is an architectural framework for Unity, designed around State pattern.
 ## Installation
 
 ### Requirements
- * Requires Unity version that supports path query parameter for git packages (Unity >= 2020.1a21). 
- * Requires UniTask package installed. Guide regarding UniTask installation can be found on [Cysharp/UniTask README](https://github.com/Cysharp/UniTask/blob/master/README.md#upm-package).
- 
+
+* Requires Unity version that supports path query parameter for git packages (Unity >= 2020.1a21).
+* Requires UniTask package installed. Guide regarding UniTask installation can be found
+  on [Cysharp/UniTask README](https://github.com/Cysharp/UniTask/blob/master/README.md#upm-package).
 
 ### Option 1: Add package from git URL
 
 You can add `https://github.com/bazyleu/UniState.git?path=Assets/UniState` to Package Manager.
 
-It is a good practice to specify target version, UniState uses the `*.*.*` release tag so you can specify a version like `#1.1.0`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`.
-You can find latest version number [here](https://github.com/bazyleu/UniState/releases). 
+It is a good practice to specify target version, UniState uses the `*.*.*` release tag so you can specify a version
+like `#1.1.0`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`.
+You can find latest version number [here](https://github.com/bazyleu/UniState/releases).
 
 ![image](https://github.com/user-attachments/assets/120e6750-1f33-44f7-99c8-a3e7fa166d21)
 ![image](https://github.com/user-attachments/assets/3fed7201-b748-4261-b4f8-7bdffdac072d)
 
 ### Option 2: Add via manifest.json
 
-You can add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState"` (or with version tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`) to `Packages/manifest.json`.
+You can add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState"` (or with version
+tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`) to `Packages/manifest.json`.
 
 ## Getting Started
 
@@ -166,6 +172,7 @@ Here's an example of how the state classes can be implemented using UniState.
         }
     }
 ```
+
 Here is how to bind these state classes using VContainer.
 
 ```csharp
@@ -181,6 +188,7 @@ Here is how to bind these state classes using VContainer.
         }
     }
 ```
+
 Following code demonstrates how to run the state machine.
 
 ```csharp
@@ -202,23 +210,27 @@ Following code demonstrates how to run the state machine.
 
 #### Dependency Injection
 
-All dependencies for states, commands, and other entities should be passed through the constructor. 
-UniState supports automatic integration with the most popular DI frameworks for Unity. 
+All dependencies for states, commands, and other entities should be passed through the constructor.
+UniState supports automatic integration with the most popular DI frameworks for Unity.
 Refer to the [integration documentation](#integrations) for more details.
-Dependencies must be registered in your DI framework, and they will automatically be resolved when creating [state](#states), 
+Dependencies must be registered in your DI framework, and they will automatically be resolved when
+creating [state](#states),
 [state machine](#state-machine),  [command](#installation) (not ready), or [handler](#installation) (not ready).
 
 ## API Details and Usage
- 
+
 ### State
 
-A state is a fundamental unit of logic in an application, often representing different screens or states, such as an idle scene, main menu, popup, or a specific state of a popup.
+A state is a fundamental unit of logic in an application, often representing different screens or states, such as an
+idle scene, main menu, popup, or a specific state of a popup.
 
 #### State Creating
 
-To create your custom state, you can inherit from `StateBase` or `StateBase<T>`. Use `StateBase<T>` if you need to pass parameters to the state.
+To create your custom state, you can inherit from `StateBase` or `StateBase<T>`. Use `StateBase<T>` if you need to pass
+parameters to the state.
 
-For highly customized states, you can manually implement the `IState<TPayload>` interface. However, in most cases, `StateBase` will suffice.
+For highly customized states, you can manually implement the `IState<TPayload>` interface. However, in most
+cases, `StateBase` will suffice.
 
 ```csharp
 
@@ -277,27 +289,33 @@ The lifecycle of a state consists of four stages, represented by the following m
     - Used for initializing resources, such as loading prefabs, subscribing to events, etc.
 
 2. **Execute**
-    - The only method that must be overridden in `StateBase`. It contains the main logic of the state and remains active until it returns a result with a transition to another state. For example, a state displaying a popup might wait for button presses and handle the result here. See the [State Transitions](#state-transitions) section for more details.
+    - The only method that must be overridden in `StateBase`. It contains the main logic of the state and remains active
+      until it returns a result with a transition to another state. For example, a state displaying a popup might wait
+      for button presses and handle the result here. See the [State Transitions](#state-transitions) section for more
+      details.
 
 3. **Exit**
-    - Completes the state's work, such as unsubscribing from buttons and closing the popup (e.g., playing a closing animation).
+    - Completes the state's work, such as unsubscribing from buttons and closing the popup (e.g., playing a closing
+      animation).
 
 4. **Dispose**
     - Cleans up resources. If you inherit from `StateBase`, this method does not need implementation.
 
 #### State Transitions
 
-The `Execute` method of a state should return a `StateTransitionInfo` object, which dictates the next actions of the state machine. To simplify its generation, you can use the `Transition` property in `StateBase`. The possible transition options are:
+The `Execute` method of a state should return a `StateTransitionInfo` object, which dictates the next actions of the
+state machine. To simplify its generation, you can use the `Transition` property in `StateBase`. The possible transition
+options are:
 
 1. **GoTo**
     - Used to transition to another state. If the state contains a payload, it should be passed to `GoTo`.
 
 2. **GoBack**
-    - Returns to the previous state. If there is no previous state (the current state is the first), it will exit the state machine. See the [State Machine](#state-machine) section for more details.
+    - Returns to the previous state. If there is no previous state (the current state is the first), it will exit the
+      state machine. See the [State Machine](#state-machine) section for more details.
 
 3. **GoToExit**
     - Exits the current state machine. See the [State Machine](#state-machine) section for more details.
-
 
 ```csharp
 public class ExampleState : StateBase
@@ -339,7 +357,9 @@ public class ExampleState : StateBase
 
 #### Disposables
 
-Disposables are a part of `StateBase` that allow users to tie `IDisposable` references and delegates to state's lifetime, guaranteeing disposal and delegate execution on state's `Dispose`, without overriding the method
+Disposables are a part of `StateBase` that allow users to tie `IDisposable` references and delegates to state's
+lifetime, guaranteeing disposal and delegate execution on state's `Dispose`, without overriding the method
+
 ```csharp
 public class LoadingState : StateBase<ILoadingScreenView>
 {
@@ -380,9 +400,14 @@ It is possible to customize the behavior of a specific state using the `StateBeh
 
 This attribute has the following parameters:
 
-- **ProhibitReturnToState** (default value: false): When enabled, this state cannot be returned to via `Transition.GoBack()`. The state with this attribute will be skipped, and control will return to the state before it. This behavior can be useful for states that represent 'loading', there is no point of returning to loading.
+- **ProhibitReturnToState** (default value: false): When enabled, this state cannot be returned to
+  via `Transition.GoBack()`. The state with this attribute will be skipped, and control will return to the state before
+  it. This behavior can be useful for states that represent 'loading', there is no point of returning to loading.
 
-- **InitializeOnStateTransition** (default value: false): When enabled, the initialization of the state will begin before exiting the previous state. Technically, this means `Initialize()` of the state will be called before `Exit()` of the previous state. This behavior can be useful for seamless transitions in complex animations, where the state represents only part of the animation.
+- **InitializeOnStateTransition** (default value: false): When enabled, the initialization of the state will begin
+  before exiting the previous state. Technically, this means `Initialize()` of the state will be called before `Exit()`
+  of the previous state. This behavior can be useful for seamless transitions in complex animations, where the state
+  represents only part of the animation.
 
 ```csharp
 [StateBehaviour(ProhibitReturnToState = true)]
@@ -404,18 +429,21 @@ public class BazState: StateBase
 }
 ```
 
-
 ### State Machine
 
 The state machine is the entry point into the framework, responsible for running states.
 
 #### Creating a State Machine
 
-To create the initial state machine, use the helper `StateMachineHelper.CreateStateMachine<TSateMachine>(ITypeResolver typeResolver)`.
+To create the initial state machine, use the
+helper `StateMachineHelper.CreateStateMachine<TSateMachine>(ITypeResolver typeResolver)`.
 
-- **TSateMachine**: Any class implementing `IStateMachine`. You can use the standard `StateMachine` or create custom ones by inheriting from `StateMachine` or implementing `IStateMachine`.
+- **TSateMachine**: Any class implementing `IStateMachine`. You can use the standard `StateMachine` or create custom
+  ones by inheriting from `StateMachine` or implementing `IStateMachine`.
 
-- **ITypeResolver**: Used to create the state machine. It acts as a factory for creating states and other state machines. You can implement it yourself or use the provided implementation from DI frameworks like VContainer or Zenject via the `.ToTypeResolver()` extension.
+- **ITypeResolver**: Used to create the state machine. It acts as a factory for creating states and other state
+  machines. You can implement it yourself or use the provided implementation from DI frameworks like VContainer or
+  Zenject via the `.ToTypeResolver()` extension.
 
 #### Running a State Machine
 
@@ -430,7 +458,8 @@ await stateMachine.Execute<BarState>(payload, cts.Token);
 
 #### Creating and Running a State Machine Inside States
 
-Any state can create and run a state machine within itself using the `StateMachineFactory` property. This is the recommended method for creating a state machine inside a state.
+Any state can create and run a state machine within itself using the `StateMachineFactory` property. This is the
+recommended method for creating a state machine inside a state.
 
 ```csharp
 ITypeResolver _newContext;
@@ -455,7 +484,8 @@ When creating a state machine inside a state, you can use two method overloads:
 - `StateMachineFactory.Create<TSateMachine>()`
 - `StateMachineFactory.Create<TSateMachine>(ITypeResolver typeResolver)`
 
-If the version without `ITypeResolver` is used, the context is inherited from the parent state machine. If `ITypeResolver` is passed, it will have a new context.
+If the version without `ITypeResolver` is used, the context is inherited from the parent state machine.
+If `ITypeResolver` is passed, it will have a new context.
 
 For smaller projects, it's recommended to use the simplified version without creating a new context:
 
@@ -463,27 +493,62 @@ For smaller projects, it's recommended to use the simplified version without cre
 StateMachineFactory.Create<TSateMachine>();
 ```
 
-For larger projects using sub-containers/sub-contexts in your DI framework to manage resources more efficiently, you can pass them into `Create` to force the state machine to use them for creating states and dependencies. Thus, UniState supports this natively without additional actions required from you.
+For larger projects using sub-containers/sub-contexts in your DI framework to manage resources more efficiently, you can
+pass them into `Create` to force the state machine to use them for creating states and dependencies. Thus, UniState
+supports this natively without additional actions required from you.
+
+#### State Machine Error Handling
+
+If an exception occurs in a state, the state machine will catch and handle it. If the exception happens during the
+state's `Initialize()` or `Exit()` methods, the state machine will continue as if the exception did not occur. If an
+exception occurs in the state's `Execute()` method, the state machine will automatically perform a `GoBack` operation,
+as if the method had returned `Transition.GoBack()`.
+
+Exceptions will not be propagated further, except for `OperationCanceledException`. When an `OperationCanceledException`
+is encountered, the state machine will stop execution.
+
+To intercept exceptions and add custom handlers, you can override the `OnError()` method in your state machine that
+inherits from `StateMachine`. This method will be called whenever the state machine processes an exception.
+
+```csharp
+public class BarStateMachine : StateMachine
+{
+    protected override void OnError(Exception exception, StateMachineErrorType phase)
+    {
+        // Custom logic here
+        base.OnError(exception, phase);
+    }
+}
+```
 
 ### Composite State
 
-Composite State is essential for complex areas of an application likely to be worked on by multiple people simultaneously. They consist of various independent sub states, each with its own logic.
+Composite State is essential for complex areas of an application likely to be worked on by multiple people
+simultaneously. They consist of various independent sub states, each with its own logic.
 
 #### Creating a Composite State
 
-To create a composite state, inherit from `CompositeStateBase` (or implement the `ICompositeState` interface for more detailed control). You can also use the ready-made implementation `DefaultCompositeState` (see the [DefaultCompositeState](#defaultcompositestate) section). No additional actions are needed.
+To create a composite state, inherit from `CompositeStateBase` (or implement the `ICompositeState` interface for more
+detailed control). You can also use the ready-made implementation `DefaultCompositeState` (see
+the [DefaultCompositeState](#defaultcompositestate) section). No additional actions are needed.
 
 #### SubState
 
-SubStates are states tied to a composite state, created and run simultaneously with it. To create a SubState, inherit from `SubStateBase` or implement the `ISubState` interface for greater customization. When creating a sub state, specify the parent composite state as a generic parameter, e.g., `FooSubState : SubStateBase<BarCompositeState>`. In all other aspects, it functions like a regular state.
+SubStates are states tied to a composite state, created and run simultaneously with it. To create a SubState, inherit
+from `SubStateBase` or implement the `ISubState` interface for greater customization. When creating a sub state, specify
+the parent composite state as a generic parameter, e.g., `FooSubState : SubStateBase<BarCompositeState>`. In all other
+aspects, it functions like a regular state.
 
 #### Default Composite State
 
-A ready-to-use implementation for a composite state that propagates `Initialize`, `Execute`, and `Exit` methods to all SubStates within it. The result of the `Execute` method will be the first completed `Execute` method among all sub states.
+A ready-to-use implementation for a composite state that propagates `Initialize`, `Execute`, and `Exit` methods to all
+SubStates within it. The result of the `Execute` method will be the first completed `Execute` method among all sub
+states.
 
 ## Integrations
 
-UniState supports integrations with the most popular DI containers. If these frameworks are installed via UPM, everything will work out of the box, and no additional actions are required.
+UniState supports integrations with the most popular DI containers. If these frameworks are installed via UPM,
+everything will work out of the box, and no additional actions are required.
 
 ### VContainer
 
@@ -491,12 +556,15 @@ GitHub: [VContainer](https://github.com/hadashiA/VContainer)
 
 #### VContainer Preparation
 
-If the VContainer is installed via UPM, you can skip this step and proceed to the [VContainer Usage](#vcontainer-usage) section.
-If the package is not installed via UPM, you need to manually add the `UNISTATE_VCONTAINER_SUPPORT` define symbol in Scripting Define Symbols (Player Settings -> Player -> Scripting Define Symbols).
+If the VContainer is installed via UPM, you can skip this step and proceed to the [VContainer Usage](#vcontainer-usage)
+section.
+If the package is not installed via UPM, you need to manually add the `UNISTATE_VCONTAINER_SUPPORT` define symbol in
+Scripting Define Symbols (Player Settings -> Player -> Scripting Define Symbols).
 
 #### VContainer Usage
 
-To use it, convert `VContainer.IObjectResolver` to `UniState.ITypeResolver` by calling the extension `ToTypeResolver()` and pass it to the state machine.
+To use it, convert `VContainer.IObjectResolver` to `UniState.ITypeResolver` by calling the extension `ToTypeResolver()`
+and pass it to the state machine.
 
 ```csharp
 // Object resolver with main or child scope from VContainer
@@ -510,15 +578,20 @@ var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(typeReso
 ```
 
 ### Zenject (Extenject)
+
 GitHub: [Extenject](https://github.com/Mathijs-Bakker/Extenject) or [Zenject](https://github.com/modesttree/Zenject)
 
 #### Zenject Preparation
 
-If the Zenject / Extenject is installed via UPM, you can skip this step and proceed to the [Zenject Usage](#zenject-usage) section.
-If the package is not installed via UPM, you need to manually add the `UNISTATE_ZENJECT_SUPPORT` define symbol in Scripting Define Symbols (Player Settings -> Player -> Scripting Define Symbols).
+If the Zenject / Extenject is installed via UPM, you can skip this step and proceed to
+the [Zenject Usage](#zenject-usage) section.
+If the package is not installed via UPM, you need to manually add the `UNISTATE_ZENJECT_SUPPORT` define symbol in
+Scripting Define Symbols (Player Settings -> Player -> Scripting Define Symbols).
 
 #### Zenject Usage
-To use it, convert `Zenject.DiContainer` to `UniState.ITypeResolver` by calling the extension `ToTypeResolver()` and pass it to the state machine.
+
+To use it, convert `Zenject.DiContainer` to `UniState.ITypeResolver` by calling the extension `ToTypeResolver()` and
+pass it to the state machine.
 
 ```csharp
 // Zenject container / sub container
@@ -532,5 +605,5 @@ var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(typeReso
 ```
 
 ## License
- 
+
 This library is under the MIT License. Full text is [here](LICENSE).
