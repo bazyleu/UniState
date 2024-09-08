@@ -10,7 +10,9 @@ UniState is an architectural framework for Unity, designed around State pattern.
     * [Requirements](#requirements)
     * [Option 1: Add package from git URL](#option-1-add-package-from-git-url)
     * [Option 2: Add via manifest.json](#option-2-add-via-manifestjson)
-- [Simple State Machine Example](#simple-state-machine-example)
+- [Getting Started](#getting-started)
+- [Framework Philosophy](#framework-philosophy)
+  + [Dependency Injection](#dependency-injection)
 - [API Details and Usage](#api-details-and-usage)
     * [States](#states)
         + [State Creating](#state-creating)
@@ -54,7 +56,7 @@ You can find latest version number [here](https://github.com/bazyleu/UniState/re
 
 You can add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState"` (or with version tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`) to `Packages/manifest.json`.
 
-## Simple State Machine Example
+## Getting Started
 
 In this section, we will explore how to create a simple architecture with UniSate using state machine.
 
@@ -170,6 +172,16 @@ Following code demonstrates how to run the state machine.
         }
     }
 ```
+
+## Framework Philosophy
+
+#### Dependency Injection
+
+All dependencies for states, commands, and other entities should be passed through the constructor. 
+UniState supports automatic integration with the most popular DI frameworks for Unity. 
+Refer to the [integration documentation](#integrations) for more details.
+Dependencies must be registered in your DI framework, and they will automatically be resolved when creating [state](#states), 
+[state machine](#state-machine),  [command](#installation) (not ready), or [handler](#installation) (not ready).
 
 ## API Details and Usage
  
