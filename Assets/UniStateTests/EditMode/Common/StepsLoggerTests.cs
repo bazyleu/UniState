@@ -31,6 +31,5 @@ namespace UniStateTests.EditMode.Common
 
             Assert.AreEqual(expectedLog, actualLog);
         }
-
     }
 }
