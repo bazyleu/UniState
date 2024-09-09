@@ -19,7 +19,7 @@ namespace UniStateTests.PlayMode
         private GameObject _containerHolder;
         private IObjectResolver _objectResolver;
 
-        [OneTimeSetUp]
+        [SetUp]
         public void Setup()
         {
            _containerHolder = new GameObject("container");
@@ -27,7 +27,7 @@ namespace UniStateTests.PlayMode
            _objectResolver = component.Container;
         }
 
-        [OneTimeTearDown]
+        [TearDown]
         public void TearDown()
         {
            Object.Destroy(_containerHolder);

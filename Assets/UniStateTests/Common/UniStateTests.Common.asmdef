@@ -1,13 +1,7 @@
 {
-  "name": "UniStateTests.PlayMode",
+  "name": "UniStateTests.Common",
   "references": [
-    "UniState",
-    "UniStateTests.Common",
-    "UniTask",
-    "UnityEditor.TestRunner",
-    "UnityEngine.TestRunner",
-    "VContainer",
-    "Zenject"
+    "UniTask"
   ],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
