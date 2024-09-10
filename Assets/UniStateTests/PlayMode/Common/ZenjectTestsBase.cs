@@ -28,6 +28,7 @@ namespace UniStateTests.PlayMode.Common
         [TearDown]
         public virtual void Teardown()
         {
+            _ctx?.Cancel();
             _ctx?.Dispose();
             _ctx = null;
 
