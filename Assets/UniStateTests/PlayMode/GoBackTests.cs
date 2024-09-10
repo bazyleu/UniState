@@ -4,6 +4,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UniState;
+using UniStateTests.Common;
 using UniStateTests.PlayMode.Common;
 using UniStateTests.PlayMode.GoBack;
 using UnityEngine.TestTools;
@@ -12,51 +13,39 @@ using Zenject;
 namespace UniStateTests.PlayMode
 {
     [TestFixture]
-    public class GoBackTests
+    public class GoBackTests : ZenjectTestsBase
     {
-        [UnityTest]
-        public IEnumerator RunChaneOfState_GoBackFromTheChain_ExitFromStateMachineWithCorrectOrderOfStates() => UniTask.ToCoroutine(async () =>
+        protected override void SetupBindings()
         {
-            //TODO: Refactor this test
+            Container.BindInterfacesAndSelfTo<ExecutionLogger>().AsSingle();
+            Container.Bind<GoBackTestFlags>().ToSelf().AsSingle();
 
-            const string expectedLog = @"Create and execute State Machine
-StateGoBack1 - Execute
-StateGoBack2 - Execute
-StateGoBack3 - Execute
-StateGoBack2 - Execute
-StateGoBack1 - Execute
-State Machine is finished
-";
+            Container.Bind<StateMachine>().ToSelf().AsTransient();
+            Container.Bind<StateGoBack1>().ToSelf().AsTransient();
+            Container.Bind<StateGoBack2>().ToSelf().AsTransient();
+            Container.Bind<StateGoBack3>().ToSelf().AsTransient();
+        }
 
-            var container = new DiContainer(StaticContext.Container);
+        [UnityTest]
+        public IEnumerator RunChaneOfState_GoBackFromTheChain_ExitFromStateMachineWithCorrectOrderOfStates() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                const string expectedLog =
+                    "StateMachine (Started) -> StateGoBack1 (Execute) -> StateGoBack2 (Execute) -> StateGoBack3 (Execute) -> " +
+                    "StateGoBack2 (Execute) -> StateGoBack1 (Execute) -> StateMachine (Finished)";
 
-            container.BindInterfacesTo<StateLogger>().AsSingle();
-            container.Bind<GoBackTestFlags>().ToSelf().AsSingle();
+                var logger = Container.Resolve<ExecutionLogger>();
 
-            container.Bind<StateMachine>().ToSelf().AsTransient();
-            container.Bind<StateGoBack1>().ToSelf().AsTransient();
-            container.Bind<StateGoBack2>().ToSelf().AsTransient();
-            container.Bind<StateGoBack3>().ToSelf().AsTransient();
+                logger.LogStep("StateMachine", "Started");
 
-            CancellationTokenSource cts = new CancellationTokenSource();
+                var stateMachine = StateMachineHelper.CreateStateMachine<StateMachine>(Container.ToTypeResolver());
+                await stateMachine.Execute<StateGoBack1>(GetTimeoutToken());
 
-            //TODO: Move to base class
-            using var slim = cts.CancelAfterSlim(TimeSpan.FromSeconds(5), DelayType.UnscaledDeltaTime);
+                logger.LogStep("StateMachine", "Finished");
 
-            var logger = container.Resolve<IStateLogger>();
+                var actualLog = logger.FinishLogging();
 
-            logger.LogLine("Create and execute State Machine");
-            var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(container.ToTypeResolver());
-            await stateMachine.Execute<StateGoBack1>(cts.Token);
-
-            logger.LogLine("State Machine is finished");
-
-            var actualLog = logger.GetFullLog();
-
-            //TODO: Move to base class
-            StaticContext.Clear();
-
-            Assert.AreEqual(expectedLog, actualLog);
-        });
+                Assert.AreEqual(expectedLog, actualLog);
+            });
     }
 }

@@ -2,6 +2,7 @@
   "name": "UniStateTests.EditMode",
   "references": [
     "UniState",
+    "UniStateTests.Common",
     "UniTask",
     "VContainer",
     "Zenject"
