@@ -9,18 +9,18 @@ namespace UniState
         private LimitedStack<StateTransitionInfo> _history;
         private IStateTransitionFactory _transitionFactory;
 
-        public void Initialize(ITypeResolver resolver)
+        public virtual void Initialize(ITypeResolver resolver)
         {
             _transitionFactory = new StateTransitionFactory(resolver);
             _history = new LimitedStack<StateTransitionInfo>(15);
         }
 
-        public async UniTask Execute<TState>(CancellationToken token) where TState : class, IState<EmptyPayload>
+        public virtual async UniTask Execute<TState>(CancellationToken token) where TState : class, IState<EmptyPayload>
         {
             await ExecuteInternal(_transitionFactory.CreateStateTransition<TState>(), token);
         }
 
-        public async UniTask Execute<TState, TPayload>(TPayload payload, CancellationToken token)
+        public virtual async UniTask Execute<TState, TPayload>(TPayload payload, CancellationToken token)
             where TState : class, IState<TPayload>
         {
             await ExecuteInternal(_transitionFactory.CreateStateTransition<TState, TPayload>(payload), token);

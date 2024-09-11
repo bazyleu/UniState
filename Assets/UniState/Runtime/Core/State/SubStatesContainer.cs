@@ -34,6 +34,12 @@ namespace UniState
 
         public async UniTask<StateTransitionInfo> Execute(CancellationToken token)
         {
+            if (List.Count == 0)
+            {
+                //TODO: Add custom exception
+                throw new Exception("No SubStates for execution");
+            }
+
             StateTransitionInfo result;
 
             var ctx = CancellationTokenSource.CreateLinkedTokenSource(token);
