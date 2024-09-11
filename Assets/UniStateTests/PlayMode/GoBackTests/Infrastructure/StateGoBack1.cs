@@ -3,17 +3,17 @@ using Cysharp.Threading.Tasks;
 using UniState;
 using UniStateTests.Common;
 
-namespace UniStateTests.PlayMode.GoBack
+namespace UniStateTests.PlayMode.GoBackTests.Infrastructure
 {
-    public class StateGoBack1 : StateBase
+    internal class StateGoBack1 : StateBase
     {
         private readonly ExecutionLogger _logger;
-        private readonly GoBackTestFlags _flags;
+        private readonly GoBackFlagsData _goBackFlags;
 
-        public StateGoBack1(ExecutionLogger logger, GoBackTestFlags flags)
+        public StateGoBack1(ExecutionLogger logger, GoBackFlagsData goBackFlags)
         {
             _logger = logger;
-            _flags = flags;
+            _goBackFlags = goBackFlags;
         }
 
         public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
@@ -22,12 +22,12 @@ namespace UniStateTests.PlayMode.GoBack
 
             await UniTask.Yield();
 
-            if (_flags.ExecutedState1)
+            if (_goBackFlags.ExecutedState1)
             {
                 return Transition.GoBack();
             }
 
-            _flags.ExecutedState1 = true;
+            _goBackFlags.ExecutedState1 = true;
 
             return Transition.GoTo<StateGoBack2>();
         }
