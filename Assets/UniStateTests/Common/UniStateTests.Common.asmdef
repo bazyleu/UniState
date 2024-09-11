@@ -1,7 +1,10 @@
 {
   "name": "UniStateTests.Common",
   "references": [
-    "UniTask"
+    "UniState",
+    "UniTask",
+    "VContainer",
+    "Zenject"
   ],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

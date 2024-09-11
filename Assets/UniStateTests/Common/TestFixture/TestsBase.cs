@@ -4,9 +4,9 @@ using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using Zenject;
 
-namespace UniStateTests.PlayMode.Common
+namespace UniStateTests.Common
 {
-    public abstract class ZenjectTestsBase
+    public abstract class TestsBase
     {
         private const int TimeoutSec = 5;
 
@@ -14,19 +14,13 @@ namespace UniStateTests.PlayMode.Common
         private IDisposable _timeoutSlim;
         private DiContainer _container;
 
-        protected DiContainer Container => _container;
-
-
         [SetUp]
         public virtual void Setup()
         {
-            _container = new DiContainer(StaticContext.Container);
-
-            SetupBindings();
         }
 
         [TearDown]
-        public virtual void Teardown()
+        public virtual void TearDown()
         {
             _ctx?.Cancel();
             _ctx?.Dispose();
@@ -34,8 +28,6 @@ namespace UniStateTests.PlayMode.Common
 
             _timeoutSlim?.Dispose();
             _timeoutSlim = null;
-
-            StaticContext.Clear();
         }
 
         protected CancellationToken GetTimeoutToken()
@@ -48,10 +40,6 @@ namespace UniStateTests.PlayMode.Common
             }
 
             return _ctx.Token;
-        }
-
-        protected virtual void SetupBindings()
-        {
         }
     }
 }

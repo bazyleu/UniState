@@ -4,12 +4,13 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using UniState;
+using UniStateTests.Common;
 using Zenject;
 
 namespace UniStateTests.EditMode.Common
 {
     [TestFixture]
-    internal class StateDisposablesTests
+    internal class StateDisposablesTests: ZenjectTestsBase
     {
         private class DisposablesState : StateBase<IList<IDisposable>>
         {
@@ -37,7 +38,7 @@ namespace UniStateTests.EditMode.Common
         [Test]
         public void Execute_WithException_DisposesInternalList() => CheckDisposeIsCalled<ExceptionDisposableState>();
 
-        private static void CheckDisposeIsCalled<TState>()
+        private void CheckDisposeIsCalled<TState>()
             where TState : DisposablesState
         {
             var disposedObjects = 0;
@@ -52,17 +53,19 @@ namespace UniStateTests.EditMode.Common
             Assert.AreEqual(disposedObjects, 2);
         }
 
-        private static void ExecuteState<TState>(IList<IDisposable> disposables)
+        private void ExecuteState<TState>(IList<IDisposable> disposables)
             where TState: DisposablesState
         {
-            var container = new DiContainer(StaticContext.Container);
-
-            container.Bind<StateMachine>().ToSelf().AsTransient();
-            container.Bind<TState>().ToSelf().AsTransient();
-
-            var stateMachine = StateMachineHelper.CreateStateMachine<StateMachine>(container.ToTypeResolver());
+            var stateMachine = StateMachineHelper.CreateStateMachine<StateMachine>(Container.ToTypeResolver());
 
             stateMachine.Execute<TState, IList<IDisposable>>(disposables, default).GetAwaiter().GetResult();
+        }
+
+        protected override void SetupBindings(DiContainer container)
+        {
+            container.BindStateMachine<StateMachine>();
+            container.BindState<DisposablesState>();
+            container.BindState<ExceptionDisposableState>();
         }
     }
 }

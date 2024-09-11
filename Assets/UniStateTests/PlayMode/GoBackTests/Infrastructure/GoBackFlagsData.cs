@@ -1,6 +1,6 @@
-namespace UniStateTests.PlayMode.GoBack
+namespace UniStateTests.PlayMode.GoBackTests.Infrastructure
 {
-    public class GoBackTestFlags
+    internal class GoBackFlagsData
     {
         public bool ExecutedState1 = false;
         public bool ExecutedState2 = false;
