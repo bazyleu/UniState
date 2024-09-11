@@ -19,7 +19,7 @@ scalability, ideal for complex Unity projects.
     * [Option 2: Add via manifest.json](#option-2-add-via-manifestjson)
 - [Getting Started](#getting-started)
 - [Framework Philosophy](#framework-philosophy)
-    + [Dependency Injection](#dependency-injection)
+  + [Dependency Injection](#dependency-injection)
 - [API Details and Usage](#api-details-and-usage)
     * [State](#state)
         + [State Creating](#state-creating)
@@ -41,9 +41,11 @@ scalability, ideal for complex Unity projects.
     * [VContainer](#vcontainer)
         + [VContainer Preparation](#vcontainer-preparation)
         + [VContainer Usage](#vcontainer-usage)
+        + [VContainer Registering](#vcontainer-registering)
     * [Zenject (Extenject)](#zenject-extenject)
         + [Zenject Preparation](#zenject-preparation)
         + [Zenject Usage](#zenject-usage)
+        + [Zenject Registering](#zenject-registering)
 - [License](#license)
 
 <!-- TOC end -->
@@ -173,20 +175,42 @@ Here's an example of how the state classes can be implemented using UniState.
     }
 ```
 
-Here is how to bind these state classes using VContainer.
+Here is how to bind these state classes using VContainer 
+(details of the VContainer bindings can be found here [VContainer Registering](#vcontainer-registering)).
 
 ```csharp
     public class ExampleLifetimeScope : LifetimeScope
     {
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.Register<MainStateMachine>(Lifetime.Scoped);
-            builder.Register<GameLoadingState>(Lifetime.Scoped);
-            builder.Register<MainMenuState>(Lifetime.Scoped);
-            builder.Register<ConfirmationExitPopupState>(Lifetime.Scoped);
-            builder.Register<GameplayState>(Lifetime.Scoped);
+            builder.RegisterStateMachine<MainStateMachine>();
+            builder.RegisterState<GameLoadingState>();
+            builder.RegisterState<MainMenuState>();
+            builder.RegisterState<ConfirmationExitPopupState>();
+            builder.RegisterState<GameplayState>();
+            
+            // Register other dependencies 
         }
     }
+```
+
+Here is how to bind these state classes using Zenject/Extenject 
+(details of the VContainer bindings can be found here [Zenject Registering](#zenject-registering)).
+
+```csharp
+public class FooInstaller : MonoInstaller
+{
+    public override void InstallBindings()
+    {
+        Container.BindStateMachine<MainStateMachine>();
+        Container.BindState<GameLoadingState>();
+        Container.BindState<MainMenuState>();
+        Container.BindState<ConfirmationExitPopupState>();
+        Container.BindState<GameplayState>();
+        
+        // Register other dependencies 
+    }
+}
 ```
 
 Following code demonstrates how to run the state machine.
@@ -214,8 +238,7 @@ All dependencies for states, commands, and other entities should be passed throu
 UniState supports automatic integration with the most popular DI frameworks for Unity.
 Refer to the [integration documentation](#integrations) for more details.
 Dependencies must be registered in your DI framework, and they will automatically be resolved when
-creating [state](#states),
-[state machine](#state-machine),  [command](#installation) (not ready), or [handler](#installation) (not ready).
+creating [state](#states), [state machine](#state-machine).
 
 ## API Details and Usage
 
@@ -577,6 +600,40 @@ var typeResolver = _objectResolver.ToTypeResolver();
 var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(typeResolver);
 ```
 
+#### VContainer Registering
+
+All state machines, states and their dependencies should be registered in DI container.
+For convenient registering of states and state machines, special extension methods are available. The main ones
+are `RegisterStateMachine` and `RegisterState`, which register both the classes themselves and all interfaces implemented by
+these classes.
+
+However, if you need to implement a transition into a state or launch a state machine via a base/abstract class, you
+should use `RegisterAbstractStateMachine` and `RegisterAbstractState`.
+
+Here's an example code:
+```csharp
+private void  RegisterStates(IContainerBuilder builder)
+{
+    // Use this registration creating state machine via class or interface.
+    // For example: StateMachineHelper.CreateStateMachine<BarStateMachine>(...) 
+    // For example: StateMachineHelper.CreateStateMachine<IBarStateMachine>(...) 
+    builder.RegisterStateMachine<BarStateMachine>();
+    
+    // Use this registration creating state machine via base/abstract class.
+    // For example: StateMachineHelper.CreateStateMachine<FooStateMachineBase>(...) 
+    builder.RegisterAbstractStateMachine<FooStateMachineBase, FooStateMachine>();
+    
+    // Use this registration for transitions to class or interface.
+    // For example: Transition.GoTo<BarState>() or Transition.GoTo<IBarState>()
+    builder.RegisterState<BarState>();
+    
+    // Use this registration for transitions to base/abstract class.
+    // For example: Transition.GoTo<FooStateBase>()
+    builder.RegisterAbstractState<FooStateBase, FooState>();
+}
+```
+You can always skip the extensions and register directly if you need custom behavior.
+
 ### Zenject (Extenject)
 
 GitHub: [Extenject](https://github.com/Mathijs-Bakker/Extenject) or [Zenject](https://github.com/modesttree/Zenject)
@@ -602,6 +659,39 @@ var typeResolver = container.ToTypeResolver();
 
 // Create state machine with Zenject support
 var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(typeResolver);
+```
+
+#### Zenject Registering
+
+All state machines, states and their dependencies should be registered in DI container.
+For convenient registering of states and state machines, special extension methods are available. The main ones
+are `BindStateMachine` and `BindState`, which bind both the classes themselves and all interfaces implemented by
+these classes.
+
+However, if you need to implement a transition into a state or launch a state machine via a base/abstract class, you
+should use `BindAbstractStateMachine` and `BindAbstractState`.
+
+Here's an example code:
+```csharp
+private void BindStates(DiContainer container)
+{
+    // Use this registration creating state machine via class or interface.
+    // For example: StateMachineHelper.CreateStateMachine<BarStateMachine>(...) 
+    // For example: StateMachineHelper.CreateStateMachine<IBarStateMachine>(...) 
+    container.BindStateMachine<BarStateMachine>();
+    
+    // Use this registration creating state machine via base/abstract class.
+    // For example: StateMachineHelper.CreateStateMachine<FooStateMachineBase>(...) 
+    container.BindAbstractStateMachine<FooStateMachineBase, FooStateMachine>();
+
+    // Use this registration for transitions to class or interface.
+    // For example: Transition.GoTo<BarState>() or Transition.GoTo<IBarState>()
+    container.BindState<BarState>();
+    
+    // Use this registration for transitions to base/abstract class.
+    // For example: Transition.GoTo<FooStateBase>()
+    container.BindAbstractState<FooStateBase, FooState>();
+}
 ```
 
 ## License
