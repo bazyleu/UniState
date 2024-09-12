@@ -24,10 +24,10 @@ namespace UniStateTests.PlayMode.GoToStateTests.Infrastructure
         {
             _logger.LogStep("SubStateGoToX6A", "Execute");
 
-            await UniTask.Yield();
-            await UniTask.Yield();
+            await UniTask.Yield(token);
+            await UniTask.Yield(token);
 
-            return Transition.GoToExit();
+            return Transition.GoTo<CompositeStateGoTo7, CompositeStatePayload>(new CompositeStatePayload(true));
         }
     }
 
@@ -42,12 +42,13 @@ namespace UniStateTests.PlayMode.GoToStateTests.Infrastructure
 
         public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
         {
-            await UniTask.Yield();
+            await UniTask.Yield(token);
 
             _logger.LogStep("SubStateGoToX6B", "Execute");
 
-            await UniTask.Yield();
-            await UniTask.Yield();
+            await UniTask.Yield(token);
+            await UniTask.Yield(token);
+            await UniTask.Yield(token);
 
             return Transition.GoToExit();
         }

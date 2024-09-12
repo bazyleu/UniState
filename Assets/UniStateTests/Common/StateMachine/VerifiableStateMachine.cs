@@ -15,14 +15,15 @@ namespace UniStateTests.Common
             _logger = logger;
         }
 
-        protected override void OnError(Exception exception, StateMachineErrorType phase)
+        protected override void HandleError(StateMachineErrorData errorData)
         {
-            throw new Exception($"StateMachine OnError. Current log: {_logger.FinishLogging()}", exception);
+            throw new Exception($"StateMachine HandleError. Current log: {_logger.FinishLogging()}", errorData.Exception);
         }
 
         public void Verify()
         {
-            Assert.AreEqual(ExpectedLog, _logger.FinishLogging());
+            var actualLog = _logger.FinishLogging();
+            Assert.AreEqual(ExpectedLog, actualLog);
         }
     }
 }

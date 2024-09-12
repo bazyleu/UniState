@@ -31,6 +31,10 @@ namespace UniStateTests.PlayMode.GoToStateTests
             container.BindState<CompositeStateGoTo6>();
             container.BindState<SubStateGoToX6A>();
             container.BindState<SubStateGoToX6B>();
+            container.BindState<CompositeStateGoTo7>();
+            container.BindState<SubStateGoToX7A>();
+            container.BindState<SubStateGoToX7B>();
+            container.BindState<StateGoTo8>();
         }
     }
 }

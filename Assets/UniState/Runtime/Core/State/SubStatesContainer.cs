@@ -36,8 +36,7 @@ namespace UniState
         {
             if (List.Count == 0)
             {
-                //TODO: Add custom exception
-                throw new Exception("No SubStates for execution");
+                throw new InvalidOperationException("No SubStates for execution");
             }
 
             StateTransitionInfo result;

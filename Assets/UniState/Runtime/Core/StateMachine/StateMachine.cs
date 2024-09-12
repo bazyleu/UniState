@@ -26,11 +26,8 @@ namespace UniState
             await ExecuteInternal(_transitionFactory.CreateStateTransition<TState, TPayload>(payload), token);
         }
 
-        protected virtual void OnError(Exception exception, StateMachineErrorType phase)
+        protected virtual void HandleError(StateMachineErrorData errorData)
         {
-            //Add Type (state type) to signature
-
-            //Call Handler
         }
 
         private async UniTask ExecuteInternal(StateTransitionInfo initialTransition, CancellationToken token)
@@ -77,7 +74,7 @@ namespace UniState
             }
             catch (Exception e)
             {
-                OnError(e, StateMachineErrorType.StateMachineFail);
+                ProcessError(new StateMachineErrorData(e, StateMachineErrorType.StateMachineFail));
             }
             finally
             {
@@ -148,7 +145,7 @@ namespace UniState
             }
             catch (Exception e)
             {
-                OnError(e, StateMachineErrorType.StateExecuting);
+                ProcessError(new StateMachineErrorData(e, StateMachineErrorType.StateExecuting, state));
             }
 
             return transitionInfo;
@@ -167,7 +164,7 @@ namespace UniState
             }
             catch (Exception e)
             {
-                OnError(e, StateMachineErrorType.StateInitializing);
+                ProcessError(new StateMachineErrorData(e, StateMachineErrorType.StateInitializing, state));
             }
         }
 
@@ -184,12 +181,14 @@ namespace UniState
             }
             catch (Exception e)
             {
-                OnError(e, StateMachineErrorType.StateExiting);
+                ProcessError(new StateMachineErrorData(e, StateMachineErrorType.StateExiting, state));
             }
             finally
             {
                 state.Dispose();
             }
         }
+
+        private void ProcessError(StateMachineErrorData errorData) => HandleError(errorData);
     }
 }
