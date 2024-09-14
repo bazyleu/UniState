@@ -29,7 +29,7 @@ namespace UniStateTests.PlayMode.GoBackTests.Infrastructure
 
             _goBackFlags.ExecutedState1 = true;
 
-            return Transition.GoTo<StateGoBack2>();
+            return Transition.GoTo<StateGoBack2, int>(42);
         }
     }
 }

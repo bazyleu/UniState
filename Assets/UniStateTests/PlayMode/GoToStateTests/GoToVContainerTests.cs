@@ -10,7 +10,7 @@ using VContainer;
 namespace UniStateTests.PlayMode.GoToStateTests
 {
     [TestFixture]
-    internal class VContainerIntegrationTests : VContainerTestsBase
+    internal class GoToVContainerTests : VContainerTestsBase
     {
         [UnityTest]
         public IEnumerator RunChaneOfState_ExitFromChain_ChainExecutedCorrectly() => UniTask.ToCoroutine(async () =>
@@ -32,6 +32,10 @@ namespace UniStateTests.PlayMode.GoToStateTests
             builder.RegisterState<CompositeStateGoTo6>();
             builder.RegisterState<SubStateGoToX6A>();
             builder.RegisterState<SubStateGoToX6B>();
+            builder.RegisterState<CompositeStateGoTo7>();
+            builder.RegisterState<SubStateGoToX7A>();
+            builder.RegisterState<SubStateGoToX7B>();
+            builder.RegisterState<StateGoTo8>();
         }
     }
 }

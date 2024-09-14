@@ -520,6 +520,36 @@ For larger projects using sub-containers/sub-contexts in your DI framework to ma
 pass them into `Create` to force the state machine to use them for creating states and dependencies. Thus, UniState
 supports this natively without additional actions required from you.
 
+#### State Machine Custom Interface 
+
+When creating a state machine, you can use your custom interface. Interface should be inherit from `IStateMachine`. This
+allows to implement additional, customized behavior.
+
+```csharp
+public interface IExtendedStateMachine : IStateMachine
+{
+    public void RunCustomLogic();
+}
+```
+
+Once your custom interface is implemented, you can utilize a special version of the API that returns your interface.
+This can be useful for adding custom logic to the state machine.
+
+```csharp
+// Option 1: Creating ExtendedStateMachine as entry point
+var stateMachine = StateMachineHelper.CreateStateMachine<ExtendedStateMachine, IExtendedStateMachine>(
+                    typeResolver);
+
+// Option 2: Creating ExtendedStateMachine inside states
+var stateMachine = StateMachineFactory.Create<ExtendedStateMachine, IExtendedStateMachine>();
+
+// Custom state machine has extended api that is defined by IExtendedStateMachine interface
+stateMachine.RunCustomLogic();
+
+// Custom state machine can run states like default state machine
+await stateMachine.Execute<FooState>(cancellationToken);
+```
+
 #### State Machine Error Handling
 
 If an exception occurs in a state, the state machine will catch and handle it. If the exception happens during the
@@ -530,16 +560,41 @@ as if the method had returned `Transition.GoBack()`.
 Exceptions will not be propagated further, except for `OperationCanceledException`. When an `OperationCanceledException`
 is encountered, the state machine will stop execution.
 
-To intercept exceptions and add custom handlers, you can override the `OnError()` method in your state machine that
+To intercept exceptions and add custom handlers, you can override the `HandleError()` method in your state machine that
 inherits from `StateMachine`. This method will be called whenever the state machine processes an exception.
 
 ```csharp
 public class BarStateMachine : StateMachine
 {
-    protected override void OnError(Exception exception, StateMachineErrorType phase)
+    protected override void HandleError(StateMachineErrorData errorData)
     {
         // Custom logic here
-        base.OnError(exception, phase);
+    }
+}
+```
+`StateMachineErrorData` contains metadata related to exceptions. Be aware that `StateMachineErrorData.State` may be null
+when `StateMachineErrorData.ErrorType` is `StateMachineErrorType.StateMachineFail`.
+
+If you wish to halt the state machine's execution following an exception, you can use the `throw` statement, which will stop execution.
+
+In the example provided, the state machine will terminate after encountering a second exception within the same state.
+
+```csharp
+public class FooStateMachine : StateMachine
+{
+    private Type _lastErrorState;
+
+    protected override void HandleError(StateMachineErrorData errorData)
+    {
+        var stateType = errorData.State?.GetType();
+
+        if (stateType != null && _lastErrorState == stateType)
+        {
+            // Stop state mahine execution and throw an exception out
+            throw new Exception($"Second exception in same state.", errorData.Exception);
+        }
+
+        _lastErrorState = stateType;
     }
 }
 ```
@@ -567,6 +622,24 @@ aspects, it functions like a regular state.
 A ready-to-use implementation for a composite state that propagates `Initialize`, `Execute`, and `Exit` methods to all
 SubStates within it. The result of the `Execute` method will be the first completed `Execute` method among all sub
 states.
+
+If you use `DefaultCompositeState` and it is executed without any SubStates, its `Execute` method will throw
+an `InvalidOperationException`.
+
+To use `DefaultCompositeState`, simply inherit your composite state from it. Here's an example:
+```csharp
+internal class FooCompositeState : DefaultCompositeState
+{
+}
+
+internal class BazSubState : SubStateBase<DefaultCompositeState>
+{
+}
+
+internal class BarSubState : SubStateBase<DefaultCompositeState>
+{
+}
+```
 
 ## Integrations
 
@@ -612,7 +685,7 @@ should use `RegisterAbstractStateMachine` and `RegisterAbstractState`.
 
 Here's an example code:
 ```csharp
-private void  RegisterStates(IContainerBuilder builder)
+private void RegisterStates(IContainerBuilder builder)
 {
     // Use this registration creating state machine via class or interface.
     // For example: StateMachineHelper.CreateStateMachine<BarStateMachine>(...) 
