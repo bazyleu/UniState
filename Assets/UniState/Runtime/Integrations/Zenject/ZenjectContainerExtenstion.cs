@@ -25,7 +25,6 @@ namespace UniState
         public static ConcreteIdArgConditionCopyNonLazyBinder BindState(
             this DiContainer container, Type type)
             => container.BindInterfacesAndSelfTo(type).AsTransient();
-        
 
         public static ConcreteIdArgConditionCopyNonLazyBinder BindAbstractState<TInterface, TState>(
             this DiContainer container)
