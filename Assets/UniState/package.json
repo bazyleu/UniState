@@ -13,6 +13,8 @@
     "state",
     "StateMachine",
     "code",
+    "UniState",
+    "UniTask",
     "project",
     "organization",
     "async/await",
