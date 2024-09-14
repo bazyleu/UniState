@@ -1,5 +1,6 @@
 #if UNISTATE_ZENJECT_SUPPORT
 
+using System;
 using Zenject;
 
 namespace UniState
@@ -20,6 +21,11 @@ namespace UniState
         public static ConcreteIdArgConditionCopyNonLazyBinder BindState<TState>(
             this DiContainer container) =>
             container.BindInterfacesAndSelfTo<TState>().AsTransient();
+
+        public static ConcreteIdArgConditionCopyNonLazyBinder BindState(
+            this DiContainer container, Type type)
+            => container.BindInterfacesAndSelfTo(type).AsTransient();
+        
 
         public static ConcreteIdArgConditionCopyNonLazyBinder BindAbstractState<TInterface, TState>(
             this DiContainer container)

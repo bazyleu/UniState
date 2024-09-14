@@ -1,7 +1,6 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
-using UniState;
 using UniStateTests.Common;
 using UniStateTests.PlayMode.GoBackTests.Infrastructure;
 using UnityEngine.TestTools;
@@ -24,11 +23,6 @@ namespace UniStateTests.PlayMode.GoBackTests
             base.SetupBindings(container);
 
             container.Bind<GoBackFlagsData>().ToSelf().AsSingle();
-
-            container.BindStateMachine<StateMachineGoBack>();
-            container.BindState<StateGoBack1>();
-            container.BindState<StateGoBack2>();
-            container.BindState<StateGoBack3>();
         }
     }
 }
