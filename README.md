@@ -500,7 +500,7 @@ public UniTask<StateTransitionInfo> Execute(CancellationToken token)
 
 #### Custom type resolvers
 
-While UniState supports `ITypeResolver` implementations for modern DI frameworks out of the box, you can create custom implementations, tailored to your needs
+While UniState provides `ITypeResolver` implementations for modern DI frameworks out of the box, you can create custom implementations, tailored to your needs
 
 An example of `ITypeResolver` with automatic state bindings:
 ```csharp
