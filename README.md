@@ -498,6 +498,28 @@ public UniTask<StateTransitionInfo> Execute(CancellationToken token)
 }
 ```
 
+#### Custom type resolvers
+
+While UniState provides `ITypeResolver` implementations for modern DI frameworks out of the box, you can create custom implementations, tailored to your needs
+
+An example of `ITypeResolver` with automatic state bindings:
+```csharp
+public class ZenjectAutoBindTypeResolver : ITypeResolver
+{
+    ...
+
+    public object Resolve(Type type)
+    {
+        if (!type.IsAbstract && !type.IsInterface && !_container.HasBinding(type))
+        {
+            _container.BindState(type);
+        }
+
+        return _container.Resolve(type);
+    }
+}
+```
+
 #### State Machine Context
 
 UniState natively supports sub-containers and sub-contexts available in modern DI frameworks.
