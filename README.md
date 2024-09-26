@@ -31,7 +31,9 @@ scalability, ideal for complex Unity projects.
         + [Creating a State Machine](#creating-a-state-machine)
         + [Running a State Machine](#running-a-state-machine)
         + [Creating and Running a State Machine Inside States](#creating-and-running-a-state-machine-inside-states)
+        + [Custom type resolvers](#custom-type-resolvers)
         + [State Machine Context](#state-machine-context)
+        + [State Machine Custom Interface ](#state-machine-custom-interface)
         + [State Machine Error Handling](#state-machine-error-handling)
     * [Composite State](#composite-state)
         + [Creating a Composite State](#creating-a-composite-state)
@@ -466,7 +468,9 @@ helper `StateMachineHelper.CreateStateMachine<TSateMachine>(ITypeResolver typeRe
 
 - **ITypeResolver**: Used to create the state machine. It acts as a factory for creating states and other state
   machines. You can implement it yourself or use the provided implementation from DI frameworks like VContainer or
-  Zenject via the `.ToTypeResolver()` extension.
+  Zenject via the `.ToTypeResolver()` extension. See [Integrations](#integrations) for supported frameworks
+  or [Custom type resolvers](#custom-type-resolvers) for cases if you DI framework is not supported out of the box or
+  you do not have DI framework.
 
 #### Running a State Machine
 
@@ -502,7 +506,7 @@ public UniTask<StateTransitionInfo> Execute(CancellationToken token)
 
 While UniState provides `ITypeResolver` implementations for modern DI frameworks out of the box, you can create custom implementations, tailored to your needs
 
-An example of `ITypeResolver` with automatic state bindings:
+An example of `ITypeResolver` with automatic state bindings for Zenject/Extenject:
 ```csharp
 public class ZenjectAutoBindTypeResolver : ITypeResolver
 {
@@ -519,6 +523,9 @@ public class ZenjectAutoBindTypeResolver : ITypeResolver
     }
 }
 ```
+
+If you do not have DI framework you have to implement ITypeResolver by your own by manually creating requested states and
+state machines.
 
 #### State Machine Context
 
