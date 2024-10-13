@@ -56,7 +56,7 @@ scalability, ideal for complex Unity projects.
 
 ### Requirements
 
-* Requires Unity version that supports path query parameter for git packages (Unity >= 2020.1a21).
+* Requires Unity version 2020.3 or higher.
 * Requires UniTask package installed. Guide regarding UniTask installation can be found
   on [Cysharp/UniTask README](https://github.com/Cysharp/UniTask/blob/master/README.md#upm-package).
 
