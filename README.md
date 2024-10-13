@@ -253,6 +253,73 @@ If the popup is complex with multiple features, it could be represented as its o
 not always tied to visual elements. Some states, like `GameLoadingState`, may handle background processes such as
 loading resources.
 
+All logic related to that state should implemented within the state class. UniState does not restrict the use of other
+frameworks or patterns, meaning you can freely use whatever suits your needs. You could, for example, run controllers
+and follow an MVC approach, follow MVVM approach, or even execute ECS code within a state.
+
+It is not recommended to use Unity GameObjects directly inside states, as it reduces testability and increases code
+coupling. A better approach is to load GameObjects through an abstraction and use them as an interface (essentially as a
+View in UniState). Add a handler for unloading to the Disposables of the state that loaded it. All approaches / patterns
+which were mentioned above support this, and you can choose any based on your preferences, as this functionality is
+outside the scope of UniState.
+
+The key concept of the framework is that once a state is exited, all resources it allocated should be released. For
+details on how to di this see [Disposables](#disposables). In cases where you have a complex popup
+with its own state machine, it’s important to allocate resources specific to the popup before launching the separate
+state machine, ensuring they are properly cleaned up after the state machine exits.
+
+```csharp
+    // This state loads resources, adds them to Disposables, and runs the internal state machine for ShopPopup.
+    // When the StateMachine completes its execution, RootShopPopupState finishes and releases its resources.
+    public class RootShopPopupState : StateBase
+    {
+        public async UniTask Initialize(CancellationToken token) 
+        {
+            // Load ShopView (a Unity GameObject) and create an IDisposable handler that 
+            // will unload the GameObject after Disposing. 
+            // After that, the GameObject will be available as IShopView in internal states.
+            var disposable = LoadShopView();
+            Disposables.Add(disposable);
+        }
+    
+        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        {
+            var stateMachine = StateMachineFactory.Create<StateMachine>();
+            
+            // Run the internal state machine for ShopPopup.
+            // In all states inside this state machine, all resources allocated in this state will be available.
+            await stateMachine.Execute<ShopPopupIdleState>(cts.Token);
+
+            return Transition.GoBack();
+        }
+
+        // The implementation of this method depends on other frameworks/patterns used in the project.
+        private IDisposable LoadShopView()
+        {
+             // Loading logic
+        }
+    }
+    
+    public class ShopPopupIdleState : StateBase
+    {
+        // IShopView is a Unity GameObject loaded in RootShopPopupState (outside the current state machine). 
+        // IShopView will be available as long as RootShopPopupState is running, 
+        // meaning throughout the entire internal state machine's operation.
+        private IShopView _view;
+        
+        public ShopPopupIdleState(IShopView view)
+        {
+             _view = view;
+        }
+    
+        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        {
+            var action = await _view.Show(token);
+            
+            // Transition logic with 'action'
+        }
+    }
+```
 
 
 ## API Details and Usage
