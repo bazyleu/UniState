@@ -50,7 +50,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-test-project-${{ matrix.targetPlatform }}
+          key: Library-test-project-${{ matrix.targetPlatform }}-${{ matrix.unityVersion }}
           restore-keys: |
             Library-test-project-
             Library-
@@ -64,3 +64,4 @@ jobs:
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           artifactsPath: ${{ matrix.testMode }}-artifacts
+          unityVersion: ${{ matrix.unityVersion }}
