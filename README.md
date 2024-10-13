@@ -19,7 +19,8 @@ scalability, ideal for complex Unity projects.
     * [Option 2: Add via manifest.json](#option-2-add-via-manifestjson)
 - [Getting Started](#getting-started)
 - [Framework Philosophy](#framework-philosophy)
-  + [Dependency Injection](#dependency-injection)
+    * [Dependency Injection](#dependency-injection)
+    * [What is a State?](#what-is-a-state)
 - [API Details and Usage](#api-details-and-usage)
     * [State](#state)
         + [State Creating](#state-creating)
@@ -234,13 +235,25 @@ Following code demonstrates how to run the state machine.
 
 ## Framework Philosophy
 
-#### Dependency Injection
+### Dependency Injection
 
 All dependencies for states, commands, and other entities should be passed through the constructor.
 UniState supports automatic integration with the most popular DI frameworks for Unity.
 Refer to the [integration documentation](#integrations) for more details.
 Dependencies must be registered in your DI framework, and they will automatically be resolved when
 creating [state](#states), [state machine](#state-machine).
+
+### What is a State?
+
+A state is an abstraction that represents a specific condition or phase of the game, often corresponding to a "screen" that the user interacts
+with. For example, the main menu is a state, a settings popup is another state, and gameplay itself may take place in a
+separate `GameplayState`. When the user opens a shop popup, they may transition into a `ShopState`.
+
+If the popup is complex with multiple features, it could be represented as its own state machine. However, states are
+not always tied to visual elements. Some states, like `GameLoadingState`, may handle background processes such as
+loading resources.
+
+
 
 ## API Details and Usage
 
