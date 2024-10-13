@@ -21,6 +21,11 @@ jobs:
         testMode:
           - EditMode
           - PlayMode
+        unityVersion:
+            - 2020.1a21
+            - 2022.3.22f1
+            - 2023.2.15f1
+            - 6000.0.22f1
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
