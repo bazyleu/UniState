@@ -251,12 +251,12 @@ separate `GameplayState`. When the user opens a shop popup, they may transition 
 not always tied to visual elements. Some states, like `GameLoadingState`, may handle background processes such as
 loading resources.
 
-All logic related to that state should implemented within the state class. UniState does not restrict the use of other
+State class contains all logic related to that state including loading and unloading resources. UniState does not restrict the use of other
 frameworks or patterns, meaning you can freely use whatever suits your needs. You could, for example, run controllers
 and follow an MVC approach, follow MVVM approach, or even execute ECS code within a state.
 
 The key concept of the framework is that once a state is exited, all resources it allocated should be released. For
-details on how to di this see [Disposables](#disposables).
+details on how to do this see [Disposables](#disposables).
 
 It is not recommended to use Unity GameObjects directly inside states, as it reduces testability and increases code
 coupling. A better approach is to load GameObjects through an abstraction and use them as an interface (essentially as a
