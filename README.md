@@ -241,15 +241,13 @@ All dependencies for states, commands, and other entities should be passed throu
 UniState supports automatic integration with the most popular DI frameworks for Unity.
 Refer to the [integration documentation](#integrations) for more details.
 Dependencies must be registered in your DI framework, and they will automatically be resolved when
-creating [state](#states), [state machine](#state-machine).
+creating [state](#state), [state machine](#state-machine).
 
 ### What is a State?
 
 A state is an abstraction that represents a specific condition or phase of the game, often corresponding to a "screen" that the user interacts
 with. For example, the main menu is a state, a settings popup is another state, and gameplay itself may take place in a
-separate `GameplayState`. When the user opens a shop popup, they may transition into a `ShopState`.
-
-If the popup is complex with multiple features, it could be represented as its own state machine. However, states are
+separate `GameplayState`. When the user opens a shop popup, they may transition into a `ShopState`. However, states are
 not always tied to visual elements. Some states, like `GameLoadingState`, may handle background processes such as
 loading resources.
 
@@ -257,15 +255,61 @@ All logic related to that state should implemented within the state class. UniSt
 frameworks or patterns, meaning you can freely use whatever suits your needs. You could, for example, run controllers
 and follow an MVC approach, follow MVVM approach, or even execute ECS code within a state.
 
+The key concept of the framework is that once a state is exited, all resources it allocated should be released. For
+details on how to di this see [Disposables](#disposables).
+
 It is not recommended to use Unity GameObjects directly inside states, as it reduces testability and increases code
 coupling. A better approach is to load GameObjects through an abstraction and use them as an interface (essentially as a
 View in UniState). Add a handler for unloading to the Disposables of the state that loaded it. All approaches / patterns
 which were mentioned above support this, and you can choose any based on your preferences, as this functionality is
 outside the scope of UniState.
 
-The key concept of the framework is that once a state is exited, all resources it allocated should be released. For
-details on how to di this see [Disposables](#disposables). In cases where you have a complex popup
-with its own state machine, it’s important to allocate resources specific to the popup before launching the separate
+```csharp
+    //Popup prefab (Monobehaviour, view)
+    public class SimplePopupView : ISimplePopupView, Monobehaviour
+    {
+        //...
+    }
+    
+    // Simple popup state example
+    public class SimplePopupState : StateBase
+    {
+        private ISimplePopupView _view;
+    
+        public override async UniTask Initialize(CancellationToken token) 
+        {
+            _view = LoadPopupView(token);
+            Disposables.Add(UnloadShopView);
+        }
+    
+        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        {
+            await _view.Show(token);
+            await _view.WaitForClick(token);
+
+            return Transition.GoBack();
+        }
+        
+        public override async UniTask Exit(CancellationToken token)
+        {
+            await _view.Hide(token);
+        }
+
+        // The implementation of this method depends on other frameworks/patterns used in the project.
+        private ISimplePopupView LoadShopView(CancellationToken token)
+        {
+             // Loading logic
+        }
+        
+        private void UnloadShopView()
+        {
+             // Unloading logic
+        }
+    }
+```
+
+If the popup is complex with multiple features, it could be represented as its own state machine. 
+In cases where you have a complex popup with its own state machine, it’s important to allocate resources specific to the popup before launching the separate
 state machine, ensuring they are properly cleaned up after the state machine exits.
 
 ```csharp
@@ -273,7 +317,7 @@ state machine, ensuring they are properly cleaned up after the state machine exi
     // When the StateMachine completes its execution, RootShopPopupState finishes and releases its resources.
     public class RootShopPopupState : StateBase
     {
-        public async UniTask Initialize(CancellationToken token) 
+        public override async UniTask Initialize(CancellationToken token) 
         {
             // Load ShopView (a Unity GameObject) and create an IDisposable handler that 
             // will unload the GameObject after Disposing. 
