@@ -9,10 +9,12 @@ namespace UniState
         private LimitedStack<StateTransitionInfo> _history;
         private IStateTransitionFactory _transitionFactory;
 
+        protected virtual int MaxHistorySize => 15;
+
         public virtual void Initialize(ITypeResolver resolver)
         {
             _transitionFactory = new StateTransitionFactory(resolver);
-            _history = new LimitedStack<StateTransitionInfo>(15);
+            _history = new LimitedStack<StateTransitionInfo>(MaxHistorySize);
         }
 
         public virtual async UniTask Execute<TState>(CancellationToken token) where TState : class, IState<EmptyPayload>

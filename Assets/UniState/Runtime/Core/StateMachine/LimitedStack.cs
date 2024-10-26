@@ -9,6 +9,8 @@ namespace UniState
         private int _topIndex = 0;
         private int _bottomIndex = 0;
 
+        private bool HasSize => _maxSize > 0;
+
         public LimitedStack(int maxSize)
         {
             _maxSize = maxSize;
@@ -19,6 +21,11 @@ namespace UniState
 
         public T Push(T element)
         {
+            if (!HasSize)
+            {
+                return element;
+            }
+
             if (Count() == _maxSize)
             {
                 _bottomIndex++;
@@ -30,10 +37,23 @@ namespace UniState
             return element;
         }
 
-        public T Peek() => _topIndex != _bottomIndex ? _items[(_topIndex-1)%_maxSize] : default;
+        public T Peek()
+        {
+            if (!HasSize)
+            {
+                return default;
+            }
+
+            return _topIndex != _bottomIndex ? _items[(_topIndex-1)%_maxSize] : default;
+        }
 
         public T Pop()
         {
+            if (!HasSize)
+            {
+                return default;
+            }
+
             var result = Peek();
 
             if (_topIndex != _bottomIndex)

@@ -32,10 +32,11 @@ scalability, ideal for complex Unity projects.
         + [Creating a State Machine](#creating-a-state-machine)
         + [Running a State Machine](#running-a-state-machine)
         + [Creating and Running a State Machine Inside States](#creating-and-running-a-state-machine-inside-states)
-        + [Custom type resolvers](#custom-type-resolvers)
-        + [State Machine Context](#state-machine-context)
-        + [State Machine Custom Interface ](#state-machine-custom-interface)
+        + [State Machine History](#state-machine-history)
         + [State Machine Error Handling](#state-machine-error-handling)
+        + [State Machine Custom Interface ](#state-machine-custom-interface)
+        + [State Machine Context](#state-machine-context)
+        + [Custom type resolvers](#custom-type-resolvers)
     * [Composite State](#composite-state)
         + [Creating a Composite State](#creating-a-composite-state)
         + [SubState](#substate)
@@ -626,81 +627,20 @@ public UniTask<StateTransitionInfo> Execute(CancellationToken token)
 }
 ```
 
-#### Custom type resolvers
+#### State Machine History
 
-While UniState provides `ITypeResolver` implementations for modern DI frameworks out of the box, you can create custom implementations, tailored to your needs
+The state machine maintains a history of transitions between states, allowing for the use of `Transition.GoBack()`. The
+size of this history can be customized through the `StateMachineLongHistory.MaxHistorySize` property (default value is
+15). If more transitions occur than the history size, only the most recent transitions will be retained, with no
+overhead or errors resulting from the limit.
 
-An example of `ITypeResolver` with automatic state bindings for Zenject/Extenject:
+Setting `MaxHistorySize = 0` disables the history, causing `Transition.GoBack()` to exit the state machine directly.
+
 ```csharp
-public class ZenjectAutoBindTypeResolver : ITypeResolver
+public class StateMachineWithDisabledHistory : StateMachine
 {
-    ...
-
-    public object Resolve(Type type)
-    {
-        if (!type.IsAbstract && !type.IsInterface && !_container.HasBinding(type))
-        {
-            _container.BindState(type);
-        }
-
-        return _container.Resolve(type);
-    }
+    protected override int MaxHistorySize => 0;
 }
-```
-
-If you do not have DI framework you have to implement ITypeResolver by your own by manually creating requested states and
-state machines.
-
-#### State Machine Context
-
-UniState natively supports sub-containers and sub-contexts available in modern DI frameworks.
-
-When creating a state machine inside a state, you can use two method overloads:
-
-- `StateMachineFactory.Create<TSateMachine>()`
-- `StateMachineFactory.Create<TSateMachine>(ITypeResolver typeResolver)`
-
-If the version without `ITypeResolver` is used, the context is inherited from the parent state machine.
-If `ITypeResolver` is passed, it will have a new context.
-
-For smaller projects, it's recommended to use the simplified version without creating a new context:
-
-```csharp
-StateMachineFactory.Create<TSateMachine>();
-```
-
-For larger projects using sub-containers/sub-contexts in your DI framework to manage resources more efficiently, you can
-pass them into `Create` to force the state machine to use them for creating states and dependencies. Thus, UniState
-supports this natively without additional actions required from you.
-
-#### State Machine Custom Interface 
-
-When creating a state machine, you can use your custom interface. Interface should be inherit from `IStateMachine`. This
-allows to implement additional, customized behavior.
-
-```csharp
-public interface IExtendedStateMachine : IStateMachine
-{
-    public void RunCustomLogic();
-}
-```
-
-Once your custom interface is implemented, you can utilize a special version of the API that returns your interface.
-This can be useful for adding custom logic to the state machine.
-
-```csharp
-// Option 1: Creating ExtendedStateMachine as entry point
-var stateMachine = StateMachineHelper.CreateStateMachine<ExtendedStateMachine, IExtendedStateMachine>(
-                    typeResolver);
-
-// Option 2: Creating ExtendedStateMachine inside states
-var stateMachine = StateMachineFactory.Create<ExtendedStateMachine, IExtendedStateMachine>();
-
-// Custom state machine has extended api that is defined by IExtendedStateMachine interface
-stateMachine.RunCustomLogic();
-
-// Custom state machine can run states like default state machine
-await stateMachine.Execute<FooState>(cancellationToken);
 ```
 
 #### State Machine Error Handling
@@ -751,6 +691,86 @@ public class FooStateMachine : StateMachine
     }
 }
 ```
+
+
+#### State Machine Custom Interface 
+
+When creating a state machine, you can use your custom interface. Interface should be inherit from `IStateMachine`. This
+allows to implement additional, customized behavior.
+
+```csharp
+public interface IExtendedStateMachine : IStateMachine
+{
+    public void RunCustomLogic();
+}
+```
+
+Once your custom interface is implemented, you can utilize a special version of the API that returns your interface.
+This can be useful for adding custom logic to the state machine.
+
+```csharp
+// Option 1: Creating ExtendedStateMachine as entry point
+var stateMachine = StateMachineHelper.CreateStateMachine<ExtendedStateMachine, IExtendedStateMachine>(
+                    typeResolver);
+
+// Option 2: Creating ExtendedStateMachine inside states
+var stateMachine = StateMachineFactory.Create<ExtendedStateMachine, IExtendedStateMachine>();
+
+// Custom state machine has extended api that is defined by IExtendedStateMachine interface
+stateMachine.RunCustomLogic();
+
+// Custom state machine can run states like default state machine
+await stateMachine.Execute<FooState>(cancellationToken);
+```
+
+#### State Machine Context
+
+UniState natively supports sub-containers and sub-contexts available in modern DI frameworks.
+
+When creating a state machine inside a state, you can use two method overloads:
+
+- `StateMachineFactory.Create<TSateMachine>()`
+- `StateMachineFactory.Create<TSateMachine>(ITypeResolver typeResolver)`
+
+If the version without `ITypeResolver` is used, the context is inherited from the parent state machine.
+If `ITypeResolver` is passed, it will have a new context.
+
+For smaller projects, it's recommended to use the simplified version without creating a new context:
+
+```csharp
+StateMachineFactory.Create<TSateMachine>();
+```
+
+For larger projects using sub-containers/sub-contexts in your DI framework to manage resources more efficiently, you can
+pass them into `Create` to force the state machine to use them for creating states and dependencies. Thus, UniState
+supports this natively without additional actions required from you.
+
+
+#### Custom type resolvers
+
+While UniState provides `ITypeResolver` implementations for modern DI frameworks out of the box, you can create custom implementations, tailored to your needs
+
+An example of `ITypeResolver` with automatic state bindings for Zenject/Extenject:
+```csharp
+public class ZenjectAutoBindTypeResolver : ITypeResolver
+{
+    ...
+
+    public object Resolve(Type type)
+    {
+        if (!type.IsAbstract && !type.IsInterface && !_container.HasBinding(type))
+        {
+            _container.BindState(type);
+        }
+
+        return _container.Resolve(type);
+    }
+}
+```
+
+If you do not have DI framework you have to implement ITypeResolver by your own by manually creating requested states and
+state machines.
+
 
 ### Composite State
 
