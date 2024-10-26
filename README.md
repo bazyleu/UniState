@@ -32,10 +32,11 @@ scalability, ideal for complex Unity projects.
         + [Creating a State Machine](#creating-a-state-machine)
         + [Running a State Machine](#running-a-state-machine)
         + [Creating and Running a State Machine Inside States](#creating-and-running-a-state-machine-inside-states)
-        + [Custom type resolvers](#custom-type-resolvers)
-        + [State Machine Context](#state-machine-context)
-        + [State Machine Custom Interface ](#state-machine-custom-interface)
+        + [State Machine History](#state-machine-history)
         + [State Machine Error Handling](#state-machine-error-handling)
+        + [State Machine Custom Interface ](#state-machine-custom-interface)
+        + [State Machine Context](#state-machine-context)
+        + [Custom type resolvers](#custom-type-resolvers)
     * [Composite State](#composite-state)
         + [Creating a Composite State](#creating-a-composite-state)
         + [SubState](#substate)
@@ -628,7 +629,19 @@ public UniTask<StateTransitionInfo> Execute(CancellationToken token)
 
 #### State Machine History
 
-//TODO 
+The state machine maintains a history of transitions between states, allowing for the use of `Transition.GoBack()`. The
+size of this history can be customized through the `StateMachineLongHistory.MaxHistorySize` property (default value is
+15). If more transitions occur than the history size, only the most recent transitions will be retained, with no
+overhead or errors resulting from the limit.
+
+Setting `MaxHistorySize = 0` disables the history, causing `Transition.GoBack()` to exit the state machine directly.
+
+```csharp
+public class StateMachineWithDisabledHistory : StateMachine
+{
+    protected override int MaxHistorySize => 0;
+}
+```
 
 #### State Machine Error Handling
 
