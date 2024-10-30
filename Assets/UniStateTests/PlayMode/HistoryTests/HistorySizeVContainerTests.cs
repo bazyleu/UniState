@@ -1,5 +1,6 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using NUnit.Framework;
 using UniState;
 using UniStateTests.Common;
 using UniStateTests.PlayMode.HistoryTests.Infrastructure;
@@ -8,6 +9,7 @@ using VContainer;
 
 namespace UniStateTests.PlayMode.HistoryTests
 {
+    [TestFixture]
     public class HistorySizeVContainerTests : VContainerTestsBase
     {
         [UnityTest]
