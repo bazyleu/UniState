@@ -645,16 +645,13 @@ public class StateMachineWithDisabledHistory : StateMachine
 
 #### State Machine Error Handling
 
-If an exception occurs in a state, the state machine will catch and handle it. If the exception happens during the
-state's `Initialize()` or `Exit()` methods, the state machine will continue as if the exception did not occur. If an
-exception occurs in the state's `Execute()` method, the state machine will automatically perform a `GoBack` operation,
-as if the method had returned `Transition.GoBack()`.
+In UniState, state machine error handling can be customized to control how exceptions within states are processed. The
+primary mechanism for this is the `HandleError()` method, which you can override in your custom state machine. This
+method is called whenever an exception occurs, allowing you to define specific logic to handle errors.
 
-Exceptions will not be propagated further, except for `OperationCanceledException`. When an `OperationCanceledException`
-is encountered, the state machine will stop execution.
-
-To intercept exceptions and add custom handlers, you can override the `HandleError()` method in your state machine that
-inherits from `StateMachine`. This method will be called whenever the state machine processes an exception.
+Exceptions are caught and processed internally without propagating further, except for `OperationCanceledException`,
+which will stop the state machine. `StateMachineErrorData` provides metadata related to exceptions, and
+`StateMachineErrorData.State` may be `null` if `StateMachineErrorType` is set to `StateMachineFail`.
 
 ```csharp
 public class BarStateMachine : StateMachine
@@ -665,12 +662,9 @@ public class BarStateMachine : StateMachine
     }
 }
 ```
-`StateMachineErrorData` contains metadata related to exceptions. Be aware that `StateMachineErrorData.State` may be null
-when `StateMachineErrorData.ErrorType` is `StateMachineErrorType.StateMachineFail`.
 
-If you wish to halt the state machine's execution following an exception, you can use the `throw` statement, which will stop execution.
-
-In the example provided, the state machine will terminate after encountering a second exception within the same state.
+To halt state machine execution after an exception, include a `throw` statement in `HandleError()`:
+In the example provided, the state machine will terminate after encountering a second exception within the same state in a row.
 
 ```csharp
 public class FooStateMachine : StateMachine
@@ -692,6 +686,22 @@ public class FooStateMachine : StateMachine
 }
 ```
 
+If an exception is encountered in a state’s `Initialize()` or `Exit()` methods, the state machine will continue working.
+However, if an exception occurs in the state’s `Execute()` method, the state machine defaults to a
+`GoBack()` operation, as though `Transition.GoBack()` were returned. You can override this behavior by customizing
+`BuildRecoveryTransition`, which receives an `IStateTransitionFactory` to specify any desired transition for error
+recovery.
+
+When an exception occurs in `Execute()`, `HandleError` will be invoked first, followed by `BuildRecoveryTransition`.
+
+```csharp
+public class BarStateMachine : StateMachine
+{
+       // If exception occurs in the state in the Execute() method, the state machine will go to the ErrorPopupState.
+       protected override StateTransitionInfo BuildRecoveryTransition(IStateTransitionFactory transitionFactory)
+            => transitionFactory.CreateStateTransition<ErrorPopupState>();
+}
+```
 
 #### State Machine Custom Interface 
 

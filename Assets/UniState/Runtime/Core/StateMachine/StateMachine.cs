@@ -32,6 +32,9 @@ namespace UniState
         {
         }
 
+        protected virtual StateTransitionInfo BuildRecoveryTransition(IStateTransitionFactory transitionFactory) =>
+            transitionFactory.CreateBackTransition();
+
         private async UniTask ExecuteInternal(StateTransitionInfo initialTransition, CancellationToken token)
         {
             var activeStateMetadata = new StateWithMetadata();
@@ -133,13 +136,11 @@ namespace UniState
 
         private async UniTask<StateTransitionInfo> ExecuteSafe(IExecutableState state, CancellationToken token)
         {
-            var transitionInfo = _transitionFactory.CreateBackTransition();
-
             try
             {
                 token.ThrowIfCancellationRequested();
 
-                transitionInfo = await state.Execute(token);
+                return await state.Execute(token);
             }
             catch (OperationCanceledException)
             {
@@ -150,7 +151,7 @@ namespace UniState
                 ProcessError(new StateMachineErrorData(e, StateMachineErrorType.StateExecuting, state));
             }
 
-            return transitionInfo;
+            return BuildRecoveryTransition(_transitionFactory);
         }
 
         private async UniTask InitializeSafe(IExecutableState state, CancellationToken token)
