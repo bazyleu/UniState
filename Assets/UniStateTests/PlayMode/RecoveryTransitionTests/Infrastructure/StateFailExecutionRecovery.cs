@@ -19,6 +19,8 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
 
         public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
         {
+            Disposables.Add(() => { _logger.LogStep("StateFailExecutionRecovery", $"Disposables"); });
+
             _logger.LogStep("StateFailExecutionRecovery", $"Execute");
 
             if (_testHelper.ExceptionWasThrown)
@@ -29,6 +31,13 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
             _testHelper.ExceptionWasThrown = true;
 
             throw new Exception("Execution exception");
+        }
+
+        public override UniTask Exit(CancellationToken token)
+        {
+            _logger.LogStep("StateFailExecutionRecovery", $"Exit");
+
+            return UniTask.CompletedTask;
         }
     }
 }

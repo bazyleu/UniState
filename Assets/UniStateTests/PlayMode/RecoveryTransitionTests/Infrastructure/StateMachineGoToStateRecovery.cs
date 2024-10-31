@@ -25,6 +25,6 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
             "StateThrowTwoExceptionRecovery (Initialize) -> StateMachineGoToStateRecovery (HandleError (Initialize exception)) -> " +
             "StateThrowTwoExceptionRecovery (Execute, Exit) -> StateMachineGoToStateRecovery (HandleError (Exit exception)) -> " +
             "StateFailExecutionRecovery (Execute) -> StateMachineGoToStateRecovery (HandleError (Execution exception)) -> " +
-            "StateMagicRecovery (Execute)";
+            "StateFailExecutionRecovery (Exit, Disposables) -> StateMagicRecovery (Execute)";
     }
 }
