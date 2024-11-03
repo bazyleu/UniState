@@ -6,7 +6,7 @@
 [![Last Commit](https://img.shields.io/github/last-commit/bazyleu/UniState)](https://github.com/bazyleu/UniState/branches)
 [![License](https://img.shields.io/github/license/bazyleu/UniState)](LICENSE)
 
-UniState is an architectural framework for Unity, designed around State pattern. Offers high performance and excellent
+UniState is an open source framework for Unity, designed around State pattern. Offers high performance and excellent
 scalability, ideal for complex Unity projects.
 
 ## Table of Contents
