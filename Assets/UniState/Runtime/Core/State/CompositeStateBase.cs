@@ -42,5 +42,11 @@ namespace UniState
             base.SetTransitionFacade(transitionFacade);
             _subStatesContainer.SetTransitionFacade(transitionFacade);
         }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _subStatesContainer.Dispose();
+        }
     }
 }
