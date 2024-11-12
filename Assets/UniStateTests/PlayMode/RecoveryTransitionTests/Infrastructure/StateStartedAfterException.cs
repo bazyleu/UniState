@@ -5,11 +5,11 @@ using UniStateTests.Common;
 
 namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
 {
-    internal class StateInitRecovery : StateBase
+    internal class StateStartedAfterException : StateBase
     {
         private readonly ExecutionLogger _logger;
 
-        public StateInitRecovery(ExecutionLogger logger)
+        public StateStartedAfterException(ExecutionLogger logger)
         {
             _logger = logger;
         }
@@ -18,9 +18,9 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
         {
             await UniTask.Yield(token);
 
-            _logger.LogStep("StateInitRecovery", $"Execute");
+            _logger.LogStep("StateStartedAfterException", $"Execute");
 
-            return Transition.GoTo<StateThrowTwoExceptionRecovery>();
+            return Transition.GoToExit();
         }
     }
 }

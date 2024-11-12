@@ -21,10 +21,10 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
             => transitionFactory.CreateExitTransition();
 
         protected override string ExpectedLog =>
-            "StateInitRecovery (Execute) -> " +
-            "StateThrowTwoExceptionRecovery (Initialize) -> StateMachineExitRecovery (HandleError (Initialize exception)) -> " +
-            "StateThrowTwoExceptionRecovery (Execute, Exit) -> StateMachineExitRecovery (HandleError (Exit exception)) -> " +
-            "StateFailExecutionRecovery (Execute) -> StateMachineExitRecovery (HandleError (Execution exception)) -> " +
-            "StateFailExecutionRecovery (Exit, Disposables)";
+            "StateInitial (Execute) -> " +
+            "StateThrowTwoException (Initialize) -> StateMachineExitRecovery (HandleError (Initialize exception)) -> " +
+            "StateThrowTwoException (Execute, Exit) -> StateMachineExitRecovery (HandleError (Exit exception)) -> " +
+            "StateWithFailExecution (Execute) -> StateMachineExitRecovery (HandleError (Execution exception)) -> " +
+            "StateWithFailExecution (Exit, Disposables)";
     }
 }

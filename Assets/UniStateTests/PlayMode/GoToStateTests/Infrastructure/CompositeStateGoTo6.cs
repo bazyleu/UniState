@@ -11,18 +11,18 @@ namespace UniStateTests.PlayMode.GoToStateTests.Infrastructure
     }
 
 
-    internal class SubStateGoToX6A : SubStateBase<CompositeStateGoTo6>
+    internal class SubStateGoTo6First : SubStateBase<CompositeStateGoTo6>
     {
         private readonly ExecutionLogger _logger;
 
-        public SubStateGoToX6A(ExecutionLogger logger)
+        public SubStateGoTo6First(ExecutionLogger logger)
         {
             _logger = logger;
         }
 
         public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
         {
-            _logger.LogStep("SubStateGoToX6A", "Execute");
+            _logger.LogStep("SubStateGoTo6First", "Execute");
 
             await UniTask.Yield(token);
             await UniTask.Yield(token);
@@ -31,11 +31,11 @@ namespace UniStateTests.PlayMode.GoToStateTests.Infrastructure
         }
     }
 
-    internal class SubStateGoToX6B : SubStateBase<CompositeStateGoTo6>
+    internal class SubStateGoTo6Second : SubStateBase<CompositeStateGoTo6>
     {
         private readonly ExecutionLogger _logger;
 
-        public SubStateGoToX6B(ExecutionLogger logger)
+        public SubStateGoTo6Second(ExecutionLogger logger)
         {
             _logger = logger;
         }
@@ -44,7 +44,7 @@ namespace UniStateTests.PlayMode.GoToStateTests.Infrastructure
         {
             await UniTask.Yield(token);
 
-            _logger.LogStep("SubStateGoToX6B", "Execute");
+            _logger.LogStep("SubStateGoTo6Second", "Execute");
 
             await UniTask.Yield(token);
             await UniTask.Yield(token);

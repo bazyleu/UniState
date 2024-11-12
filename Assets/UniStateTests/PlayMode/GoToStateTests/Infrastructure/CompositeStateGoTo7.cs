@@ -10,18 +10,18 @@ namespace UniStateTests.PlayMode.GoToStateTests.Infrastructure
 
     }
 
-    internal class SubStateGoToX7A : SubStateBase<CompositeStateGoTo7, CompositeStatePayload>
+    internal class SubStateGoTo7First : SubStateBase<CompositeStateGoTo7, CompositeStatePayload>
     {
         private readonly ExecutionLogger _logger;
 
-        public SubStateGoToX7A(ExecutionLogger logger)
+        public SubStateGoTo7First(ExecutionLogger logger)
         {
             _logger = logger;
         }
 
         public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
         {
-            _logger.LogStep("SubStateGoToX7A", $"Execute:{Payload.DelayFirstSubState}");
+            _logger.LogStep("SubStateGoTo7First", $"Execute:{Payload.DelayFirstSubState}");
 
             if (Payload.DelayFirstSubState)
             {
@@ -34,16 +34,16 @@ namespace UniStateTests.PlayMode.GoToStateTests.Infrastructure
 
             await UniTask.Yield(token);
             await UniTask.Yield(token);
-            
+
             return Transition.GoTo<IStateGoTo8, bool>(true);
         }
     }
 
-    internal class SubStateGoToX7B : SubStateBase<CompositeStateGoTo7, CompositeStatePayload>
+    internal class SubStateGoTo7Second : SubStateBase<CompositeStateGoTo7, CompositeStatePayload>
     {
         private readonly ExecutionLogger _logger;
 
-        public SubStateGoToX7B(ExecutionLogger logger)
+        public SubStateGoTo7Second(ExecutionLogger logger)
         {
             _logger = logger;
         }
@@ -52,7 +52,7 @@ namespace UniStateTests.PlayMode.GoToStateTests.Infrastructure
         {
             await UniTask.Yield(token);
 
-            _logger.LogStep("SubStateGoToX7B", $"Execute:{Payload.DelayFirstSubState}");
+            _logger.LogStep("SubStateGoTo7Second", $"Execute:{Payload.DelayFirstSubState}");
 
             await UniTask.Yield(token);
             await UniTask.Yield(token);

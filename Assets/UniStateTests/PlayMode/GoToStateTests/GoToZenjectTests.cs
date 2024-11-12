@@ -29,11 +29,11 @@ namespace UniStateTests.PlayMode.GoToStateTests
             container.BindState<StateGoTo4>();
             container.BindState<StateGoTo5>();
             container.BindState<CompositeStateGoTo6>();
-            container.BindState<SubStateGoToX6A>();
-            container.BindState<SubStateGoToX6B>();
+            container.BindState<SubStateGoTo6First>();
+            container.BindState<SubStateGoTo6Second>();
             container.BindState<CompositeStateGoTo7>();
-            container.BindState<SubStateGoToX7A>();
-            container.BindState<SubStateGoToX7B>();
+            container.BindState<SubStateGoTo7First>();
+            container.BindState<SubStateGoTo7Second>();
             container.BindState<StateGoTo8>();
         }
     }

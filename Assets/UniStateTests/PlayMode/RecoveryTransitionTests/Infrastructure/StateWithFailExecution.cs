@@ -6,12 +6,12 @@ using UniStateTests.Common;
 
 namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
 {
-    internal class StateFailExecutionRecovery : StateBase
+    internal class StateWithFailExecution : StateBase
     {
         private readonly ExecutionLogger _logger;
         private readonly RecoveryTestHelper _testHelper;
 
-        public StateFailExecutionRecovery(RecoveryTestHelper testHelper, ExecutionLogger logger)
+        public StateWithFailExecution(RecoveryTestHelper testHelper, ExecutionLogger logger)
         {
             _testHelper = testHelper;
             _logger = logger;
@@ -19,9 +19,9 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
 
         public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
         {
-            Disposables.Add(() => { _logger.LogStep("StateFailExecutionRecovery", $"Disposables"); });
+            Disposables.Add(() => { _logger.LogStep("StateWithFailExecution", $"Disposables"); });
 
-            _logger.LogStep("StateFailExecutionRecovery", $"Execute");
+            _logger.LogStep("StateWithFailExecution", $"Execute");
 
             if (_testHelper.ExceptionWasThrown)
             {
@@ -35,7 +35,7 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
 
         public override UniTask Exit(CancellationToken token)
         {
-            _logger.LogStep("StateFailExecutionRecovery", $"Exit");
+            _logger.LogStep("StateWithFailExecution", $"Exit");
 
             return UniTask.CompletedTask;
         }

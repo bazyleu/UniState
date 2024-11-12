@@ -3,24 +3,23 @@ using Cysharp.Threading.Tasks;
 using UniState;
 using UniStateTests.Common;
 
-namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
+namespace UniStateTests.PlayMode.GoBackTests.Infrastructure
 {
-    internal class StateMagicRecovery : StateBase
+    internal class StateGoBackThird : StateBase
     {
         private readonly ExecutionLogger _logger;
-
-        public StateMagicRecovery(ExecutionLogger logger)
+        public StateGoBackThird(ExecutionLogger logger)
         {
             _logger = logger;
         }
 
         public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
         {
-            await UniTask.Yield(token);
+            _logger.LogStep("StateGoBackThird", "Execute");
 
-            _logger.LogStep("StateMagicRecovery", $"Execute");
+            await UniTask.Yield();
 
-            return Transition.GoToExit();
+            return Transition.GoBack();
         }
     }
 }
