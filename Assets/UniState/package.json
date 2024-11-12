@@ -5,9 +5,9 @@
     "name": "Dzmitry Bazyleu",
     "url": "https://www.linkedin.com/in/dzmitry-bazyleu/"
   },
-  "version": "0.9.0",
+  "version": "1.0.0",
   "unity": "2021.3",
-  "description": "UniState is an architectural framework for Unity, designed around State pattern. Offers high performance and excellent scalability, ideal for complex Unity projects.",
+  "description": "UniState is an open source framework for Unity, designed around State pattern. Offers high performance and excellent scalability, ideal for complex Unity projects.",
   "keywords": [
     "architecture",
     "state",
@@ -21,5 +21,5 @@
     "async"
   ],
   "license": "MIT",
-  "category": "Task"
+  "category": "Scripting"
 }
