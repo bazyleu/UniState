@@ -5,12 +5,12 @@ using UniStateTests.Common;
 
 namespace UniStateTests.PlayMode.GoBackTests.Infrastructure
 {
-    internal class StateGoBack2 : StateBase<int>
+    internal class StateGoBackSecond : StateBase<int>
     {
         private readonly ExecutionLogger _logger;
-        private readonly GoBackFlagsData _goBackFlags;
+        private readonly GoBackTestHelper _goBackFlags;
 
-        public StateGoBack2(ExecutionLogger logger, GoBackFlagsData goBackFlags)
+        public StateGoBackSecond(ExecutionLogger logger, GoBackTestHelper goBackFlags)
         {
             _logger = logger;
             _goBackFlags = goBackFlags;
@@ -18,7 +18,7 @@ namespace UniStateTests.PlayMode.GoBackTests.Infrastructure
 
         public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
         {
-            _logger.LogStep("StateGoBack2", $"Execute:{Payload}");
+            _logger.LogStep("StateGoBackSecond", $"Execute:{Payload}");
 
             await UniTask.Yield();
 
@@ -29,7 +29,7 @@ namespace UniStateTests.PlayMode.GoBackTests.Infrastructure
 
             _goBackFlags.ExecutedState2 = true;
 
-            return Transition.GoTo<StateGoBack3>();
+            return Transition.GoTo<StateGoBackThird>();
         }
     }
 }

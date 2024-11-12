@@ -30,11 +30,11 @@ namespace UniStateTests.PlayMode.GoToStateTests
             builder.RegisterState<StateGoTo4>();
             builder.RegisterState<StateGoTo5>();
             builder.RegisterState<CompositeStateGoTo6>();
-            builder.RegisterState<SubStateGoToX6A>();
-            builder.RegisterState<SubStateGoToX6B>();
+            builder.RegisterState<SubStateGoTo6First>();
+            builder.RegisterState<SubStateGoTo6Second>();
             builder.RegisterState<CompositeStateGoTo7>();
-            builder.RegisterState<SubStateGoToX7A>();
-            builder.RegisterState<SubStateGoToX7B>();
+            builder.RegisterState<SubStateGoTo7First>();
+            builder.RegisterState<SubStateGoTo7Second>();
             builder.RegisterState<StateGoTo8>();
         }
     }

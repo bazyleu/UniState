@@ -18,13 +18,13 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
         }
 
         protected override string ExpectedLog =>
-            "StateInitRecovery (Execute) -> " +
-            "StateThrowTwoExceptionRecovery (Initialize) -> StateMachineDefaultRecovery (HandleError (Initialize exception)) -> " +
-            "StateThrowTwoExceptionRecovery (Execute, Exit) -> StateMachineDefaultRecovery (HandleError (Exit exception)) -> " +
-            "StateFailExecutionRecovery (Execute) -> StateMachineDefaultRecovery (HandleError (Execution exception)) -> " +
-            "StateFailExecutionRecovery (Exit, Disposables) -> " +
-            "StateThrowTwoExceptionRecovery (Initialize) -> StateMachineDefaultRecovery (HandleError (Initialize exception)) -> " +
-            "StateThrowTwoExceptionRecovery (Execute, Exit) -> StateMachineDefaultRecovery (HandleError (Exit exception)) -> " +
-            "StateFailExecutionRecovery (Execute, Exit, Disposables)";
+            "StateInitial (Execute) -> " +
+            "StateThrowTwoException (Initialize) -> StateMachineDefaultRecovery (HandleError (Initialize exception)) -> " +
+            "StateThrowTwoException (Execute, Exit) -> StateMachineDefaultRecovery (HandleError (Exit exception)) -> " +
+            "StateWithFailExecution (Execute) -> StateMachineDefaultRecovery (HandleError (Execution exception)) -> " +
+            "StateWithFailExecution (Exit, Disposables) -> " +
+            "StateThrowTwoException (Initialize) -> StateMachineDefaultRecovery (HandleError (Initialize exception)) -> " +
+            "StateThrowTwoException (Execute, Exit) -> StateMachineDefaultRecovery (HandleError (Exit exception)) -> " +
+            "StateWithFailExecution (Execute, Exit, Disposables)";
     }
 }

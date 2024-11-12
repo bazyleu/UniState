@@ -14,15 +14,15 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests
     {
         [UnityTest]
         public IEnumerator RunChaneOfStateWithDefaultRecovery_ExceptionDuringExecute_StateMachineExecuteGoBack() =>
-            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineDefaultRecovery, StateInitRecovery>(); });
+            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineDefaultRecovery, StateInitial>(); });
 
         [UnityTest]
         public IEnumerator RunChaneOfStateWithGoToStateRecovery_ExceptionDuringExecute_StateMachineGoToRecoveryState() =>
-            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineGoToStateRecovery, StateInitRecovery>(); });
+            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineGoToStateRecovery, StateInitial>(); });
 
         [UnityTest]
         public IEnumerator RunChaneOfStateWithExitRecovery_ExceptionDuringExecute_StateMachineExit() =>
-            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineExitRecovery, StateInitRecovery>(); });
+            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineExitRecovery, StateInitial>(); });
 
         protected override void SetupBindings(IContainerBuilder builder)
         {
@@ -34,10 +34,10 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests
             builder.RegisterStateMachine<StateMachineGoToStateRecovery>();
             builder.RegisterStateMachine<StateMachineExitRecovery>();
 
-            builder.RegisterState<StateInitRecovery>();
-            builder.RegisterState<StateThrowTwoExceptionRecovery>();
-            builder.RegisterState<StateFailExecutionRecovery>();
-            builder.RegisterState<StateMagicRecovery>();
+            builder.RegisterState<StateInitial>();
+            builder.RegisterState<StateThrowTwoException>();
+            builder.RegisterState<StateWithFailExecution>();
+            builder.RegisterState<StateStartedAfterException>();
         }
     }
 }

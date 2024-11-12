@@ -16,19 +16,19 @@ namespace UniStateTests.PlayMode.GoBackTests
         public IEnumerator RunChaneOfState_GoBackFromTheChain_ExitFromStateMachineWithCorrectOrderOfStates() =>
             UniTask.ToCoroutine(async () =>
             {
-                await RunAndVerify<StateMachineGoBack, StateGoBack1>();
+                await RunAndVerify<StateMachineGoBack, StateGoBackFirst>();
             });
 
         protected override void SetupBindings(DiContainer container)
         {
             base.SetupBindings(container);
 
-            container.Bind<GoBackFlagsData>().ToSelf().AsSingle();
+            container.Bind<GoBackTestHelper>().ToSelf().AsSingle();
 
             container.BindStateMachine<StateMachineGoBack>();
-            container.BindState<StateGoBack1>();
-            container.BindState<StateGoBack2>();
-            container.BindState<StateGoBack3>();
+            container.BindState<StateGoBackFirst>();
+            container.BindState<StateGoBackSecond>();
+            container.BindState<StateGoBackThird>();
         }
     }
 }

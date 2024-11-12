@@ -18,13 +18,13 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
         }
 
         protected override StateTransitionInfo BuildRecoveryTransition(IStateTransitionFactory transitionFactory)
-            => transitionFactory.CreateStateTransition<StateMagicRecovery>();
+            => transitionFactory.CreateStateTransition<StateStartedAfterException>();
 
         protected override string ExpectedLog =>
-            "StateInitRecovery (Execute) -> " +
-            "StateThrowTwoExceptionRecovery (Initialize) -> StateMachineGoToStateRecovery (HandleError (Initialize exception)) -> " +
-            "StateThrowTwoExceptionRecovery (Execute, Exit) -> StateMachineGoToStateRecovery (HandleError (Exit exception)) -> " +
-            "StateFailExecutionRecovery (Execute) -> StateMachineGoToStateRecovery (HandleError (Execution exception)) -> " +
-            "StateFailExecutionRecovery (Exit, Disposables) -> StateMagicRecovery (Execute)";
+            "StateInitial (Execute) -> " +
+            "StateThrowTwoException (Initialize) -> StateMachineGoToStateRecovery (HandleError (Initialize exception)) -> " +
+            "StateThrowTwoException (Execute, Exit) -> StateMachineGoToStateRecovery (HandleError (Exit exception)) -> " +
+            "StateWithFailExecution (Execute) -> StateMachineGoToStateRecovery (HandleError (Execution exception)) -> " +
+            "StateWithFailExecution (Exit, Disposables) -> StateStartedAfterException (Execute)";
     }
 }

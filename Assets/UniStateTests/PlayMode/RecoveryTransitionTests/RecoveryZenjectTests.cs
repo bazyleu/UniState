@@ -15,15 +15,15 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests
     {
         [UnityTest]
         public IEnumerator RunChaneOfStateWithDefaultRecovery_ExceptionDuringExecute_StateMachineExecuteGoBack() =>
-            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineDefaultRecovery, StateInitRecovery>(); });
+            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineDefaultRecovery, StateInitial>(); });
 
         [UnityTest]
         public IEnumerator RunChaneOfStateWithGoToStateRecovery_ExceptionDuringExecute_StateMachineGoToRecoveryState() =>
-            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineGoToStateRecovery, StateInitRecovery>(); });
+            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineGoToStateRecovery, StateInitial>(); });
 
         [UnityTest]
         public IEnumerator RunChaneOfStateWithExitRecovery_ExceptionDuringExecute_StateMachineExit() =>
-            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineExitRecovery, StateInitRecovery>(); });
+            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineExitRecovery, StateInitial>(); });
 
         protected override void SetupBindings(DiContainer container)
         {
@@ -35,10 +35,10 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests
             container.BindStateMachine<StateMachineGoToStateRecovery>();
             container.BindStateMachine<StateMachineExitRecovery>();
 
-            container.BindState<StateInitRecovery>();
-            container.BindState<StateThrowTwoExceptionRecovery>();
-            container.BindState<StateFailExecutionRecovery>();
-            container.BindState<StateMagicRecovery>();
+            container.BindState<StateInitial>();
+            container.BindState<StateThrowTwoException>();
+            container.BindState<StateWithFailExecution>();
+            container.BindState<StateStartedAfterException>();
         }
     }
 }

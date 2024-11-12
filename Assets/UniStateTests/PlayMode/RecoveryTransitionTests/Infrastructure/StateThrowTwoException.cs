@@ -6,18 +6,18 @@ using UniStateTests.Common;
 
 namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
 {
-    internal class StateThrowTwoExceptionRecovery : StateBase
+    internal class StateThrowTwoException : StateBase
     {
         private readonly ExecutionLogger _logger;
 
-        public StateThrowTwoExceptionRecovery(ExecutionLogger logger)
+        public StateThrowTwoException(ExecutionLogger logger)
         {
             _logger = logger;
         }
 
         public override UniTask Initialize(CancellationToken token)
         {
-            _logger.LogStep("StateThrowTwoExceptionRecovery", $"Initialize");
+            _logger.LogStep("StateThrowTwoException", $"Initialize");
 
             throw new Exception("Initialize exception");
         }
@@ -26,14 +26,14 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
         {
             await UniTask.Yield(token);
 
-            _logger.LogStep("StateThrowTwoExceptionRecovery", $"Execute");
+            _logger.LogStep("StateThrowTwoException", $"Execute");
 
-            return Transition.GoTo<StateFailExecutionRecovery>();
+            return Transition.GoTo<StateWithFailExecution>();
         }
 
         public override UniTask Exit(CancellationToken token)
         {
-            _logger.LogStep("StateThrowTwoExceptionRecovery", $"Exit");
+            _logger.LogStep("StateThrowTwoException", $"Exit");
 
             throw new Exception("Exit exception");
         }
