@@ -78,7 +78,7 @@ available [here](#state-creating).
 
 **Step 3:** Configure Dependency Injection (DI) by registering the state machine and states in the DI container. 
 ```csharp
-builder.RegisterStateMachine<MainStateMachine>();
+builder.RegisterStateMachine<StateMachine>();
 builder.RegisterState<MainMenuState>();
 ```
 Additional information on DI configuration is available [here](#integrations).
@@ -99,7 +99,7 @@ Additional information on DI configuration is available [here](#integrations).
 ```
 More details on running the state machine can be found [here](#running-a-state-machine).
 
-That’s it! Your first project with UniState is set up.
+That is it! Your first project with UniState is set up.
 
 ## Installation
 
