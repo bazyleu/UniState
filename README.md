@@ -13,11 +13,11 @@ scalability, ideal for complex Unity projects.
 
 <!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
 
+- [Getting Started](#getting-started)
 - [Installation](#installation)
     * [Requirements](#requirements)
     * [Option 1: Add package from git URL](#option-1-add-package-from-git-url)
     * [Option 2: Add via manifest.json](#option-2-add-via-manifestjson)
-- [Getting Started](#getting-started)
 - [Framework Philosophy](#framework-philosophy)
     * [Dependency Injection](#dependency-injection)
     * [What is a State?](#what-is-a-state)
@@ -54,6 +54,53 @@ scalability, ideal for complex Unity projects.
 
 <!-- TOC end -->
 
+
+## Getting Started
+
+**Step 1:** 
+Install UniState by adding the following URL to Unity Package Manager:  
+`https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`.  
+Details on installation are available [here](#installation).
+
+**Step 2:** Create a state by defining a class that inherits from `StateBase` or `StateBase<T>`. Example transition logic:
+```csharp
+public class MainMenuState : StateBase
+{
+    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    {
+        // Add your state logic here
+        return Transition.GoTo<GameplayState>();
+    }
+}
+```
+Detailed information about creating states is
+available [here](#state-creating).
+
+**Step 3:** Configure Dependency Injection (DI) by registering the state machine and states in the DI container. 
+```csharp
+builder.RegisterStateMachine<MainStateMachine>();
+builder.RegisterState<MainMenuState>();
+```
+Additional information on DI configuration is available [here](#integrations).
+
+**Step 4:** Create and run the state machine by specifying the initial state.
+```csharp
+    public class Game
+    {
+        private IObjectResolver _objectResolver;
+        private CancellationTokenSource _ctx;
+
+        public async void Run()
+        {
+            var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(_objectResolver.ToTypeResolver());
+            await stateMachine.Execute<GameLoadingState>(_ctx.Token);
+        }
+    }
+```
+More details on running the state machine can be found [here](#running-a-state-machine).
+
+That’s it! Your first project with UniState is set up.
+
 ## Installation
 
 ### Requirements
@@ -78,161 +125,7 @@ You can find latest version number [here](https://github.com/bazyleu/UniState/re
 You can add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState"` (or with version
 tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`) to `Packages/manifest.json`.
 
-## Getting Started
 
-In this section, we will explore how to create a simple architecture with UniSate using state machine.
-
-The following diagram illustrates the state transitions for example game.
-
-```mermaid
-graph LR
-Run --> GameLoadingState
-GameLoadingState --> MainMenuState;
-MainMenuState --> GameplayState;
-GameplayState --> MainMenuState;
-MainMenuState --> ConfirmationExitPopupState;
-ConfirmationExitPopupState --> MainMenuState;
-ConfirmationExitPopupState --> Exit
-```
-
-Here's an example of how the state classes can be implemented using UniState.
-
-```csharp
-   public class MainStateMachine : StateMachine
-   {
-   }
-
-    public class GameLoadingState : StateBase
-    {
-        private ILoader _loader;
-
-        public GameLoadingState(ILoader loader)
-        {
-            _loader = loader;
-        }
-
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
-        {
-            await _loader.Loading();
-
-            return Transition.GoTo<MainMenuState>();
-        }
-    }
-
-    public class MainMenuState : StateBase
-    {
-        private IMainMenu _mainMenu;
-
-        public MainMenuState(IMainMenu mainMenu)
-        {
-            _mainMenu = mainMenu;
-        }
-
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
-        {
-            var action = await _mainMenu.GetAction();
-
-            switch (action)
-            {
-                case "play":
-                    return Transition.GoTo<GameplayState>();
-
-                case "exit":
-                    return Transition.GoTo<ConfirmationExitPopupState>();
-
-                default:
-                    return Transition.GoTo<ConfirmationExitPopupState>();
-            }
-        }
-    }
-
-    public class ConfirmationExitPopupState : StateBase
-    {
-        private IConfirmationPopup _confirmationPopup;
-
-        public ConfirmationExitPopupState(IConfirmationPopup confirmationPopup)
-        {
-            _confirmationPopup = _confirmationPopup;
-        }
-
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
-        {
-            var confirm = await _confirmationPopup.ShowPopup();
-
-            return confirm ? Transition.GoToExit() : Transition.GoBack();
-        }
-    }
-
-    public class GameplayState : StateBase
-    {
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
-        {
-            await Playloop();
-
-            return Transition.GoBack();
-        }
-
-        private UniTask Playloop()
-        {
-            return UniTask.CompletedTask;
-        }
-    }
-```
-
-Here is how to bind these state classes using VContainer 
-(details of the VContainer bindings can be found here [VContainer Registering](#vcontainer-registering)).
-
-```csharp
-    public class ExampleLifetimeScope : LifetimeScope
-    {
-        protected override void Configure(IContainerBuilder builder)
-        {
-            builder.RegisterStateMachine<MainStateMachine>();
-            builder.RegisterState<GameLoadingState>();
-            builder.RegisterState<MainMenuState>();
-            builder.RegisterState<ConfirmationExitPopupState>();
-            builder.RegisterState<GameplayState>();
-            
-            // Register other dependencies 
-        }
-    }
-```
-
-Here is how to bind these state classes using Zenject/Extenject 
-(details of the VContainer bindings can be found here [Zenject Registering](#zenject-registering)).
-
-```csharp
-public class FooInstaller : MonoInstaller
-{
-    public override void InstallBindings()
-    {
-        Container.BindStateMachine<MainStateMachine>();
-        Container.BindState<GameLoadingState>();
-        Container.BindState<MainMenuState>();
-        Container.BindState<ConfirmationExitPopupState>();
-        Container.BindState<GameplayState>();
-        
-        // Register other dependencies 
-    }
-}
-```
-
-Following code demonstrates how to run the state machine.
-
-```csharp
-    public class Game
-    {
-        private IObjectResolver _objectResolver;
-
-        public async void Run()
-        {
-            CancellationTokenSource cts = new CancellationTokenSource();
-
-            var stateMachine =  StateMachineHelper.CreateStateMachine<MainStateMachine>(_objectResolver.ToTypeResolver());
-            await stateMachine.Execute<GameLoadingState>(cts.Token);
-        }
-    }
-```
 
 ## Framework Philosophy
 
