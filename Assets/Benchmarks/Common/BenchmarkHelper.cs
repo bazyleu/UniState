@@ -6,7 +6,7 @@ namespace Benchmarks.Common
         private int _executedStates;
         private int _executedMethods;
 
-        private int ExecutedMethods => _executedMethods;
+        public int ExecutedMethods => _executedMethods;
 
         public void SetStatesCountTarget(int stateCount)
         {
