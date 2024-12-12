@@ -72,6 +72,15 @@ public class MainMenuState : StateBase
         return Transition.GoTo<GameplayState>();
     }
 }
+
+public class GameplayState : StateBase
+{
+    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    {
+        // Add your state logic here
+        return Transition.GoBack();
+    }
+}
 ```
 Detailed information about creating states is
 available [here](#state-creating).
@@ -80,6 +89,7 @@ available [here](#state-creating).
 ```csharp
 builder.RegisterStateMachine<StateMachine>();
 builder.RegisterState<MainMenuState>();
+builder.RegisterState<GameplayState>();
 ```
 Additional information on DI configuration is available [here](#integrations).
 
@@ -93,7 +103,7 @@ Additional information on DI configuration is available [here](#integrations).
         public async void Run()
         {
             var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(_objectResolver.ToTypeResolver());
-            await stateMachine.Execute<GameLoadingState>(_ctx.Token);
+            await stateMachine.Execute<MainMenuState>(_ctx.Token);
         }
     }
 ```
