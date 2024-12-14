@@ -8,8 +8,8 @@ namespace Benchmarks.MonoStateFixtures
 {
     public class MonoStateMachine : MonoBehaviour
     {
-        private readonly List<MonoStateBase> _history = new();
-        private readonly BenchmarkHelper _benchmarkHelper = new();
+        private List<MonoStateBase> _history;
+        private BenchmarkHelper _benchmarkHelper;
 
         private bool _executionCompleted = false;
 
@@ -20,6 +20,9 @@ namespace Benchmarks.MonoStateFixtures
 
         public async UniTask Run(int stateCount)
         {
+            _history = new List<MonoStateBase>();
+            _benchmarkHelper = new BenchmarkHelper();
+
             _executionCompleted = false;
             _benchmarkHelper.SetStatesCountTarget(stateCount);
 
@@ -27,7 +30,7 @@ namespace Benchmarks.MonoStateFixtures
 
             await UniTask.WaitUntil(() => _executionCompleted);
 
-            Debug.Log("ExecutedMethods:" + _benchmarkHelper.ExecutedMethods);
+            Debug.Log("MonoStateMachine - ExecutedMethods:" + _benchmarkHelper.ExecutedMethods);
         }
 
         private IEnumerator StartStateMachine()
