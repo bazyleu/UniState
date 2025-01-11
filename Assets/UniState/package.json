@@ -7,10 +7,11 @@
   },
   "version": "1.0.0",
   "unity": "2021.3",
-  "description": "UniState is a code architecture framework for Unity, designed around State pattern. Offers high performance and excellent scalability, ideal for complex Unity projects.",
+  "description": "UniState is a modern, high-performance, scalable state machine package for Unity.",
   "keywords": [
     "architecture",
     "state",
+    "performance",
     "StateMachine",
     "code",
     "UniState",
