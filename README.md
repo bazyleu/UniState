@@ -6,8 +6,23 @@
 [![Last Commit](https://img.shields.io/github/last-commit/bazyleu/UniState)](https://github.com/bazyleu/UniState/branches)
 [![License](https://img.shields.io/github/license/bazyleu/UniState)](LICENSE)
 
-UniState is a code architecture framework for Unity, designed around State pattern. Offers high performance and excellent
-scalability, ideal for complex Unity projects.
+UniState is a modern, high-performance, scalable state machine package for Unity. It can serve as a core architectural
+pattern or be used to address specific tasks.
+
+* Performance: optimized for minimal runtime allocations, see [performance](#performance) section for details.
+* Scalability: memory allocations happen only on demand, [performance](#performance) does not degrade with the number of states and
+  state machines.
+* Modularity: designed to define [states](#state), [substates](#substate), and [state machines](#state-machine) in an
+  isolated way. States can be easily replaced or removed without hidden effects even in big projects.
+* Asynchronous: modern asynchronous API with async-await and [UniTask](https://github.com/Cysharp/UniTask)
+* Reliability: allows you to define [global error handling](#state-machine-error-handling) at the state machine level,
+  and guarantees that all resources will be [disposed](#disposables).
+* Simplicity: if you use [state base](#state-creating) you have to implement only one method for fast start.
+* Flexibility: everything in framework core is an abstraction. Can be replaced with your own implementation, 
+* see [state creating](#state-creating) and [creating a state machine](#creating-a-state-machine) sections for details.
+* Testability: UniState is designed to be testable. All abstractions use interfaces that can be easily mocked with
+  [NSubstitutes](https://nsubstitute.github.io/) or any other framework. States can be run separately for testing purposes.
+* DI friendly: has [integration](#integrations) with most popular DI containers
 
 ## Table of Contents
 
@@ -18,6 +33,7 @@ scalability, ideal for complex Unity projects.
     * [Requirements](#requirements)
     * [Option 1: Add package from git URL](#option-1-add-package-from-git-url)
     * [Option 2: Add via manifest.json](#option-2-add-via-manifestjson)
+- [Performance](#performance)
 - [Framework Philosophy](#framework-philosophy)
     * [Dependency Injection](#dependency-injection)
     * [What is a State?](#what-is-a-state)
@@ -135,7 +151,8 @@ You can find latest version number [here](https://github.com/bazyleu/UniState/re
 You can add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState"` (or with version
 tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`) to `Packages/manifest.json`.
 
-
+## Performance
+Performance tests report  will be updated after resolving [this ticket](https://github.com/bazyleu/UniState/issues/57).
 
 ## Framework Philosophy
 
