@@ -9,20 +9,21 @@
 UniState is a modern, high-performance, scalable state machine package for Unity. It can serve as a core architectural
 pattern or be used to address specific tasks.
 
-* Performance: optimized for minimal runtime allocations, see [performance](#performance) section for details.
-* Scalability: memory allocations happen only on demand, [performance](#performance) does not degrade with the number of states and
-  state machines.
-* Modularity: designed to define [states](#state), [substates](#substate), and [state machines](#state-machine) in an
+* **Performance**: optimized for minimal runtime allocations, see [performance](#performance) section for details.
+* **Modularity**: designed to define [states](#state), [substates](#substate), and [state machines](#state-machine) in an
   isolated way. States can be easily replaced or removed without hidden effects even in big projects.
-* Asynchronous: modern asynchronous API with async-await and [UniTask](https://github.com/Cysharp/UniTask)
-* Reliability: allows you to define [global error handling](#state-machine-error-handling) at the state machine level,
+* **Scalability**: memory allocations happen only on demand, [performance](#performance) does not degrade with the number of
+  states and state machines.
+* **Asynchronous**: modern asynchronous API with async-await and [UniTask](https://github.com/Cysharp/UniTask)
+* **Reliability**: allows you to define [global error handling](#state-machine-error-handling) at the state machine level,
   and guarantees that all resources will be [disposed](#disposables).
-* Simplicity: if you use [state base](#state-creating) you have to implement only one method for fast start.
-* Flexibility: everything in framework core is an abstraction. Can be replaced with your own implementation, 
-* see [state creating](#state-creating) and [creating a state machine](#creating-a-state-machine) sections for details.
-* Testability: UniState is designed to be testable. All abstractions use interfaces that can be easily mocked with
-  [NSubstitutes](https://nsubstitute.github.io/) or any other framework. States can be run separately for testing purposes.
-* DI friendly: has [integration](#integrations) with most popular DI containers
+* **Simplicity**: if you use [state base](#state-creating) you have to implement only one method for fast start.
+* **Flexibility**: everything in framework core is an abstraction. Can be replaced with your own implementation,
+  see [state creating](#state-creating) and [creating a state machine](#creating-a-state-machine) sections for details.
+* **Testability**: UniState is designed to be testable. All abstractions use interfaces that can be easily mocked with
+  [NSubstitutes](https://nsubstitute.github.io/) or any other framework. States can be run separately for testing
+  purposes.
+* **DI friendly**: has [integration](#integrations) with most popular DI containers
 
 ## Table of Contents
 
