@@ -779,6 +779,12 @@ private void RegisterStates(IContainerBuilder builder)
     // Use this registration for transitions to base/abstract class.
     // For example: Transition.GoTo<FooStateBase>()
     builder.RegisterAbstractState<FooStateBase, FooState>();
+    
+    // Singleton version of states, not recommended in general use, but can be handy in some cases
+    builder.RegisterStateMachine<BarStateMachine>(Lifetime.Singleton);
+    builder.RegisterAbstractStateMachine<FooStateMachineBase, FooStateMachine>(Lifetime.Singleton);
+    builder.RegisterState<BarState>(Lifetime.Singleton);
+    builder.RegisterAbstractState<FooStateBase, FooState>(Lifetime.Singleton);
 }
 ```
 You can always skip the extensions and register directly if you need custom behavior.
@@ -840,6 +846,12 @@ private void BindStates(DiContainer container)
     // Use this registration for transitions to base/abstract class.
     // For example: Transition.GoTo<FooStateBase>()
     container.BindAbstractState<FooStateBase, FooState>();
+    
+    // Singleton version of states, not recommended in general use, but can be handy in some cases
+    container.BindStateMachineAsSingle<BarStateMachine>();
+    container.BindAbstractStateMachineAsSingle<FooStateMachineBase, FooStateMachine>();
+    container.BindStateAsSingle<BarState>();
+    container.BindAbstractStateAsSingle<FooStateBase, FooState>();
 }
 ```
 
