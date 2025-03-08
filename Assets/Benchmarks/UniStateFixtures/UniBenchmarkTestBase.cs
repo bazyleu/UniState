@@ -6,14 +6,9 @@ using UnityEngine;
 
 namespace Benchmarks.UniStateFixtures
 {
-    public class UniBenchmarkRunner : MonoBehaviour
+    public class UniBenchmarkTestBase : MonoBehaviour
     {
-        private void Start()
-        {
-            Run(5, false).Forget();
-        }
-
-        public async UniTask Run(int stateCount, bool withoutHistory)
+        protected async UniTask Run(int stateCount, bool withoutHistory)
         {
             var benchmarkHelper = new BenchmarkHelper();
             var resolver = new SimpleResolver(benchmarkHelper);
@@ -26,8 +21,11 @@ namespace Benchmarks.UniStateFixtures
                     : StateMachineHelper.CreateStateMachine<StateMachine>(resolver);
 
             await stateMachine.Execute<FooState>(CancellationToken.None);
+        }
 
-            Debug.Log("UniBenchmarkRunner - ExecutedMethods:" + benchmarkHelper.ExecutedMethods);
+        public void Clear()
+        {
+            // UniState clears resources automatically
         }
     }
 }

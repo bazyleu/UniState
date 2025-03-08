@@ -3,22 +3,18 @@ using System.Collections.Generic;
 using Benchmarks.Common;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Benchmarks.MonoStateFixtures
 {
-    public class MonoStateMachine : MonoBehaviour
+    public class MonoBenchmarkTestBase : MonoBehaviour
     {
         private List<MonoStateBase> _history;
         private BenchmarkHelper _benchmarkHelper;
 
         private bool _executionCompleted = false;
 
-        private void Start()
-        {
-            Run(5).Forget();
-        }
-
-        public async UniTask Run(int stateCount)
+        protected async UniTask Run(int stateCount)
         {
             _history = new List<MonoStateBase>();
             _benchmarkHelper = new BenchmarkHelper();
@@ -29,8 +25,16 @@ namespace Benchmarks.MonoStateFixtures
             StartCoroutine(StartStateMachine());
 
             await UniTask.WaitUntil(() => _executionCompleted);
+        }
 
-            Debug.Log("MonoStateMachine - ExecutedMethods:" + _benchmarkHelper.ExecutedMethods);
+        public void Clear()
+        {
+            for (int i = _history.Count - 1; i >=0; i--)
+            {
+                Destroy(_history[i].gameObject);
+            }
+
+            _history.Clear();
         }
 
         private IEnumerator StartStateMachine()

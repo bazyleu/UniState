@@ -6,5 +6,6 @@ namespace Benchmarks.Common
     {
         string Name { get; }
         UniTask Run();
+        void Clear();
     }
 }
