@@ -74,7 +74,7 @@ namespace Benchmarks.Common
                 AllocatedMemoryBytes = (int)g.Average(r => r.AllocatedMemoryBytes),
             });
 
-            //TODO: Check and print results and averageResults
+            //TODO: Check and print results and averageResults + run 10 times
         }
 
         private void DisableGC()
