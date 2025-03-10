@@ -11,6 +11,8 @@ namespace Benchmarks.Common
 {
     public class BenchmarkRunner : MonoBehaviour
     {
+        private const int NumberOfCycles = 10;
+
         [SerializeField]
         private MonoBehaviour[] _benchmarkTests;
 
@@ -31,38 +33,39 @@ namespace Benchmarks.Common
 
         private async UniTaskVoid Run(List<IBenchmarkTest> benchmarkTests)
         {
-            var results = new List<BenchmarkTestResult>(benchmarkTests.Count * 10);
+            var results = new List<BenchmarkTestResult>(benchmarkTests.Count * NumberOfCycles);
 
             DisableGC();
 
-            for (int i = 0; i < benchmarkTests.Count; i++)
+            for (int i = 0; i < NumberOfCycles; i++)
             {
-                var stopwatch = new Stopwatch();
-                System.GC.Collect();
-                System.GC.WaitForPendingFinalizers();
-
-                stopwatch.Start();
-                var test = benchmarkTests[i];
-
-                long allocatedBefore = Profiler.GetMonoUsedSizeLong();
-
-                await test.Run();
-
-                long allocatedAfter = Profiler.GetMonoUsedSizeLong();
-
-                test.Clear();
-                stopwatch.Stop();
-
-                var time = TimeSpan.FromTicks(stopwatch.Elapsed.Ticks);
-
-                results.Add(new BenchmarkTestResult()
+                for (int j = 0; j < benchmarkTests.Count; j++)
                 {
-                    TestName = test.Name,
-                    ExecutionTimeSec = (int)time.TotalMilliseconds,
-                    AllocatedMemoryBytes = allocatedAfter - allocatedBefore,
-                });
+                    var stopwatch = new Stopwatch();
+                    System.GC.Collect();
+                    System.GC.WaitForPendingFinalizers();
 
-                Debug.Log($"Benchmark {test.Name} completed. Run time: {(int)time.TotalMilliseconds}, allocated memory: {allocatedAfter - allocatedBefore}");
+                    stopwatch.Start();
+                    var test = benchmarkTests[j];
+
+                    long allocatedBefore = Profiler.GetMonoUsedSizeLong();
+
+                    await test.Run();
+
+                    long allocatedAfter = Profiler.GetMonoUsedSizeLong();
+
+                    test.Clear();
+                    stopwatch.Stop();
+
+                    var time = TimeSpan.FromTicks(stopwatch.Elapsed.Ticks);
+
+                    results.Add(new BenchmarkTestResult()
+                    {
+                        TestName = test.Name,
+                        ExecutionTimeMs = time.TotalMilliseconds,
+                        AllocatedMemoryBytes = allocatedAfter - allocatedBefore,
+                    });
+                }
             }
 
             EnableGC();
@@ -70,24 +73,39 @@ namespace Benchmarks.Common
             var averageResults = results.GroupBy(t => t.TestName).Select(g => new BenchmarkTestResult()
             {
                 TestName = g.Key,
-                ExecutionTimeSec = (int)g.Average(r => r.ExecutionTimeSec),
+                ExecutionTimeMs = g.Average(r => r.ExecutionTimeMs),
                 AllocatedMemoryBytes = (int)g.Average(r => r.AllocatedMemoryBytes),
             });
 
-            //TODO: Check and print results and averageResults + run 10 times
+            var orderedResults = results.OrderBy(r => r.TestName).ThenByDescending(r => r.AllocatedMemoryBytes)
+                .ToArray();
+
+            Debug.Log($"+++ Benchmark Results Section +++");
+
+            foreach (var result in orderedResults)
+            {
+                Debug.Log(result.ToString());
+            }
+
+            Debug.Log($"+++ Average Benchmark Results Section +++");
+
+            foreach (var result in averageResults)
+            {
+                Debug.Log(result.ToString());
+            }
         }
 
         private void DisableGC()
         {
 #if !UNITY_EDITOR
-            GarbageCollector.GCMode = GarbageCollector.Mode.Disabled;
+            UnityEngine.Scripting.GarbageCollector.GCMode = UnityEngine.Scripting.GarbageCollector.Mode.Disabled;
 #endif
         }
 
         private void EnableGC()
         {
 #if !UNITY_EDITOR
-            GarbageCollector.GCMode = GarbageCollector.Mode.Enabled;
+            UnityEngine.Scripting.GarbageCollector.GCMode = UnityEngine.Scripting.GarbageCollector.Mode.Enabled;
 #endif
         }
     }
