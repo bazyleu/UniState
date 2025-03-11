@@ -9,16 +9,13 @@ namespace UniState
 {
     public class SubStatesContainer<TPayload> : ISubStatesContainer<TPayload>, ISetupable<TPayload>
     {
-        private readonly List<IState<TPayload>> _subStates = new();
+        private List<IState<TPayload>> _subStates = new();
 
         public List<IState<TPayload>> List => _subStates;
 
         public void Initialize(List<IState<TPayload>> subStates)
         {
-            foreach (var subState in subStates)
-            {
-                _subStates.Add(subState);
-            }
+            _subStates = new List<IState<TPayload>>(subStates);
         }
 
         public void SetPayload(TPayload payload) => _subStates.ForEach(s => s.SetPayload(payload));

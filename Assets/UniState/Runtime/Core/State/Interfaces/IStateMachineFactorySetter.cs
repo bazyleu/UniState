@@ -1,5 +1,3 @@
-using UniState;
-
 namespace UniState
 {
     public interface IStateMachineFactorySetter

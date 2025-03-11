@@ -8,7 +8,8 @@ namespace UniState
         public StateMachineErrorType ErrorType { get; }
         public IExecutableState State { get; }
 
-        public StateMachineErrorData(Exception exception, StateMachineErrorType errorType, IExecutableState state = null)
+        public StateMachineErrorData(Exception exception, StateMachineErrorType errorType,
+            IExecutableState state = null)
         {
             Exception = exception;
             ErrorType = errorType;

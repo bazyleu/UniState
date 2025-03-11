@@ -30,8 +30,6 @@ namespace UniState
             if (state is ICompositeState<TPayload> compositeState)
             {
                 var subStatesLinked = _resolver.Resolve<IEnumerable<ISubState<TState, TPayload>>>();
-
-
                 compositeState.SetSubStates(subStatesLinked);
             }
 
@@ -42,7 +40,6 @@ namespace UniState
             return state;
         }
     }
-
 
     public sealed class EmptyPayload
     {

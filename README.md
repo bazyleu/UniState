@@ -153,7 +153,29 @@ You can add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?pa
 tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`) to `Packages/manifest.json`.
 
 ## Performance
-Performance tests report  will be updated after resolving [this ticket](https://github.com/bazyleu/UniState/issues/57).
+
+UniState is the fastest and most efficient asynchronous state machine available for Unity. When compared to state
+machine implementations based on MonoBehaviour, UniState delivers a performance boost of over 5000x in execution speed
+and up to a 10x reduction in allocations.
+
+For typical scenarios involving small to medium state chains - the most common use case - UniState can reduce memory
+allocations by a factor ranging between 2x and 10x. In cases where state chains exceed 200 states, the benefits in
+memory allocation become less pronounced but execution speed remain consistent with 5000x+ boost.
+
+Measurements for Windows PC (with IL2CPP scripting backend):
+```
+Benchmark Mono 10 states: 516.4 ms, 120.83 KB
+Benchmark Mono 50 states: 2520.9 ms, 150.44 KB
+Benchmark Mono 200 states: 10033.6 ms, 283.83 KB
+
+Benchmark UniState 10 states: 0.1 ms, 13.11 KB
+Benchmark UniState 50 states: 0.2 ms, 68.81 KB
+Benchmark UniState 200 states: 0.7 ms, 273.20 KB
+
+Benchmark UniState with history 10 states: 0.1 ms, 14.34 KB
+Benchmark UniState with history 50 states: 0.2 ms, 69.58 KB
+Benchmark UniState with history 200 states: 0.7 ms, 276.95 KB
+```
 
 ## Framework Philosophy
 
@@ -807,6 +829,12 @@ private void RegisterStates(IContainerBuilder builder)
     // Use this registration for transitions to base/abstract class.
     // For example: Transition.GoTo<FooStateBase>()
     builder.RegisterAbstractState<FooStateBase, FooState>();
+    
+    // Singleton version of states, not recommended in general use, but can be handy in some cases
+    builder.RegisterStateMachine<BarStateMachine>(Lifetime.Singleton);
+    builder.RegisterAbstractStateMachine<FooStateMachineBase, FooStateMachine>(Lifetime.Singleton);
+    builder.RegisterState<BarState>(Lifetime.Singleton);
+    builder.RegisterAbstractState<FooStateBase, FooState>(Lifetime.Singleton);
 }
 ```
 You can always skip the extensions and register directly if you need custom behavior.
@@ -868,6 +896,12 @@ private void BindStates(DiContainer container)
     // Use this registration for transitions to base/abstract class.
     // For example: Transition.GoTo<FooStateBase>()
     container.BindAbstractState<FooStateBase, FooState>();
+    
+    // Singleton version of states, not recommended in general use, but can be handy in some cases
+    container.BindStateMachineAsSingle<BarStateMachine>();
+    container.BindAbstractStateMachineAsSingle<FooStateMachineBase, FooStateMachine>();
+    container.BindStateAsSingle<BarState>();
+    container.BindAbstractStateAsSingle<FooStateBase, FooState>();
 }
 ```
 
