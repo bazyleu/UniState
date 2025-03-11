@@ -41,11 +41,12 @@ namespace Benchmarks.Common
             {
                 for (int j = 0; j < benchmarkTests.Count; j++)
                 {
-                    var stopwatch = new Stopwatch();
-                    System.GC.Collect();
-                    System.GC.WaitForPendingFinalizers();
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
 
+                    var stopwatch = new Stopwatch();
                     stopwatch.Start();
+
                     var test = benchmarkTests[j];
 
                     long allocatedBefore = Profiler.GetMonoUsedSizeLong();
