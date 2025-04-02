@@ -5,7 +5,6 @@ using UniStateTests.Common;
 
 namespace UniStateTests.PlayMode.GoToStateTests.Infrastructure
 {
-    [StateBehaviour(ProhibitReturnToState = true, InitializeOnStateTransition = true)]
     internal class StateGoTo1: StateBase
     {
         private readonly ExecutionLogger _logger;
