@@ -24,6 +24,7 @@ pattern or be used to address specific tasks.
   [NSubstitutes](https://nsubstitute.github.io/) or any other framework. States can be run separately for testing
   purposes.
 * **DI friendly**: has [integration](#integrations) with most popular DI containers
+* **Continuous Testing**: fully covered by tests. All tests run [automatically](https://github.com/bazyleu/UniState/actions) to verify each change.
 
 ## Table of Contents
 
