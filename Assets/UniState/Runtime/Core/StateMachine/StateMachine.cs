@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using UniState.Runtime.Core.Extensions;
 
 namespace UniState
 {
@@ -104,9 +105,9 @@ namespace UniState
 
             var transitionToState = nextTransition.Transition == TransitionType.State;
 
-            var item = transitionToState ? nextTransition : GetInfoFromHistory();
+            var item = transitionToState ? nextTransition : _history.Pop();
 
-            if (transitionToState && previousTransition != null)
+            if (transitionToState && previousTransition.CanBeAddedToHistory())
             {
                 _history.Push(previousTransition);
             }
@@ -115,23 +116,6 @@ namespace UniState
             {
                 stateWithMetadata.BuildState(item, item.StateBehaviourData);
             }
-        }
-
-        private StateTransitionInfo GetInfoFromHistory()
-        {
-            var item = _history.Pop();
-
-            while (item != null)
-            {
-                if (!item.StateBehaviourData.ProhibitReturnToState)
-                {
-                    return item;
-                }
-
-                item = _history.Pop();
-            }
-
-            return null;
         }
 
         private async UniTask<StateTransitionInfo> ExecuteSafe(IExecutableState state, CancellationToken token)
