@@ -105,7 +105,7 @@ namespace UniState
 
             var transitionToState = nextTransition.Transition == TransitionType.State;
 
-            var item = transitionToState ? nextTransition : _history.Pop();
+            var item = transitionToState ? nextTransition : GetInfoFromHistory(nextTransition);
 
             if (transitionToState && previousTransition.CanBeAddedToHistory())
             {
@@ -116,6 +116,25 @@ namespace UniState
             {
                 stateWithMetadata.BuildState(item, item.StateBehaviourData);
             }
+        }
+
+        private StateTransitionInfo GetInfoFromHistory(StateTransitionInfo nextTransition)
+        {
+            if (nextTransition.HistorySelector == null)
+            {
+                return _history.Pop();
+            }
+
+            while (_history.Count() > 0)
+            {
+                var info = _history.Pop();
+                if (nextTransition.HistorySelector(info))
+                {
+                    return info;
+                }
+            }
+
+            return null;
         }
 
         private async UniTask<StateTransitionInfo> ExecuteSafe(IExecutableState state, CancellationToken token)

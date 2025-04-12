@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace UniState
 {
@@ -48,11 +47,19 @@ namespace UniState
 
         public StateTransitionInfo CreateBackTransition() => new() { Transition = TransitionType.Back };
 
+        public StateTransitionInfo CreateBackToTransition<TState>()
+            where TState : class, IExecutableState
+            => new()
+            {
+                Transition = TransitionType.Back,
+                HistorySelector = info => info?.StateBehaviourData?.StateType == typeof(TState),
+            };
+
         public StateTransitionInfo CreateExitTransition() => new() { Transition = TransitionType.Exit };
 
         private StateBehaviourData BuildStateBehaviourData(Type stateType)
         {
-            var data = new StateBehaviourData();
+            var data = new StateBehaviourData(stateType);
 
             var attribute =
                 (StateBehaviourAttribute)Attribute.GetCustomAttribute(stateType, typeof(StateBehaviourAttribute));
