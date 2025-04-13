@@ -408,7 +408,11 @@ options are:
     - Returns to the previous state. If there is no previous state (the current state is the first), it will exit the
       state machine. See the [State Machine](#state-machine) section for more details.
 
-3. **GoToExit**
+3. **GoBackTo**
+   - Returns to specified previous state. If specified state isn't found in [State Machine's History](#state-machine-history), it will exit the
+     state machine.
+
+4. **GoToExit**
     - Exits the current state machine. See the [State Machine](#state-machine) section for more details.
 
 ```csharp
