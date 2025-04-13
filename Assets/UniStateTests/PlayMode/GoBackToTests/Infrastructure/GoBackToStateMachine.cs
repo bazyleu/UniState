@@ -4,14 +4,13 @@ namespace UniStateTests.PlayMode.GoBackToTests.Infrastructure
 {
     internal class GoBackToStateMachine : VerifiableStateMachine
     {
-        private readonly GoBackToTestsHelper _helper;
-
-        public GoBackToStateMachine(GoBackToTestsHelper helper, ExecutionLogger logger)
+        public GoBackToStateMachine(ExecutionLogger logger)
             : base(logger)
-        {
-            _helper = helper;
-        }
+        { }
 
-        protected override string ExpectedLog => _helper.ExpectedLog;
+        protected override string ExpectedLog =>
+            $"{nameof(GoBackToState1)} (Execute) -> {nameof(GoBackToState2)} (Execute:42) -> " +
+            $"{nameof(GoBackToState3)} (Execute) -> {nameof(GoBackToState4)} (Execute) -> " +
+            $"{nameof(GoBackToState2)} (Execute:42)";
     }
 }
