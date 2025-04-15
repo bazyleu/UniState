@@ -409,8 +409,9 @@ options are:
       state machine. See the [State Machine](#state-machine) section for more details.
 
 3. **GoBackTo**
-   - Returns to specified previous state. If specified state isn't found in [State Machine's History](#state-machine-history), it will exit the
-     state machine.
+   - Returns to specified previous state, dropping all intermediate states from the [State Machine's History](#state-machine-history).
+   - If specified state isn't found in the history, it will exit the state machine.
+   - If multiple states with specified type are present in the history, the latest state will be selected.
 
 4. **GoToExit**
     - Exits the current state machine. See the [State Machine](#state-machine) section for more details.
@@ -436,6 +437,9 @@ public class ExampleState : StateBase
 
             case TransitionExample.GoBack:
                 return Transition.GoBack();
+
+            case TransitionExample.GoBackTo:
+                return Transition.GoBackTo<BarState>();
 
             case TransitionExample.GoToExit:
                 return Transition.GoToExit();
