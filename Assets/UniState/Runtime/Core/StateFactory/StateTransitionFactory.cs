@@ -52,14 +52,14 @@ namespace UniState
             => new()
             {
                 Transition = TransitionType.Back,
-                HistorySelector = info => info?.StateBehaviourData?.StateType == typeof(TState),
+                GoBackToType = typeof(TState),
             };
 
         public StateTransitionInfo CreateExitTransition() => new() { Transition = TransitionType.Exit };
 
         private StateBehaviourData BuildStateBehaviourData(Type stateType)
         {
-            var data = new StateBehaviourData(stateType);
+            var data = new StateBehaviourData();
 
             var attribute =
                 (StateBehaviourAttribute)Attribute.GetCustomAttribute(stateType, typeof(StateBehaviourAttribute));

@@ -119,7 +119,7 @@ namespace UniState
 
         private StateTransitionInfo GetInfoFromHistory(StateTransitionInfo nextTransition)
         {
-            if (nextTransition.HistorySelector == null)
+            if (nextTransition.GoBackToType == null)
             {
                 return _history.Pop();
             }
@@ -127,7 +127,7 @@ namespace UniState
             while (_history.Count() > 0)
             {
                 var info = _history.Pop();
-                if (nextTransition.HistorySelector(info))
+                if (nextTransition.GoBackToType == info.Creator?.StateType)
                 {
                     return info;
                 }
