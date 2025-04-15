@@ -20,11 +20,14 @@ namespace UniStateTests.PlayMode.GoBackToTests.Infrastructure
         {
             _logger.LogStep(nameof(GoBackToState2), $"Execute:{Payload}");
             
-            var result = _helper.SecondStateExecuted
-                ? Transition.GoBackTo<GoBackToState3>()
-                : Transition.GoTo<GoBackToState3>();
+            var result = _helper.SecondStateExecuteCount switch
+            {
+                0 => Transition.GoTo<GoBackToState2, int>(11),
+                1 => Transition.GoTo<GoBackToState3>(),
+                _ => Transition.GoBackTo<GoBackToState3>(),
+            };
 
-            _helper.SecondStateExecuted = true;
+            _helper.SecondStateExecuteCount++;
             
             return UniTask.FromResult(result);
         }

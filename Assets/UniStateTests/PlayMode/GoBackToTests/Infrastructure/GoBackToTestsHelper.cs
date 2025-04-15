@@ -2,6 +2,6 @@
 {
     public class GoBackToTestsHelper
     {
-        public bool SecondStateExecuted;
+        public int SecondStateExecuteCount;
     }
 }
