@@ -1,4 +1,4 @@
-﻿namespace UniState.Runtime.Core.Extensions
+﻿namespace UniState
 {
     public static class StateTransitionInfoExtensions
     {
