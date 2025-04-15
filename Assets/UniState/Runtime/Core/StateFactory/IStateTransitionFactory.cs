@@ -9,8 +9,10 @@ namespace UniState
             where TState : class, IState<EmptyPayload>;
 
         StateTransitionInfo CreateBackTransition();
+
         StateTransitionInfo CreateBackToTransition<TState>()
             where TState : class, IExecutableState;
+
         StateTransitionInfo CreateExitTransition();
     }
 }
