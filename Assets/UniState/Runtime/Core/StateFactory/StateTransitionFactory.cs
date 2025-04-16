@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace UniState
 {
@@ -47,6 +46,14 @@ namespace UniState
         }
 
         public StateTransitionInfo CreateBackTransition() => new() { Transition = TransitionType.Back };
+
+        public StateTransitionInfo CreateBackToTransition<TState>()
+            where TState : class, IExecutableState
+            => new()
+            {
+                Transition = TransitionType.Back,
+                GoBackToType = typeof(TState),
+            };
 
         public StateTransitionInfo CreateExitTransition() => new() { Transition = TransitionType.Exit };
 

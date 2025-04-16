@@ -18,6 +18,9 @@ namespace UniState
 
         public StateTransitionInfo GoBack() => _factory.CreateBackTransition();
 
+        public StateTransitionInfo GoBackTo<TState>() where TState : class, IExecutableState
+            => _factory.CreateBackToTransition<TState>();
+
         public StateTransitionInfo GoToExit() => _factory.CreateExitTransition();
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace UniState
@@ -9,6 +10,8 @@ namespace UniState
         private TPayload _payload;
         private IStateTransitionFacade _transitionFacade;
         private IStateMachineFactory _stateMachineFactory;
+        
+        public Type StateType => typeof(TState);
 
         public StateFactory(ITypeResolver resolver)
         {

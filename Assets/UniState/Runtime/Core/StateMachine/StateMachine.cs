@@ -104,9 +104,9 @@ namespace UniState
 
             var transitionToState = nextTransition.Transition == TransitionType.State;
 
-            var item = transitionToState ? nextTransition : GetInfoFromHistory();
+            var item = transitionToState ? nextTransition : GetInfoFromHistory(nextTransition);
 
-            if (transitionToState && previousTransition != null)
+            if (transitionToState && previousTransition.CanBeAddedToHistory())
             {
                 _history.Push(previousTransition);
             }
@@ -117,18 +117,20 @@ namespace UniState
             }
         }
 
-        private StateTransitionInfo GetInfoFromHistory()
+        private StateTransitionInfo GetInfoFromHistory(StateTransitionInfo nextTransition)
         {
-            var item = _history.Pop();
-
-            while (item != null)
+            if (nextTransition.GoBackToType == null)
             {
-                if (!item.StateBehaviourData.ProhibitReturnToState)
-                {
-                    return item;
-                }
+                return _history.Pop();
+            }
 
-                item = _history.Pop();
+            while (_history.Count() > 0)
+            {
+                var info = _history.Pop();
+                if (nextTransition.GoBackToType == info.Creator?.StateType)
+                {
+                    return info;
+                }
             }
 
             return null;
