@@ -77,7 +77,7 @@ pattern or be used to address specific tasks.
 
 **Step 1:** 
 Install UniState by adding the following URL to Unity Package Manager:  
-`https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`.  
+`https://github.com/bazyleu/UniState.git?path=Assets/UniState`.  
 Details on installation are available [here](#installation).
 
 **Step 2:** Create a state by defining a class that inherits from `StateBase` or `StateBase<T>`. Example transition logic:
@@ -142,7 +142,7 @@ That is it! Your first project with UniState is set up.
 You can add `https://github.com/bazyleu/UniState.git?path=Assets/UniState` to Package Manager.
 
 It is a good practice to specify target version, UniState uses the `*.*.*` release tag so you can specify a version
-like `#1.1.0`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`.
+like `#1.3.0`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.3.0`.
 You can find latest version number [here](https://github.com/bazyleu/UniState/releases).
 
 ![image](https://github.com/user-attachments/assets/120e6750-1f33-44f7-99c8-a3e7fa166d21)
@@ -151,7 +151,7 @@ You can find latest version number [here](https://github.com/bazyleu/UniState/re
 ### Option 2: Add via manifest.json
 
 You can add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState"` (or with version
-tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`) to `Packages/manifest.json`.
+tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.3.0`) to `Packages/manifest.json`.
 
 ## Performance
 
@@ -177,6 +177,10 @@ Benchmark UniState with history 10 states: 0.1 ms, 14.34 KB
 Benchmark UniState with history 50 states: 0.2 ms, 69.58 KB
 Benchmark UniState with history 200 states: 0.7 ms, 276.95 KB
 ```
+
+## Tutorial
+//TODO
+
 
 ## Framework Philosophy
 
