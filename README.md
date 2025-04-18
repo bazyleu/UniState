@@ -59,6 +59,13 @@ pattern or be used to address specific tasks.
         + [Creating a Composite State](#creating-a-composite-state)
         + [SubState](#substate)
         + [Default Composite State](#default-composite-state)
+- [Tutorials](#tutorials)
+    * [Simple Dice Game](#simple-dice-game)
+        + [Overview](#overview)
+        + [Step 1: Create the states](#step-1-create-the-states)
+        + [Step 2: Create entry point](#step-2-create-entry-point)
+        + [Step 3: Configure VContainer](#step-3-configure-vcontainer)
+        + [Step 4: Set up the scene](#step-4-set-up-the-scene)
 - [Integrations](#integrations)
     * [VContainer](#vcontainer)
         + [VContainer Preparation](#vcontainer-preparation)
@@ -77,7 +84,7 @@ pattern or be used to address specific tasks.
 
 **Step 1:** 
 Install UniState by adding the following URL to Unity Package Manager:  
-`https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`.  
+`https://github.com/bazyleu/UniState.git?path=Assets/UniState`.  
 Details on installation are available [here](#installation).
 
 **Step 2:** Create a state by defining a class that inherits from `StateBase` or `StateBase<T>`. Example transition logic:
@@ -127,7 +134,8 @@ Additional information on DI configuration is available [here](#integrations).
 ```
 More details on running the state machine can be found [here](#running-a-state-machine).
 
-That is it! Your first project with UniState is set up.
+That is it! Your first project with UniState is set up. In [tutorials](#tutorials) section more detailed tutorial can be
+found.
 
 ## Installation
 
@@ -142,7 +150,7 @@ That is it! Your first project with UniState is set up.
 You can add `https://github.com/bazyleu/UniState.git?path=Assets/UniState` to Package Manager.
 
 It is a good practice to specify target version, UniState uses the `*.*.*` release tag so you can specify a version
-like `#1.1.0`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`.
+like `#1.3.0`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.3.0`.
 You can find latest version number [here](https://github.com/bazyleu/UniState/releases).
 
 ![image](https://github.com/user-attachments/assets/120e6750-1f33-44f7-99c8-a3e7fa166d21)
@@ -151,7 +159,7 @@ You can find latest version number [here](https://github.com/bazyleu/UniState/re
 ### Option 2: Add via manifest.json
 
 You can add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState"` (or with version
-tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.1.0`) to `Packages/manifest.json`.
+tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.3.0`) to `Packages/manifest.json`.
 
 ## Performance
 
@@ -775,6 +783,156 @@ internal class BarSubState : SubStateBase<DefaultCompositeState>
 {
 }
 ```
+
+## Tutorials
+
+### Simple Dice Game
+
+#### Overview
+
+In this hands‑on tutorial you will create a tiny, self‑playing **dice game** that demonstrates the simple UniState
+workflow — from defining states to wiring everything together with **VContainer**.
+
+> **Goal**  
+> Roll a six‑sided die until the value is 5 or 6.\
+>`StartGameState` → `RollDiceState`\
+>5,6 → `WinState` → Exit\
+>1,2,3,4 → `LostState` → `RollDiceState`
+
+You can find code [here](https://github.com/bazyleu/UniState/tree/main/Assets/Examples).
+
+#### Step 1: Create the states
+
+Each state inherits from **`StateBase`** and returns a transition that drives the flow.
+
+```csharp
+    internal class StartGameState : StateBase
+    {
+        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        {
+            Debug.Log("Welcome to the game! Your game will be loaded in 2 seconds!");
+            await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: token);
+            
+            return Transition.GoTo<RollDiceState>();
+        }
+    }
+```
+```csharp
+    public class RollDiceState : StateBase
+    {
+        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        {
+            Debug.Log("Need to roll 5+. Rolling the dice...");
+            await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: token);
+
+            var dice = Random.Range(0, 7);
+            Debug.Log($"Dice is {dice}");
+
+            if (dice > 4)
+                return Transition.GoTo<WinState>();
+
+            return Transition.GoTo<LostState>();
+        }
+    }
+```
+```csharp
+    public class LostState : StateBase
+    {
+        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        {
+            Debug.Log("You lost. You will have a another chance in...");
+
+            Debug.Log("3 seconds");
+            await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: token);
+
+            Debug.Log("2 seconds");
+            await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: token);
+
+            Debug.Log("1 second");
+            await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: token);
+
+            return Transition.GoBack();
+        }
+    }
+```
+```csharp
+    public class WinState : StateBase
+    {
+        public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        {
+            Debug.Log("Congratulations! You won this game!");
+            
+            return UniTask.FromResult(Transition.GoToExit());
+        }
+    }
+```
+
+#### Step 2: Create entry point
+
+DiceEntryPoint runs on scene start, converts IObjectResolver into an ITypeResolver, creates the state machine, and runs
+StartGameState.
+
+```csharp
+    public class DiceEntryPoint : IStartable
+    {
+        private readonly IObjectResolver _objectResolver;
+
+        public DiceEntryPoint(IObjectResolver objectResolver)
+        {
+            _objectResolver = objectResolver;
+        }
+
+        public void Start()
+        {
+            var stateMachine = StateMachineHelper.CreateStateMachine<StateMachine>(
+                _objectResolver.ToTypeResolver());
+
+            stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+        }
+    }
+```
+
+#### Step 3: Configure VContainer
+
+DiceScope is a LifetimeScope that registers the state machine and all states.
+The helper extensions RegisterStateMachine and RegisterState is used for registering.
+
+```csharp
+    public class DiceScope : LifetimeScope
+    {
+        protected override void Configure(IContainerBuilder builder)
+        {
+            builder.RegisterEntryPoint<DiceEntryPoint>();
+
+            builder.RegisterStateMachine<StateMachine>();
+
+            builder.RegisterState<StartGameState>();
+            builder.RegisterState<RollDiceState>();
+            builder.RegisterState<LostState>();
+            builder.RegisterState<WinState>();
+        }
+    }
+```
+
+#### Step 4: Set up the scene
+
+Create a new Unity scene (e.g., DiceGameScene).
+Add an empty GameObject and attach the DiceScope component.
+Press Play — all interaction happens in the Console:
+
+```csharp
+Welcome to the game! Your game will be loaded in 2 seconds!
+Need to roll 5+. Rolling the dice...
+Dice is 2
+You lost. You will have another chance in...
+3 seconds
+2 seconds
+1 second
+Need to roll 5+. Rolling the dice...
+Dice is 6
+Congratulations! You won this game!
+```
+
 
 ## Integrations
 
