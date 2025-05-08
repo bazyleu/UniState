@@ -2,6 +2,6 @@ namespace UniState
 {
     public interface IInitializableStateMachine
     {
-        void Initialize(ITypeResolver resolver);
+        void SetResolver(ITypeResolver resolver);
     }
 }

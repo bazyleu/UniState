@@ -7,7 +7,7 @@ namespace UniState
         {
             var stateMachine = typeResolver.Resolve<TSateMachine>();
 
-            stateMachine.Initialize(typeResolver);
+            stateMachine.SetResolver(typeResolver);
 
             return stateMachine;
         }
@@ -18,7 +18,7 @@ namespace UniState
         {
             var stateMachine = typeResolver.Resolve<TSateMachine>();
 
-            stateMachine.Initialize(typeResolver);
+            stateMachine.SetResolver(typeResolver);
 
             return stateMachine;
         }
