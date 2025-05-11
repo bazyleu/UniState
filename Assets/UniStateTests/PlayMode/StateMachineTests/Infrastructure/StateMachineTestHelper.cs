@@ -4,11 +4,17 @@ namespace UniStateTests.PlayMode.StateMachineTests.Infrastructure
 {
     public class StateMachineTestHelper
     {
-        private IVerifiableStateMachine _currentStateMachine;
+        public IVerifiableStateMachine CurrentStateMachine { get; private set; }
+        public StateMachineExecutionType ExecutionType { get; private set; }
 
         public void SetCurrentStateMachine(IVerifiableStateMachine stateMachine)
         {
-            _currentStateMachine = stateMachine;
+            CurrentStateMachine = stateMachine;
+        }
+
+        public void SetPath(StateMachineExecutionType executionType)
+        {
+            ExecutionType = executionType;
         }
     }
 }
