@@ -1,8 +1,8 @@
 using UniStateTests.Common;
 
-namespace UniStateTests.PlayMode.StateMachineTests.Infrastructure
+namespace UniStateTests.PlayMode.Execution.Infrastructure
 {
-    public class StateMachineTestHelper
+    public class ExecutionTestHelper
     {
         public IVerifiableStateMachine CurrentStateMachine { get; private set; }
         public StateMachineExecutionType ExecutionType { get; private set; }

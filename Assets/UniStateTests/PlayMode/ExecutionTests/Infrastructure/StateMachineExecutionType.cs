@@ -1,4 +1,4 @@
-namespace UniStateTests.PlayMode.StateMachineTests.Infrastructure
+namespace UniStateTests.PlayMode.Execution.Infrastructure
 {
     public enum StateMachineExecutionType
     {
