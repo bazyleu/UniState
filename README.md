@@ -28,6 +28,8 @@ pattern or be used to address specific tasks.
 
 ## Table of Contents
 
+## Table of Contents
+
 <!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
 
 - [Getting Started](#getting-started)
@@ -52,6 +54,8 @@ pattern or be used to address specific tasks.
         + [Creating and Running a State Machine Inside States](#creating-and-running-a-state-machine-inside-states)
         + [State Machine History](#state-machine-history)
         + [State Machine Error Handling](#state-machine-error-handling)
+            - [General Error-Handling Principles](#general-error-handling-principles)
+            - [State Machine Specific Exceptions](#state-machine-specific-exceptions)
         + [State Machine Custom Interface ](#state-machine-custom-interface)
         + [State Machine Context](#state-machine-context)
         + [Custom type resolvers](#custom-type-resolvers)
@@ -78,7 +82,6 @@ pattern or be used to address specific tasks.
 - [License](#license)
 
 <!-- TOC end -->
-
 
 ## Getting Started
 
@@ -568,6 +571,13 @@ var payload = new BarPayload();
 await stateMachine.Execute<BarState>(payload, cts.Token);
 ```
 
+A state machine supports only one active execution flow.  
+Calling `Execute()` again while the current run has not finished raises **`AlreadyExecutingException`** to prevent
+concurrent execution.
+
+You can determine whether the machine is already running by checking property **`IsExecuting`**.
+
+
 #### Creating and Running a State Machine Inside States
 
 Any state can create and run a state machine within itself using the `StateMachineFactory` property. This is the
@@ -604,6 +614,8 @@ public class StateMachineWithDisabledHistory : StateMachine
 ```
 
 #### State Machine Error Handling
+
+##### General Error-Handling Principles
 
 In UniState, state machine error handling can be customized to control how exceptions within states are processed. The
 primary mechanism for this is the `HandleError()` method, which you can override in your custom state machine. This
@@ -662,6 +674,17 @@ public class BarStateMachine : StateMachine
             => transitionFactory.CreateStateTransition<ErrorPopupState>();
 }
 ```
+
+##### State Machine Specific Exceptions
+
+During the lifetime of UniState state machine may raise state-machine-specific exceptions:
+
+* **`AlreadyExecutingException`** — derived from `InvalidOperationException`. Thrown when `Execute()` is called while the
+  state machine is already executing, preventing a second concurrent run and indicating an incorrect lifecycle invocation.
+
+* **`NoSubStatesException`** — derived from `InvalidOperationException`. Thrown by `DefaultCompositeState` if its
+  `Execute()` method starts without any SubStates being present.
+
 
 #### State Machine Custom Interface 
 

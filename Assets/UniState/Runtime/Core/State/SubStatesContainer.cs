@@ -33,7 +33,7 @@ namespace UniState
         {
             if (List.Count == 0)
             {
-                throw new InvalidOperationException("No SubStates for execution");
+                throw new NoSubStatesException();
             }
 
             StateTransitionInfo result;

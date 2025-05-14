@@ -9,12 +9,14 @@ namespace UniState
         private LimitedStack<StateTransitionInfo> _history;
         private IStateTransitionFactory _transitionFactory;
 
+        public bool IsExecuting => _isExecuting;
         protected virtual int MaxHistorySize => 15;
 
-        public virtual void Initialize(ITypeResolver resolver)
+        private bool _isExecuting = false;
+
+        public virtual void SetResolver(ITypeResolver resolver)
         {
             _transitionFactory = new StateTransitionFactory(resolver);
-            _history = new LimitedStack<StateTransitionInfo>(MaxHistorySize);
         }
 
         public virtual async UniTask Execute<TState>(CancellationToken token) where TState : class, IState<EmptyPayload>
@@ -35,8 +37,21 @@ namespace UniState
         protected virtual StateTransitionInfo BuildRecoveryTransition(IStateTransitionFactory transitionFactory) =>
             transitionFactory.CreateBackTransition();
 
+        private void Initialize()
+        {
+            _history = new LimitedStack<StateTransitionInfo>(MaxHistorySize);
+            _isExecuting = true;
+        }
+
         private async UniTask ExecuteInternal(StateTransitionInfo initialTransition, CancellationToken token)
         {
+            if (_isExecuting)
+            {
+                throw new AlreadyExecutingException();
+            }
+
+            Initialize();
+
             var activeStateMetadata = new StateWithMetadata();
             var nextStateMetadata = new StateWithMetadata();
 
@@ -88,6 +103,8 @@ namespace UniState
 
                 activeStateMetadata.Dispose();
                 activeStateMetadata.Clear();
+
+                _isExecuting = false;
             }
         }
 
