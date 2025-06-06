@@ -28,6 +28,6 @@ namespace UniStateTests.PlayMode.HistoryTests.Infrastructure
         }
     }
 
-    public interface IStateMachineLongHistory : IStateMachine
+    public interface IStateMachineLongHistory : IVerifiableStateMachine
     {}
 }

@@ -11,9 +11,7 @@ namespace UniStateTests.Common
             where TStateMachine : class, IStateMachine, IVerifiableStateMachine
             where TState : class, IState<EmptyPayload>
         {
-            var stateMachine =
-                StateMachineHelper.CreateStateMachine<IVerifiableStateMachine, TStateMachine>(
-                    typeResolver);
+            var stateMachine = typeResolver.Resolve<TStateMachine>();
             await stateMachine.Execute<TState>(cancellationToken);
 
             stateMachine.Verify();

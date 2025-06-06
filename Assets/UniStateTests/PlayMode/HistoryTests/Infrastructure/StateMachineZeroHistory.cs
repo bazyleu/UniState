@@ -19,6 +19,6 @@ namespace UniStateTests.PlayMode.HistoryTests.Infrastructure
         }
     }
 
-    public interface IStateMachineZeroHistory : IStateMachine
+    public interface IStateMachineZeroHistory : IVerifiableStateMachine
     {}
 }

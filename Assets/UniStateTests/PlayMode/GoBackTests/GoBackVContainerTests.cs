@@ -14,7 +14,7 @@ namespace UniStateTests.PlayMode.GoBackTests
         public IEnumerator RunChaneOfState_GoBackFromTheChain_ExitFromStateMachineWithCorrectOrderOfStates() =>
             UniTask.ToCoroutine(async () =>
             {
-                await RunAndVerify<StateMachineGoBack, StateGoBackFirst>();
+                await RunAndVerify<IVerifiableStateMachine, StateGoBackFirst>();
             });
 
         protected override void SetupBindings(IContainerBuilder builder)

@@ -1,9 +1,10 @@
 #if UNISTATE_VCONTAINER_SUPPORT
 
+using System;
 using VContainer;
 
 namespace UniState
-{       //TODO: Change API for regisreing State
+{
     public static class VContainerBuilderExtensions
     {
         public static void RegisterStateMachine<TInterface, TStateMachine>(
@@ -12,6 +13,10 @@ namespace UniState
             where TStateMachine : TInterface
             where TInterface : IStateMachine
         {
+            if (typeof(TInterface) == typeof(TStateMachine))
+                throw new ArgumentException(
+                    $"RegisterStateMachine<{typeof(TInterface)}> exception: Type parameters must differ : use RegisterStateMachine<Interface, Implementation>() where Implementation implements Interface.\");");
+
             builder.Register<TStateMachine>(lifetime);
             builder.Register<TInterface>(
                 r =>
@@ -32,20 +37,20 @@ namespace UniState
             builder.RegisterStateMachine<TInterface, TStateMachine>(Lifetime.Transient);
         }
 
-        public static RegistrationBuilder RegisterState<TState>(this IContainerBuilder builder) =>
+        public static void RegisterState<TState>(this IContainerBuilder builder) =>
             builder.RegisterState<TState>(Lifetime.Transient);
 
-        public static RegistrationBuilder RegisterState<TState>(this IContainerBuilder builder, Lifetime lifetime) =>
+        public static void RegisterState<TState>(this IContainerBuilder builder, Lifetime lifetime) =>
             builder.Register<TState>(lifetime).AsSelf().AsImplementedInterfaces();
 
-        public static RegistrationBuilder RegisterAbstractState<TStateBase, TState>(this IContainerBuilder builder)
-            where TState : TStateBase =>
-            builder.RegisterAbstractState<TStateBase, TState>(Lifetime.Transient);
+        public static void RegisterState<TInterface, TState>(this IContainerBuilder builder)
+            where TState : TInterface =>
+            builder.RegisterState<TInterface, TState>(Lifetime.Transient);
 
-        public static RegistrationBuilder RegisterAbstractState<TStateBase, TState>(this IContainerBuilder builder,
+        public static void RegisterState<TInterface, TState>(this IContainerBuilder builder,
             Lifetime lifetime)
-            where TState : TStateBase =>
-            builder.Register<TStateBase, TState>(lifetime);
+            where TState : TInterface =>
+            builder.Register<TInterface, TState>(lifetime);
     }
 }
 

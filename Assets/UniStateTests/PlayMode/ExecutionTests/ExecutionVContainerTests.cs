@@ -20,17 +20,17 @@ namespace UniStateTests.PlayMode.Execution
                 var testHelper = Container.Resolve<ExecutionTestHelper>();
                 testHelper.SetPath(StateMachineExecutionType.Default);
 
-                await RunAndVerify<ExecutionStateMachine, FirstState>();
+                await RunAndVerify<IVerifiableStateMachine, FirstState>();
                 Assert.False(testHelper.CurrentStateMachine.IsExecuting);
 
                 testHelper.SetPath(StateMachineExecutionType.WrongDependency);
 
-                await RunAndVerify<ExecutionStateMachine, FirstState>();
+                await RunAndVerify<IVerifiableStateMachine, FirstState>();
                 Assert.False(testHelper.CurrentStateMachine.IsExecuting);
 
                 testHelper.SetPath(StateMachineExecutionType.Exception);
 
-                await RunAndVerify<ExecutionStateMachine, FirstState>();
+                await RunAndVerify<IVerifiableStateMachine, FirstState>();
                 Assert.False(testHelper.CurrentStateMachine.IsExecuting);
             });
 

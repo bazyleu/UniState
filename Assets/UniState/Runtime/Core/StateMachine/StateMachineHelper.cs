@@ -1,5 +1,7 @@
 namespace UniState
 {
+
+    //TODO: Remove
     public static class StateMachineHelper
     {
         public static TStateMachine CreateStateMachine<TStateMachine>(ITypeResolver typeResolver)
