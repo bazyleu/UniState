@@ -1,8 +1,9 @@
+using UniState;
 using UniStateTests.Common;
 
 namespace UniStateTests.PlayMode.HistoryTests.Infrastructure
 {
-    internal class StateMachineLongHistory : VerifiableStateMachine
+    internal class StateMachineLongHistory : VerifiableStateMachine, IStateMachineLongHistory
     {
         public const int MaxTransition = 24;
 
@@ -26,4 +27,7 @@ namespace UniStateTests.PlayMode.HistoryTests.Infrastructure
         {
         }
     }
+
+    public interface IStateMachineLongHistory : IStateMachine
+    {}
 }

@@ -30,9 +30,10 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests
 
             builder.Register<RecoveryTestHelper>(Lifetime.Singleton);
 
-            builder.RegisterStateMachine<StateMachineDefaultRecovery>();
-            builder.RegisterStateMachine<StateMachineGoToStateRecovery>();
-            builder.RegisterStateMachine<StateMachineExitRecovery>();
+            //Pay Attantion
+            builder.RegisterStateMachine<IStateMachineDefaultRecovery, StateMachineDefaultRecovery>();
+            builder.RegisterStateMachine<IStateMachineGoToStateRecovery, StateMachineGoToStateRecovery>();
+            builder.RegisterStateMachine<IStateMachineExitRecovery, StateMachineExitRecovery>();
 
             builder.RegisterState<StateInitial>();
             builder.RegisterState<StateThrowTwoException>();

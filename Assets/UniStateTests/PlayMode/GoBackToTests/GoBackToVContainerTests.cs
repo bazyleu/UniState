@@ -16,7 +16,7 @@ namespace UniStateTests.PlayMode.GoBackToTests
         {
             base.SetupBindings(builder);
 
-            builder.RegisterStateMachine<GoBackToStateMachine>();
+            builder.RegisterStateMachine<IVerifiableStateMachine, GoBackToStateMachine>();
             builder.RegisterState<GoBackToState1>();
             builder.RegisterState<GoBackToState2>();
             builder.RegisterState<GoBackToState3>();

@@ -22,7 +22,7 @@ namespace UniStateTests.PlayMode.GoToStateTests
         {
             base.SetupBindings(builder);
 
-            builder.RegisterStateMachine<StateMachineGoToState>();
+            builder.RegisterStateMachine<IVerifiableStateMachine, StateMachineGoToState>();
             builder.RegisterState<StateGoTo1>();
             builder.RegisterState<StateGoTo2>();
             builder.RegisterState<StateGoTo3>();

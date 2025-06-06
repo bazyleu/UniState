@@ -22,7 +22,7 @@ namespace UniStateTests.PlayMode.StateBehaviorAttributeTests
         {
             base.SetupBindings(builder);
 
-            builder.RegisterStateMachine<StateMachineBehaviourAttribute>();
+            builder.RegisterStateMachine<IVerifiableStateMachine, StateMachineBehaviourAttribute>();
             builder.RegisterState<FirstState>();
             builder.RegisterState<NoReturnState>();
             builder.RegisterState<FastInitializeState>();

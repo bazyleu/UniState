@@ -26,8 +26,8 @@ namespace UniStateTests.PlayMode.HistoryTests
 
             builder.Register<HistorySizeTestHelper>(Lifetime.Singleton);
 
-            builder.RegisterStateMachine<StateMachineLongHistory>();
-            builder.RegisterStateMachine<StateMachineZeroHistory>();
+            builder.RegisterStateMachine<IStateMachineLongHistory, StateMachineLongHistory>();
+            builder.RegisterStateMachine<IStateMachineZeroHistory, StateMachineZeroHistory>();
             builder.RegisterState<StateInitLongHistory>();
             builder.RegisterState<StateInitZeroHistory>();
             builder.RegisterState<StateFooHistory>();

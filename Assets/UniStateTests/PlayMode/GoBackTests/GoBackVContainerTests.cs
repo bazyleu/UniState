@@ -23,7 +23,7 @@ namespace UniStateTests.PlayMode.GoBackTests
 
             builder.Register<GoBackTestHelper>(Lifetime.Singleton);
 
-            builder.RegisterStateMachine<StateMachineGoBack>();
+            builder.RegisterStateMachine<IVerifiableStateMachine, StateMachineGoBack>();
             builder.RegisterState<StateGoBackFirst>();
             builder.RegisterState<StateGoBackSecond>();
             builder.RegisterState<StateGoBackThird>();

@@ -3,7 +3,7 @@ using UniStateTests.Common;
 
 namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
 {
-    internal class StateMachineExitRecovery : VerifiableStateMachine
+    internal class StateMachineExitRecovery : VerifiableStateMachine, IStateMachineExitRecovery
     {
         private readonly ExecutionLogger _logger;
 
@@ -27,4 +27,7 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
             "StateWithFailExecution (Execute) -> StateMachineExitRecovery (HandleError (Execution exception)) -> " +
             "StateWithFailExecution (Exit, Disposables)";
     }
+
+    public interface IStateMachineExitRecovery : IStateMachine
+    {}
 }

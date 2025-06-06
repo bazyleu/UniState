@@ -22,7 +22,7 @@ namespace UniStateTests.PlayMode.SubStateTests
         {
             base.SetupBindings(builder);
 
-            builder.RegisterStateMachine<StateMachineSubStates>();
+            builder.RegisterStateMachine<IVerifiableStateMachine, StateMachineSubStates>();
 
             builder.RegisterState<StateInitial>();
             builder.RegisterState<StateFinal>();

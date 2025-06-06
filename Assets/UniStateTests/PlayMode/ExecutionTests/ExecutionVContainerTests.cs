@@ -41,7 +41,7 @@ namespace UniStateTests.PlayMode.Execution
 
             builder.Register<ExecutionTestHelper>(Lifetime.Singleton);
 
-            builder.RegisterStateMachine<ExecutionStateMachine>();
+            builder.RegisterStateMachine<IVerifiableStateMachine, ExecutionStateMachine>();
 
             builder.RegisterState<FirstState>();
             builder.RegisterState<SecondState>();
