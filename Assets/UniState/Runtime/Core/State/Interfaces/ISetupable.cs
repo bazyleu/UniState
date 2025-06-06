@@ -1,7 +1,7 @@
 namespace UniState
 {
-    public interface ISetupable<TPayload> : IPayloadSetter<TPayload>, ITransitionFacadeSetter,
-        IStateMachineFactorySetter
+    public interface ISetupable<TPayload> : IPayloadSetter<TPayload>,
+        ISetTransitionFacadeSetter
     {
     }
 }

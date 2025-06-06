@@ -30,12 +30,6 @@ namespace UniState
             _subStatesContainer.SetPayload(payload);
         }
 
-        public override void SetStateMachineFactory(IStateMachineFactory stateMachineFactory)
-        {
-            base.SetStateMachineFactory(stateMachineFactory);
-            _subStatesContainer.SetStateMachineFactory(stateMachineFactory);
-        }
-
         public override void SetTransitionFacade(IStateTransitionFacade transitionFacade)
         {
             base.SetTransitionFacade(transitionFacade);

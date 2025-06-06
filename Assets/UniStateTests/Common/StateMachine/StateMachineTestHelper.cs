@@ -12,7 +12,7 @@ namespace UniStateTests.Common
             where TState : class, IState<EmptyPayload>
         {
             var stateMachine =
-                StateMachineHelper.CreateStateMachine<TStateMachine, IVerifiableStateMachine>(
+                StateMachineHelper.CreateStateMachine<IVerifiableStateMachine, TStateMachine>(
                     typeResolver);
             await stateMachine.Execute<TState>(cancellationToken);
 

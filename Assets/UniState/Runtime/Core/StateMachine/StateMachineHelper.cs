@@ -2,26 +2,25 @@ namespace UniState
 {
     public static class StateMachineHelper
     {
-        public static IExecutableStateMachine CreateStateMachine<TSateMachine>(ITypeResolver typeResolver)
-            where TSateMachine : class, IStateMachine
+        public static TStateMachine CreateStateMachine<TStateMachine>(ITypeResolver typeResolver)
+            where TStateMachine : IStateMachine
         {
-            var stateMachine = typeResolver.Resolve<TSateMachine>();
+            var stateMachine = typeResolver.Resolve<TStateMachine>();
 
             stateMachine.SetResolver(typeResolver);
 
             return stateMachine;
         }
 
-        public static TReturn CreateStateMachine<TSateMachine, TReturn>(ITypeResolver typeResolver)
-            where TSateMachine : class, IStateMachine, TReturn
-            where TReturn : IExecutableStateMachine
+        public static TInterface CreateStateMachine<TInterface, TStateMachine>(ITypeResolver typeResolver)
+            where TStateMachine : TInterface
+            where TInterface : IStateMachine
         {
-            var stateMachine = typeResolver.Resolve<TSateMachine>();
+            var stateMachine = typeResolver.Resolve<TStateMachine>();
 
             stateMachine.SetResolver(typeResolver);
 
             return stateMachine;
         }
-
     }
 }

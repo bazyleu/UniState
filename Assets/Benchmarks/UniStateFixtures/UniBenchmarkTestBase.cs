@@ -15,7 +15,7 @@ namespace Benchmarks.UniStateFixtures
 
             benchmarkHelper.SetStatesCountTarget(stateCount);
 
-            IExecutableStateMachine stateMachine =
+            IStateMachine stateMachine =
                 withoutHistory
                     ? StateMachineHelper.CreateStateMachine<StateMachineWithoutHistory>(resolver)
                     : StateMachineHelper.CreateStateMachine<StateMachine>(resolver);

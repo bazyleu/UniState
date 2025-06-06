@@ -1,6 +1,6 @@
 namespace UniState
 {
-    public interface IStateMachineFactorySetter
+    public interface ISetTransitionFacadeSetter
     {
         void SetTransitionFacade(IStateTransitionFacade transitionFacade);
     }

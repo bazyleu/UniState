@@ -3,29 +3,34 @@
 using VContainer;
 
 namespace UniState
-{
+{       //TODO: Change API for regisreing State
     public static class VContainerBuilderExtensions
     {
-        public static RegistrationBuilder RegisterStateMachine<TStateMachine>(this IContainerBuilder builder)
-            where TStateMachine : IStateMachine =>
-            builder.RegisterStateMachine<TStateMachine>(Lifetime.Transient);
-
-        public static RegistrationBuilder RegisterStateMachine<TStateMachine>(this IContainerBuilder builder,
+        public static void RegisterStateMachine<TInterface, TStateMachine>(
+            this IContainerBuilder builder,
             Lifetime lifetime)
-            where TStateMachine : IStateMachine =>
+            where TStateMachine : TInterface
+            where TInterface : IStateMachine
+        {
             builder.Register<TStateMachine>(lifetime);
+            builder.Register<TInterface>(
+                r =>
+                {
+                    var stateMachine = r.Resolve<TStateMachine>();
+                    stateMachine.SetResolver(r.ToTypeResolver());
 
-        public static RegistrationBuilder RegisterAbstractStateMachine<TStateMachineBase, TStateMachine>(
+                    return stateMachine;
+                },
+                lifetime);
+        }
+
+        public static void RegisterStateMachine<TInterface, TStateMachine>(
             this IContainerBuilder builder)
-            where TStateMachine : TStateMachineBase
-            where TStateMachineBase : IStateMachine =>
-            builder.RegisterAbstractStateMachine<TStateMachineBase, TStateMachine>(Lifetime.Transient);
-
-        public static RegistrationBuilder RegisterAbstractStateMachine<TStateMachineBase, TStateMachine>(
-            this IContainerBuilder builder, Lifetime lifetime)
-            where TStateMachine : TStateMachineBase
-            where TStateMachineBase : IStateMachine =>
-            builder.Register<TStateMachineBase, TStateMachine>(lifetime);
+            where TStateMachine : TInterface
+            where TInterface : IStateMachine
+        {
+            builder.RegisterStateMachine<TInterface, TStateMachine>(Lifetime.Transient);
+        }
 
         public static RegistrationBuilder RegisterState<TState>(this IContainerBuilder builder) =>
             builder.RegisterState<TState>(Lifetime.Transient);
