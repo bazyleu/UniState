@@ -11,13 +11,13 @@ namespace UniStateTests.PlayMode.GoBackToTests
     {
         [Test]
         public void RunChainOfStates_GoBackToChain_LogsExpected()
-            => RunAndVerify<GoBackToStateMachine, GoBackToState1>().GetAwaiter().GetResult();
+            => RunAndVerify<IVerifiableStateMachine, GoBackToState1>().GetAwaiter().GetResult();
 
         protected override void SetupBindings(DiContainer container)
         {
             base.SetupBindings(container);
 
-            container.BindStateMachine<GoBackToStateMachine>();
+            container.BindStateMachine<IVerifiableStateMachine, GoBackToStateMachine>();
             container.BindState<GoBackToState1>();
             container.BindState<GoBackToState2>();
             container.BindState<GoBackToState3>();

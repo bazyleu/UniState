@@ -14,15 +14,15 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests
     {
         [UnityTest]
         public IEnumerator RunChaneOfStateWithDefaultRecovery_ExceptionDuringExecute_StateMachineExecuteGoBack() =>
-            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineDefaultRecovery, StateInitial>(); });
+            UniTask.ToCoroutine(async () => { await RunAndVerify<IStateMachineDefaultRecovery, StateInitial>(); });
 
         [UnityTest]
         public IEnumerator RunChaneOfStateWithGoToStateRecovery_ExceptionDuringExecute_StateMachineGoToRecoveryState() =>
-            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineGoToStateRecovery, StateInitial>(); });
+            UniTask.ToCoroutine(async () => { await RunAndVerify<IStateMachineGoToStateRecovery, StateInitial>(); });
 
         [UnityTest]
         public IEnumerator RunChaneOfStateWithExitRecovery_ExceptionDuringExecute_StateMachineExit() =>
-            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineExitRecovery, StateInitial>(); });
+            UniTask.ToCoroutine(async () => { await RunAndVerify<IStateMachineExitRecovery, StateInitial>(); });
 
         protected override void SetupBindings(IContainerBuilder builder)
         {

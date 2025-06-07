@@ -63,7 +63,7 @@ namespace UniStateTests.EditMode.Common
 
         protected override void SetupBindings(DiContainer container)
         {
-            container.BindStateMachine<StateMachine>();
+            container.BindStateMachine<IStateMachine, StateMachine>();
             container.BindState<DisposablesState>();
             container.BindState<ExceptionDisposableState>();
         }

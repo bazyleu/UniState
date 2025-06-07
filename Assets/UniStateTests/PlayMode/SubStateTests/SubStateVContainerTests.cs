@@ -16,7 +16,7 @@ namespace UniStateTests.PlayMode.SubStateTests
     {
         [UnityTest]
         public IEnumerator RunChaneOfStateSubStates_ExeptionRisedInSubState_AllSubStateDisposed() =>
-            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineSubStates, StateInitial>(); });
+            UniTask.ToCoroutine(async () => { await RunAndVerify<IVerifiableStateMachine, StateInitial>(); });
 
         protected override void SetupBindings(IContainerBuilder builder)
         {

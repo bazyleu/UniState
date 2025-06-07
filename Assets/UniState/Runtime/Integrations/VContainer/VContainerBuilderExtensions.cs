@@ -15,7 +15,7 @@ namespace UniState
         {
             if (typeof(TInterface) == typeof(TStateMachine))
                 throw new ArgumentException(
-                    $"RegisterStateMachine<{typeof(TInterface)}> exception: Type parameters must differ : use RegisterStateMachine<Interface, Implementation>() where Implementation implements Interface.\");");
+                    $"RegisterStateMachine<{typeof(TInterface).Name}>: Type parameters must differ : use RegisterStateMachine<Interface, Implementation>() where Implementation implements Interface.\");");
 
             builder.Register<TStateMachine>(lifetime);
             builder.Register<TInterface>(

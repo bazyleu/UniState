@@ -28,6 +28,6 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
             "StateWithFailExecution (Execute, Exit, Disposables)";
     }
 
-    public interface IStateMachineDefaultRecovery : IStateMachine
+    public interface IStateMachineDefaultRecovery : IVerifiableStateMachine
     {}
 }

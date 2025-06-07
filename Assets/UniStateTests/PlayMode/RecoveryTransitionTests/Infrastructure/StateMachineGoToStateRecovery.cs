@@ -27,7 +27,7 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
             "StateWithFailExecution (Execute) -> StateMachineGoToStateRecovery (HandleError (Execution exception)) -> " +
             "StateWithFailExecution (Exit, Disposables) -> StateStartedAfterException (Execute)";
     }
-    public interface IStateMachineGoToStateRecovery : IStateMachine
+    public interface IStateMachineGoToStateRecovery : IVerifiableStateMachine
     {}
 
 }
