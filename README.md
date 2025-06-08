@@ -70,6 +70,7 @@ pattern or be used to address specific tasks.
         + [Step 2: Create entry point](#step-2-create-entry-point)
         + [Step 3: Configure VContainer](#step-3-configure-vcontainer)
         + [Step 4: Set up the scene](#step-4-set-up-the-scene)
+    * [Upgrading from Versions < 1.5.0](#upgrading-from-versions--150)
 - [Integrations](#integrations)
     * [VContainer](#vcontainer)
         + [VContainer Preparation](#vcontainer-preparation)
