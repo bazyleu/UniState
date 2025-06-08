@@ -57,8 +57,8 @@ pattern or be used to address specific tasks.
             - [General Error-Handling Principles](#general-error-handling-principles)
             - [State Machine Specific Exceptions](#state-machine-specific-exceptions)
         + [State Machine Custom Interface ](#state-machine-custom-interface)
-        + [State Machine Context](#state-machine-context)
-        + [Custom type resolvers](#custom-type-resolvers)
+        + [Built-in Support for DI Scopes](#built-in-support-for-di-scopes)
+        + [Custom Type Resolvers](#custom-type-resolvers)
         + [Working Without a DI Framework](#working-without-a-di-framework)
     * [Composite State](#composite-state)
         + [Creating a Composite State](#creating-a-composite-state)
@@ -717,30 +717,26 @@ stateMachine.RunCustomLogic();
 await stateMachine.Execute<FooState>(cancellationToken);
 ```
 
-#### State Machine Context
+#### Built-in Support for DI Scopes
 
 UniState natively supports sub-containers and sub-contexts available in modern DI frameworks.
 
-When creating a state machine inside a state, you can use two method overloads:
+A state machine uses the **container scope in which it was registered**:
 
-- `StateMachineFactory.Create<TSateMachine>()`
-- `StateMachineFactory.Create<TSateMachine>(ITypeResolver typeResolver)`
+* Registered in the root container → its context is the root.
+* Registered in a child container → its context is that child.
 
-If the version without `ITypeResolver` is used, the context is inherited from the parent state machine.
-If `ITypeResolver` is passed, it will have a new context.
+All states created by the machine—and every dependency those states request—are resolved through this context.
 
-For smaller projects, it's recommended to use the simplified version without creating a new context:
-
+To switch the context at runtime call **`SetResolver(ITypeResolver)`** with a resolver obtained from any container or sub-container:
 ```csharp
-StateMachineFactory.Create<TSateMachine>();
+IObjectResolver container;
+var newResolver = container.ToTypeResolver();
+
+stateMachine.SetResolver(newResolver);
 ```
 
-For larger projects using sub-containers/sub-contexts in your DI framework to manage resources more efficiently, you can
-pass them into `Create` to force the state machine to use them for creating states and dependencies. Thus, UniState
-supports this natively without additional actions required from you.
-
-
-#### Custom type resolvers
+#### Custom Type Resolvers
 
 While UniState provides `ITypeResolver` implementations for modern DI frameworks out of the box, you can create custom implementations, tailored to your needs
 
