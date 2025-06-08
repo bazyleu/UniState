@@ -59,6 +59,7 @@ pattern or be used to address specific tasks.
         + [State Machine Custom Interface ](#state-machine-custom-interface)
         + [State Machine Context](#state-machine-context)
         + [Custom type resolvers](#custom-type-resolvers)
+        + [Working Without a DI Framework](#working-without-a-di-framework)
     * [Composite State](#composite-state)
         + [Creating a Composite State](#creating-a-composite-state)
         + [SubState](#substate)
@@ -762,8 +763,53 @@ public class ZenjectAutoBindTypeResolver : ITypeResolver
 ```
 
 If you do not have DI framework you have to implement ITypeResolver by your own by manually creating requested states and
-state machines.
+state machines (see [Working Without a DI Framework](#working-without-aa-di-framework).
 
+#### Working Without a DI Framework
+
+UniState is engineered to integrate seamlessly with modern DI containers.  
+However, if your project does not use a DI framework you can still adopt UniState by **supplying a manual implementation of `ITypeResolver`**.
+
+An example of `ITypeResolver` without DI framework and state machine running:
+```csharp
+    public class CustomResolver : ITypeResolver
+    {
+        public object Resolve(Type type)
+        {
+            if (typeof(BarState) == type)
+            {
+                return new BarState();
+            }
+
+            if (typeof(FooState) == type)
+            {
+                return FooState();
+            }
+
+            if (typeof(StateMachine) == type)
+            {
+                return new StateMachine();
+            }
+
+            throw new NotImplementedException();
+        }
+    }
+
+    public class EntryPoint : MonoBehaviour
+    {
+        public async UniTask Run()
+        {
+            var resolver = new CustomResolver();
+            var stateMachine = resolver.Resolve<StateMachine>();
+
+            stateMachine.SetResolver(resolver);
+
+            await stateMachine.Execute<FooState>(CancellationToken.None);
+        }
+    }
+}
+
+```
 
 ### Composite State
 
