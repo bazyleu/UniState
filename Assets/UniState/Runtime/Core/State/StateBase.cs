@@ -16,7 +16,6 @@ namespace UniState
         protected T Payload { get; private set; }
 
         protected IStateTransitionFacade Transition { get; private set; }
-        protected IStateMachineFactory StateMachineFactory { get; private set; }
         protected List<IDisposable> Disposables => _disposables ??= new(4);
 
         public abstract UniTask<StateTransitionInfo> Execute(CancellationToken token);
@@ -37,9 +36,6 @@ namespace UniState
         }
 
         public virtual void SetTransitionFacade(IStateTransitionFacade transitionFacade) => Transition = transitionFacade;
-
-        public virtual void SetStateMachineFactory(IStateMachineFactory stateMachineFactory) =>
-            StateMachineFactory = stateMachineFactory;
 
         public virtual void Dispose()
         {

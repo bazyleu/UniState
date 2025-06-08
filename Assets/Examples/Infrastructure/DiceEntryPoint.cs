@@ -9,18 +9,16 @@ namespace Examples.Infrastructure
 {
     public class DiceEntryPoint : IStartable
     {
-        private readonly IObjectResolver _objectResolver;
+        private readonly IStateMachine _stateMachine;
 
-        public DiceEntryPoint(IObjectResolver objectResolver)
+        public DiceEntryPoint(IStateMachine stateMachine)
         {
-            _objectResolver = objectResolver;
+            _stateMachine = stateMachine;
         }
 
         public void Start()
         {
-            var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(_objectResolver.ToTypeResolver());
-
-            stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
         }
     }
 }

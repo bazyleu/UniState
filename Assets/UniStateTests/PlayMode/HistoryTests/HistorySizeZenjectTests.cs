@@ -14,11 +14,11 @@ namespace UniStateTests.PlayMode.HistoryTests
     {
         [UnityTest]
         public IEnumerator RunChaneOfStateWithLongHistory_GoBack_ChainExecutedCorrectly() =>
-            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineLongHistory, StateInitLongHistory>(); });
+            UniTask.ToCoroutine(async () => { await RunAndVerify<IStateMachineLongHistory, StateInitLongHistory>(); });
 
         [UnityTest]
         public IEnumerator RunChaneOfStateWithZeroHistory_GoBack_ExitFromStateMachine() =>
-            UniTask.ToCoroutine(async () => { await RunAndVerify<StateMachineZeroHistory, StateInitZeroHistory>(); });
+            UniTask.ToCoroutine(async () => { await RunAndVerify<IStateMachineZeroHistory, StateInitZeroHistory>(); });
 
         protected override void SetupBindings(DiContainer container)
         {
@@ -26,8 +26,8 @@ namespace UniStateTests.PlayMode.HistoryTests
 
             container.BindInterfacesAndSelfTo<HistorySizeTestHelper>().AsSingle();
 
-            container.BindStateMachine<StateMachineLongHistory>();
-            container.BindStateMachine<StateMachineZeroHistory>();
+            container.BindStateMachine<IStateMachineLongHistory, StateMachineLongHistory>();
+            container.BindStateMachine<IStateMachineZeroHistory, StateMachineZeroHistory>();
             container.BindState<StateInitLongHistory>();
             container.BindState<StateInitZeroHistory>();
             container.BindState<StateFooHistory>();

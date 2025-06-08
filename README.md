@@ -51,14 +51,14 @@ pattern or be used to address specific tasks.
     * [State Machine](#state-machine)
         + [Creating a State Machine](#creating-a-state-machine)
         + [Running a State Machine](#running-a-state-machine)
-        + [Creating and Running a State Machine Inside States](#creating-and-running-a-state-machine-inside-states)
+        + [Launching Nested State Machines](#launching-nested-state-machines)
         + [State Machine History](#state-machine-history)
         + [State Machine Error Handling](#state-machine-error-handling)
             - [General Error-Handling Principles](#general-error-handling-principles)
             - [State Machine Specific Exceptions](#state-machine-specific-exceptions)
-        + [State Machine Custom Interface ](#state-machine-custom-interface)
-        + [State Machine Context](#state-machine-context)
-        + [Custom type resolvers](#custom-type-resolvers)
+        + [Built-in Support for DI Scopes](#built-in-support-for-di-scopes)
+        + [Custom Type Resolvers](#custom-type-resolvers)
+        + [Working Without a DI Framework](#working-without-a-di-framework)
     * [Composite State](#composite-state)
         + [Creating a Composite State](#creating-a-composite-state)
         + [SubState](#substate)
@@ -115,7 +115,7 @@ available [here](#state-creating).
 
 **Step 3:** Configure Dependency Injection (DI) by registering the state machine and states in the DI container. 
 ```csharp
-builder.RegisterStateMachine<StateMachine>();
+builder.RegisterStateMachine<IStateMachine, StateMachine>();
 builder.RegisterState<MainMenuState>();
 builder.RegisterState<GameplayState>();
 ```
@@ -125,13 +125,17 @@ Additional information on DI configuration is available [here](#integrations).
 ```csharp
     public class Game
     {
-        private IObjectResolver _objectResolver;
-        private CancellationTokenSource _ctx;
+        // Note that you must resolve the interface but not the implementation
+        private readonly IStateMachine _stateMachine;
 
-        public async void Run()
+        public Game(IStateMachine stateMachine)
         {
-            var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(_objectResolver.ToTypeResolver());
-            await stateMachine.Execute<MainMenuState>(_ctx.Token);
+            _stateMachine = stateMachine;
+        }
+
+        public void Start()
+        {
+            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
         }
     }
 ```
@@ -405,6 +409,8 @@ The lifecycle of a state consists of four stages, represented by the following m
 
 4. **Dispose**
     - Cleans up resources. If you inherit from `StateBase`, this method does not need implementation.
+    - **Note:** If you inherit state from StateBase, do not override the Dispose method. Use [Disposables](#disposables)
+      instead.
 
 #### State Transitions
 
@@ -548,21 +554,34 @@ The state machine is the entry point into the framework, responsible for running
 
 #### Creating a State Machine
 
-To create the initial state machine, use the
-helper `StateMachineHelper.CreateStateMachine<TSateMachine>(ITypeResolver typeResolver)`.
+You can work with the built-in `StateMachine` class or supply a custom implementation by either deriving from
+`StateMachine` or implementing `IStateMachine`.
+Custom interfaces that extend `IStateMachine` are fully supported and can be registered side-by-side.
 
-- **TSateMachine**: Any class implementing `IStateMachine`. You can use the standard `StateMachine` or create custom
-  ones by inheriting from `StateMachine` or implementing `IStateMachine`.
-
-- **ITypeResolver**: Used to create the state machine. It acts as a factory for creating states and other state
-  machines. You can implement it yourself or use the provided implementation from DI frameworks like VContainer or
-  Zenject via the `.ToTypeResolver()` extension. See [Integrations](#integrations) for supported frameworks
-  or [Custom type resolvers](#custom-type-resolvers) for cases if you DI framework is not supported out of the box or
-  you do not have DI framework.
+```csharp
+    public class StateMachineWithoutHistory : StateMachine
+    {
+        protected override int MaxHistorySize => 0;
+    }
+    
+    public interface IBarMachine : IStateMachine
+    {
+        public void Bar();
+    }
+    
+    public class BarMachine : StateMachine, IBarMachine
+    {
+       public void Bar()
+       {
+            Debug.Log("Bar");
+       }
+    }
+```
 
 #### Running a State Machine
 
-After creating the state machine, you can run it with the specified state:
+To use a state machine, resolve it through its interface and invoke `Execute<TInitialState>(cancellationToken)` with the
+desired entry state.
 
 ```csharp
 await stateMachine.Execute<FooState>(cts.Token);
@@ -578,24 +597,37 @@ concurrent execution.
 You can determine whether the machine is already running by checking property **`IsExecuting`**.
 
 
-#### Creating and Running a State Machine Inside States
+#### Launching Nested State Machines
 
-Any state can create and run a state machine within itself using the `StateMachineFactory` property. This is the
-recommended method for creating a state machine inside a state.
+Any state can launch any number of nested state machines.  
+Simply inject the machines through the state’s constructor, no additional action required.
 
 ```csharp
-ITypeResolver _newContext;
-
-public UniTask<StateTransitionInfo> Execute(CancellationToken token)
+public class RootGameplayState : StateBase
 {
-    var stateMachine = StateMachineFactory.Create<StateMachine>();
-    await stateMachine.Execute<FooState>(cts.Token);
+    private readonly IStateMachine _uiMachine;
+    private readonly IStateMachine _logicMachine;
 
-    var stateMachineWithNewContext = StateMachineFactory.Create<StateMachine>(_newContext);
-    await stateMachineWithNewContext.Execute<FooState>(cts.Token);
-    ...
+    public GameplayState(IStateMachine uiMachine,
+                         IStateMachine logicMachine)
+    {
+        _uiMachine = uiMachine;
+        _logicMachine = _logicMachine;
+    }
+
+    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    {
+        // Run UI-related flow in parallel
+        _uiMachine.Execute<UiRootState>(token).Forget();
+
+        // Run logic and await completion
+        await _logicMachine.Execute<LogicRootState>(token);
+
+        return Transition.GoBack();
+    }
 }
 ```
+
 
 #### State Machine History
 
@@ -685,61 +717,26 @@ During the lifetime of UniState state machine may raise state-machine-specific e
 * **`NoSubStatesException`** — derived from `InvalidOperationException`. Thrown by `DefaultCompositeState` if its
   `Execute()` method starts without any SubStates being present.
 
-
-#### State Machine Custom Interface 
-
-When creating a state machine, you can use your custom interface. Interface should be inherit from `IStateMachine`. This
-allows to implement additional, customized behavior.
-
-```csharp
-public interface IExtendedStateMachine : IStateMachine
-{
-    public void RunCustomLogic();
-}
-```
-
-Once your custom interface is implemented, you can utilize a special version of the API that returns your interface.
-This can be useful for adding custom logic to the state machine.
-
-```csharp
-// Option 1: Creating ExtendedStateMachine as entry point
-var stateMachine = StateMachineHelper.CreateStateMachine<ExtendedStateMachine, IExtendedStateMachine>(
-                    typeResolver);
-
-// Option 2: Creating ExtendedStateMachine inside states
-var stateMachine = StateMachineFactory.Create<ExtendedStateMachine, IExtendedStateMachine>();
-
-// Custom state machine has extended api that is defined by IExtendedStateMachine interface
-stateMachine.RunCustomLogic();
-
-// Custom state machine can run states like default state machine
-await stateMachine.Execute<FooState>(cancellationToken);
-```
-
-#### State Machine Context
+#### Built-in Support for DI Scopes
 
 UniState natively supports sub-containers and sub-contexts available in modern DI frameworks.
 
-When creating a state machine inside a state, you can use two method overloads:
+A state machine uses the **container scope in which it was registered**:
 
-- `StateMachineFactory.Create<TSateMachine>()`
-- `StateMachineFactory.Create<TSateMachine>(ITypeResolver typeResolver)`
+* Registered in the root container → its context is the root.
+* Registered in a child container → its context is that child.
 
-If the version without `ITypeResolver` is used, the context is inherited from the parent state machine.
-If `ITypeResolver` is passed, it will have a new context.
+All states created by the machine—and every dependency those states request—are resolved through this context.
 
-For smaller projects, it's recommended to use the simplified version without creating a new context:
-
+To switch the context at runtime call **`SetResolver(ITypeResolver)`** with a resolver obtained from any container or sub-container:
 ```csharp
-StateMachineFactory.Create<TSateMachine>();
+IObjectResolver container;
+var newResolver = container.ToTypeResolver();
+
+stateMachine.SetResolver(newResolver);
 ```
 
-For larger projects using sub-containers/sub-contexts in your DI framework to manage resources more efficiently, you can
-pass them into `Create` to force the state machine to use them for creating states and dependencies. Thus, UniState
-supports this natively without additional actions required from you.
-
-
-#### Custom type resolvers
+#### Custom Type Resolvers
 
 While UniState provides `ITypeResolver` implementations for modern DI frameworks out of the box, you can create custom implementations, tailored to your needs
 
@@ -762,8 +759,53 @@ public class ZenjectAutoBindTypeResolver : ITypeResolver
 ```
 
 If you do not have DI framework you have to implement ITypeResolver by your own by manually creating requested states and
-state machines.
+state machines (see [Working Without a DI Framework](#working-without-aa-di-framework).
 
+#### Working Without a DI Framework
+
+UniState is engineered to integrate seamlessly with modern DI containers.  
+However, if your project does not use a DI framework you can still adopt UniState by **supplying a manual implementation of `ITypeResolver`**.
+
+An example of `ITypeResolver` without DI framework and state machine running:
+```csharp
+    public class CustomResolver : ITypeResolver
+    {
+        public object Resolve(Type type)
+        {
+            if (typeof(BarState) == type)
+            {
+                return new BarState();
+            }
+
+            if (typeof(FooState) == type)
+            {
+                return FooState();
+            }
+
+            if (typeof(StateMachine) == type)
+            {
+                return new StateMachine();
+            }
+
+            throw new NotImplementedException();
+        }
+    }
+
+    public class EntryPoint : MonoBehaviour
+    {
+        public async UniTask Run()
+        {
+            var resolver = new CustomResolver();
+            var stateMachine = resolver.Resolve<StateMachine>();
+
+            stateMachine.SetResolver(resolver);
+
+            await stateMachine.Execute<FooState>(CancellationToken.None);
+        }
+    }
+}
+
+```
 
 ### Composite State
 
@@ -898,19 +940,16 @@ StartGameState.
 ```csharp
     public class DiceEntryPoint : IStartable
     {
-        private readonly IObjectResolver _objectResolver;
+        private readonly IStateMachine _stateMachine;
 
-        public DiceEntryPoint(IObjectResolver objectResolver)
+        public DiceEntryPoint(IStateMachine stateMachine)
         {
-            _objectResolver = objectResolver;
+            _stateMachine = stateMachine;
         }
 
         public void Start()
         {
-            var stateMachine = StateMachineHelper.CreateStateMachine<StateMachine>(
-                _objectResolver.ToTypeResolver());
-
-            stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
         }
     }
 ```
@@ -919,6 +958,8 @@ StartGameState.
 
 DiceScope is a LifetimeScope that registers the state machine and all states.
 The helper extensions RegisterStateMachine and RegisterState is used for registering.
+Note that for a state machine you must register an interface (or abstract class) and an implementation, and resolve the
+interface, not the implementation.
 
 ```csharp
     public class DiceScope : LifetimeScope
@@ -927,7 +968,7 @@ The helper extensions RegisterStateMachine and RegisterState is used for registe
         {
             builder.RegisterEntryPoint<DiceEntryPoint>();
 
-            builder.RegisterStateMachine<StateMachine>();
+            builder.RegisterStateMachine<IStateMachine, StateMachine>();
 
             builder.RegisterState<StartGameState>();
             builder.RegisterState<RollDiceState>();
@@ -956,6 +997,25 @@ Dice is 6
 Congratulations! You won this game!
 ```
 
+### Upgrading from Versions < 1.5.0
+
+The 1.5.0 release removes several helper APIs and unifies state-machine usage. The table below lists each breaking change and its direct replacement.
+
+| Removed API | Use Instead                                                    | Notes |
+|-------------|----------------------------------------------------------------|-------|
+| `StateMachineHelper` | Resolve the state machine via DI and call `Execute`            | Helper no longer required. |
+| `StateMachineFactory` | Inject the state machine directly via interface into the state | Helper no longer required. |
+| `IExecutableStateMachine` | `IStateMachine`                                                | Single interface for all operations. |
+| `RegisterAbstractState` / `BindAbstractState` and variants | `RegisterState<TBase, TImpl>` / `BindState<TBase, TImpl>`      | Same functionality without the *Abstract* prefix. |
+
+1. **Register and inject state machines by the `IStateMachine` (or your own) interface.**
+2. Replace factory/utility calls** (`StateMachineHelper`, `StateMachineFactory`) with direct DI resolution.
+3. Update container bindings** to the two-parameter `RegisterState` / `BindState` overloads.
+4. Remove references to `IExecutableStateMachine`;** use `IStateMachine` everywhere.
+
+After applying these steps the project will compile and run on UniState ≥ 1.5.0.
+
+
 
 ## Integrations
 
@@ -975,56 +1035,45 @@ Scripting Define Symbols (Player Settings -> Player -> Scripting Define Symbols)
 
 #### VContainer Usage
 
-To use it, convert `VContainer.IObjectResolver` to `UniState.ITypeResolver` by calling the extension `ToTypeResolver()`
-and pass it to the state machine.
+No extra setup is required - simply resolve the state machine from the DI container and invoke its Execute method.
 
 ```csharp
-// Object resolver with main or child scope from VContainer
-VContainer.IObjectResolver _objectResolver;
+    public class GameEntryPoint : IStartable
+    {
+        private readonly IStateMachine _stateMachine;
 
-// Convert VContainer.IObjectResolver to ITypeResolver.TypeResolver
-var typeResolver = _objectResolver.ToTypeResolver();
+        public GameEntryPoint(IStateMachine stateMachine)
+        {
+            _stateMachine = stateMachine;
+        }
 
-// Create state machine with VContainer support
-var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(typeResolver);
+        public void Start()
+        {
+            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+        }
+    }
 ```
 
 #### VContainer Registering
 
 All state machines, states and their dependencies should be registered in DI container.
-For convenient registering of states and state machines, special extension methods are available. The main ones
-are `RegisterStateMachine` and `RegisterState`, which register both the classes themselves and all interfaces implemented by
-these classes.
-
-However, if you need to implement a transition into a state or launch a state machine via a base/abstract class, you
-should use `RegisterAbstractStateMachine` and `RegisterAbstractState`.
+For convenient registering of states and state machines, special extension methods are available.
 
 Here's an example code:
 ```csharp
 private void RegisterStates(IContainerBuilder builder)
 {
-    // Use this registration creating state machine via class or interface.
-    // For example: StateMachineHelper.CreateStateMachine<BarStateMachine>(...) 
-    // For example: StateMachineHelper.CreateStateMachine<IBarStateMachine>(...) 
-    builder.RegisterStateMachine<BarStateMachine>();
+      // Use these registering in general use
     
-    // Use this registration creating state machine via base/abstract class.
-    // For example: StateMachineHelper.CreateStateMachine<FooStateMachineBase>(...) 
-    builder.RegisterAbstractStateMachine<FooStateMachineBase, FooStateMachine>();
+      builder.RegisterStateMachine<IStateMachine, BarStateMachine>();
+      builder.RegisterState<BarState>();
+      builder.RegisterState<IBarState, BarState>();
     
-    // Use this registration for transitions to class or interface.
-    // For example: Transition.GoTo<BarState>() or Transition.GoTo<IBarState>()
-    builder.RegisterState<BarState>();
-    
-    // Use this registration for transitions to base/abstract class.
-    // For example: Transition.GoTo<FooStateBase>()
-    builder.RegisterAbstractState<FooStateBase, FooState>();
-    
-    // Singleton version of states, not recommended in general use, but can be handy in some cases
-    builder.RegisterStateMachine<BarStateMachine>(Lifetime.Singleton);
-    builder.RegisterAbstractStateMachine<FooStateMachineBase, FooStateMachine>(Lifetime.Singleton);
-    builder.RegisterState<BarState>(Lifetime.Singleton);
-    builder.RegisterAbstractState<FooStateBase, FooState>(Lifetime.Singleton);
+      // Singleton version of registering, not recommended in general use
+      
+      builder.RegisterStateMachine<IStateMachine, BarStateMachine>(Lifetime.Singleton);
+      builder.RegisterState<BarState>(Lifetime.Singleton);
+      builder.RegisterState<IBarState, BarState>(Lifetime.Singleton);
 }
 ```
 You can always skip the extensions and register directly if you need custom behavior.
@@ -1042,56 +1091,45 @@ Scripting Define Symbols (Player Settings -> Player -> Scripting Define Symbols)
 
 #### Zenject Usage
 
-To use it, convert `Zenject.DiContainer` to `UniState.ITypeResolver` by calling the extension `ToTypeResolver()` and
-pass it to the state machine.
+No extra setup is required - simply resolve the state machine from the DI container and invoke its Execute method.
 
 ```csharp
-// Zenject container / sub container
-Zenject.DiContainer container;
+    public class GameEntryPoint : IStartable
+    {
+        private readonly IStateMachine _stateMachine;
 
-// Convert Zenject.DiContainer to ITypeResolver.TypeResolver
-var typeResolver = container.ToTypeResolver();
+        public GameEntryPoint(IStateMachine stateMachine)
+        {
+            _stateMachine = stateMachine;
+        }
 
-// Create state machine with Zenject support
-var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(typeResolver);
+        public void Start()
+        {
+            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+        }
+    }
 ```
 
 #### Zenject Registering
 
 All state machines, states and their dependencies should be registered in DI container.
-For convenient registering of states and state machines, special extension methods are available. The main ones
-are `BindStateMachine` and `BindState`, which bind both the classes themselves and all interfaces implemented by
-these classes.
-
-However, if you need to implement a transition into a state or launch a state machine via a base/abstract class, you
-should use `BindAbstractStateMachine` and `BindAbstractState`.
+For convenient registering of states and state machines, special extension methods are available.
 
 Here's an example code:
 ```csharp
 private void BindStates(DiContainer container)
 {
-    // Use this registration creating state machine via class or interface.
-    // For example: StateMachineHelper.CreateStateMachine<BarStateMachine>(...) 
-    // For example: StateMachineHelper.CreateStateMachine<IBarStateMachine>(...) 
-    container.BindStateMachine<BarStateMachine>();
-    
-    // Use this registration creating state machine via base/abstract class.
-    // For example: StateMachineHelper.CreateStateMachine<FooStateMachineBase>(...) 
-    container.BindAbstractStateMachine<FooStateMachineBase, FooStateMachine>();
-
-    // Use this registration for transitions to class or interface.
-    // For example: Transition.GoTo<BarState>() or Transition.GoTo<IBarState>()
+     // Use these bindings in general use
+     
+    container.BindStateMachine<IStateMachine, BarStateMachine>();
     container.BindState<BarState>();
+    container.BindState<IBarState, BarState>();
     
-    // Use this registration for transitions to base/abstract class.
-    // For example: Transition.GoTo<FooStateBase>()
-    container.BindAbstractState<FooStateBase, FooState>();
+    // Singleton version of bindings, not recommended in general use
     
-    // Singleton version of states, not recommended in general use, but can be handy in some cases
-    container.BindStateMachineAsSingle<BarStateMachine>();
-    container.BindAbstractStateMachineAsSingle<FooStateMachineBase, FooStateMachine>();
+    container.BindStateMachineAsSingle<IStateMachine, BarStateMachine>();
     container.BindStateAsSingle<BarState>();
-    container.BindAbstractStateAsSingle<FooStateBase, FooState>();
+    container.BindStateAsSingle<IBarState, BarState>();
 }
 ```
 

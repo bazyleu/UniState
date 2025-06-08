@@ -15,17 +15,17 @@ namespace UniStateTests.PlayMode.GoToStateTests
         [UnityTest]
         public IEnumerator RunChaneOfState_ExitFromChain_ChainExecutedCorrectly() => UniTask.ToCoroutine(async () =>
         {
-            await RunAndVerify<StateMachineGoToState, StateGoTo1>();
+            await RunAndVerify<IVerifiableStateMachine, StateGoTo1>();
         });
 
         protected override void SetupBindings(DiContainer container)
         {
             base.SetupBindings(container);
 
-            container.BindStateMachine<StateMachineGoToState>();
+            container.BindStateMachine<IVerifiableStateMachine, StateMachineGoToState>();
             container.BindState<StateGoTo1>();
             container.BindState<StateGoTo2>();
-            container.BindAbstractState<StateGoToAbstract3, StateGoTo3>();
+            container.BindState<StateGoToAbstract3, StateGoTo3>();
             container.BindState<StateGoTo4>();
             container.BindState<StateGoTo5>();
             container.BindState<CompositeStateGoTo6>();

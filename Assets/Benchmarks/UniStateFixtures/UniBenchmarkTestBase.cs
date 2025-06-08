@@ -15,10 +15,11 @@ namespace Benchmarks.UniStateFixtures
 
             benchmarkHelper.SetStatesCountTarget(stateCount);
 
-            IExecutableStateMachine stateMachine =
-                withoutHistory
-                    ? StateMachineHelper.CreateStateMachine<StateMachineWithoutHistory>(resolver)
-                    : StateMachineHelper.CreateStateMachine<StateMachine>(resolver);
+            var stateMachine = withoutHistory
+                ? resolver.Resolve<StateMachineWithoutHistory>()
+                : resolver.Resolve<StateMachine>();
+
+            stateMachine.SetResolver(resolver);
 
             await stateMachine.Execute<FooState>(CancellationToken.None);
         }

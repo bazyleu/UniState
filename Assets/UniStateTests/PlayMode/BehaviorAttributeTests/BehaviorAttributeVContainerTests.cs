@@ -15,14 +15,14 @@ namespace UniStateTests.PlayMode.StateBehaviorAttributeTests
         [UnityTest]
         public IEnumerator RunChaneOfStateWithAttributes_ExitFromChain_ChainExecutedCorrectly() => UniTask.ToCoroutine(async () =>
         {
-            await RunAndVerify<StateMachineBehaviourAttribute, FirstState>();
+            await RunAndVerify<IVerifiableStateMachine, FirstState>();
         });
 
         protected override void SetupBindings(IContainerBuilder builder)
         {
             base.SetupBindings(builder);
 
-            builder.RegisterStateMachine<StateMachineBehaviourAttribute>();
+            builder.RegisterStateMachine<IVerifiableStateMachine, StateMachineBehaviourAttribute>();
             builder.RegisterState<FirstState>();
             builder.RegisterState<NoReturnState>();
             builder.RegisterState<FastInitializeState>();

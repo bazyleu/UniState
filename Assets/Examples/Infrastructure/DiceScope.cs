@@ -11,7 +11,7 @@ namespace Examples.Infrastructure
         {
             builder.RegisterEntryPoint<DiceEntryPoint>();
 
-            builder.RegisterStateMachine<StateMachine>();
+            builder.RegisterStateMachine<IStateMachine, StateMachine>();
 
             builder.RegisterState<StartGameState>();
             builder.RegisterState<RollDiceState>();

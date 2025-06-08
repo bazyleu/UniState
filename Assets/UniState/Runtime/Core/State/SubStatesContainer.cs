@@ -20,9 +20,6 @@ namespace UniState
 
         public void SetPayload(TPayload payload) => _subStates.ForEach(s => s.SetPayload(payload));
 
-        public void SetStateMachineFactory(IStateMachineFactory stateMachineFactory) =>
-            _subStates.ForEach(s => s.SetStateMachineFactory(stateMachineFactory));
-
         public void SetTransitionFacade(IStateTransitionFacade transitionFacade) =>
             _subStates.ForEach(s => s.SetTransitionFacade(transitionFacade));
 

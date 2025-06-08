@@ -56,14 +56,13 @@ namespace UniStateTests.EditMode.Common
         private void ExecuteState<TState>(IList<IDisposable> disposables)
             where TState: DisposablesState
         {
-            var stateMachine = StateMachineHelper.CreateStateMachine<StateMachine>(Container.ToTypeResolver());
-
+            var stateMachine = Container.Resolve<IStateMachine>();
             stateMachine.Execute<TState, IList<IDisposable>>(disposables, default).GetAwaiter().GetResult();
         }
 
         protected override void SetupBindings(DiContainer container)
         {
-            container.BindStateMachine<StateMachine>();
+            container.BindStateMachine<IStateMachine, StateMachine>();
             container.BindState<DisposablesState>();
             container.BindState<ExceptionDisposableState>();
         }

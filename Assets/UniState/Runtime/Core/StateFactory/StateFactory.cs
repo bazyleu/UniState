@@ -9,8 +9,7 @@ namespace UniState
 
         private TPayload _payload;
         private IStateTransitionFacade _transitionFacade;
-        private IStateMachineFactory _stateMachineFactory;
-        
+
         public Type StateType => typeof(TState);
 
         public StateFactory(ITypeResolver resolver)
@@ -18,12 +17,10 @@ namespace UniState
             _resolver = resolver;
         }
 
-        public void Setup(TPayload payload, IStateTransitionFacade transitionFacade,
-            IStateMachineFactory stateMachineFactory)
+        public void Setup(TPayload payload, IStateTransitionFacade transitionFacade)
         {
             _payload = payload;
             _transitionFacade = transitionFacade;
-            _stateMachineFactory = stateMachineFactory;
         }
 
         public IExecutableState Create()
@@ -38,7 +35,6 @@ namespace UniState
 
             state.SetPayload(_payload);
             state.SetTransitionFacade(_transitionFacade);
-            state.SetStateMachineFactory(_stateMachineFactory);
 
             return state;
         }
