@@ -409,6 +409,8 @@ The lifecycle of a state consists of four stages, represented by the following m
 
 4. **Dispose**
     - Cleans up resources. If you inherit from `StateBase`, this method does not need implementation.
+    - **Note:** If you inherit state from StateBase, do not override the Dispose method. Use [Disposables](#disposables)
+      instead.
 
 #### State Transitions
 
