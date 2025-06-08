@@ -56,7 +56,6 @@ pattern or be used to address specific tasks.
         + [State Machine Error Handling](#state-machine-error-handling)
             - [General Error-Handling Principles](#general-error-handling-principles)
             - [State Machine Specific Exceptions](#state-machine-specific-exceptions)
-        + [State Machine Custom Interface ](#state-machine-custom-interface)
         + [Built-in Support for DI Scopes](#built-in-support-for-di-scopes)
         + [Custom Type Resolvers](#custom-type-resolvers)
         + [Working Without a DI Framework](#working-without-a-di-framework)
@@ -715,37 +714,6 @@ During the lifetime of UniState state machine may raise state-machine-specific e
 
 * **`NoSubStatesException`** — derived from `InvalidOperationException`. Thrown by `DefaultCompositeState` if its
   `Execute()` method starts without any SubStates being present.
-
-
-#### State Machine Custom Interface 
-
-When creating a state machine, you can use your custom interface. Interface should be inherit from `IStateMachine`. This
-allows to implement additional, customized behavior.
-
-```csharp
-public interface IExtendedStateMachine : IStateMachine
-{
-    public void RunCustomLogic();
-}
-```
-
-Once your custom interface is implemented, you can utilize a special version of the API that returns your interface.
-This can be useful for adding custom logic to the state machine.
-
-```csharp
-// Option 1: Creating ExtendedStateMachine as entry point
-var stateMachine = StateMachineHelper.CreateStateMachine<ExtendedStateMachine, IExtendedStateMachine>(
-                    typeResolver);
-
-// Option 2: Creating ExtendedStateMachine inside states
-var stateMachine = StateMachineFactory.Create<ExtendedStateMachine, IExtendedStateMachine>();
-
-// Custom state machine has extended api that is defined by IExtendedStateMachine interface
-stateMachine.RunCustomLogic();
-
-// Custom state machine can run states like default state machine
-await stateMachine.Execute<FooState>(cancellationToken);
-```
 
 #### Built-in Support for DI Scopes
 
