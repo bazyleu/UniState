@@ -553,21 +553,34 @@ The state machine is the entry point into the framework, responsible for running
 
 #### Creating a State Machine
 
-To create the initial state machine, use the
-helper `StateMachineHelper.CreateStateMachine<TSateMachine>(ITypeResolver typeResolver)`.
+You can work with the built-in `StateMachine` class or supply a custom implementation by either deriving from
+`StateMachine` or implementing `IStateMachine`.
+Custom interfaces that extend `IStateMachine` are fully supported and can be registered side-by-side.
 
-- **TSateMachine**: Any class implementing `IStateMachine`. You can use the standard `StateMachine` or create custom
-  ones by inheriting from `StateMachine` or implementing `IStateMachine`.
-
-- **ITypeResolver**: Used to create the state machine. It acts as a factory for creating states and other state
-  machines. You can implement it yourself or use the provided implementation from DI frameworks like VContainer or
-  Zenject via the `.ToTypeResolver()` extension. See [Integrations](#integrations) for supported frameworks
-  or [Custom type resolvers](#custom-type-resolvers) for cases if you DI framework is not supported out of the box or
-  you do not have DI framework.
+```csharp
+    public class StateMachineWithoutHistory : StateMachine
+    {
+        protected override int MaxHistorySize => 0;
+    }
+    
+    public interface IBarMachine : IStateMachine
+    {
+        public void Bar();
+    }
+    
+    public class BarMachine : StateMachine, IBarMachine
+    {
+       public void Bar()
+       {
+            Debug.Log("Bar");
+       }
+    }
+```
 
 #### Running a State Machine
 
-After creating the state machine, you can run it with the specified state:
+To use a state machine, resolve it through its interface and invoke `Execute<TInitialState>(cancellationToken)` with the
+desired entry state.
 
 ```csharp
 await stateMachine.Execute<FooState>(cts.Token);
