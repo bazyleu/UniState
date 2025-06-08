@@ -1020,56 +1020,45 @@ Scripting Define Symbols (Player Settings -> Player -> Scripting Define Symbols)
 
 #### VContainer Usage
 
-To use it, convert `VContainer.IObjectResolver` to `UniState.ITypeResolver` by calling the extension `ToTypeResolver()`
-and pass it to the state machine.
+No extra setup is required - simply resolve the state machine from the DI container and invoke its Execute method.
 
 ```csharp
-// Object resolver with main or child scope from VContainer
-VContainer.IObjectResolver _objectResolver;
+    public class GameEntryPoint : IStartable
+    {
+        private readonly IStateMachine _stateMachine;
 
-// Convert VContainer.IObjectResolver to ITypeResolver.TypeResolver
-var typeResolver = _objectResolver.ToTypeResolver();
+        public GameEntryPoint(IStateMachine stateMachine)
+        {
+            _stateMachine = stateMachine;
+        }
 
-// Create state machine with VContainer support
-var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(typeResolver);
+        public void Start()
+        {
+            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+        }
+    }
 ```
 
 #### VContainer Registering
 
 All state machines, states and their dependencies should be registered in DI container.
-For convenient registering of states and state machines, special extension methods are available. The main ones
-are `RegisterStateMachine` and `RegisterState`, which register both the classes themselves and all interfaces implemented by
-these classes.
-
-However, if you need to implement a transition into a state or launch a state machine via a base/abstract class, you
-should use `RegisterAbstractStateMachine` and `RegisterAbstractState`.
+For convenient registering of states and state machines, special extension methods are available.
 
 Here's an example code:
 ```csharp
 private void RegisterStates(IContainerBuilder builder)
 {
-    // Use this registration creating state machine via class or interface.
-    // For example: StateMachineHelper.CreateStateMachine<BarStateMachine>(...) 
-    // For example: StateMachineHelper.CreateStateMachine<IBarStateMachine>(...) 
-    builder.RegisterStateMachine<BarStateMachine>();
+      // Use these registering in general use
     
-    // Use this registration creating state machine via base/abstract class.
-    // For example: StateMachineHelper.CreateStateMachine<FooStateMachineBase>(...) 
-    builder.RegisterAbstractStateMachine<FooStateMachineBase, FooStateMachine>();
+      builder.RegisterStateMachine<IStateMachine, BarStateMachine>();
+      builder.RegisterState<BarState>();
+      builder.RegisterState<IBarState, BarState>();
     
-    // Use this registration for transitions to class or interface.
-    // For example: Transition.GoTo<BarState>() or Transition.GoTo<IBarState>()
-    builder.RegisterState<BarState>();
-    
-    // Use this registration for transitions to base/abstract class.
-    // For example: Transition.GoTo<FooStateBase>()
-    builder.RegisterAbstractState<FooStateBase, FooState>();
-    
-    // Singleton version of states, not recommended in general use, but can be handy in some cases
-    builder.RegisterStateMachine<BarStateMachine>(Lifetime.Singleton);
-    builder.RegisterAbstractStateMachine<FooStateMachineBase, FooStateMachine>(Lifetime.Singleton);
-    builder.RegisterState<BarState>(Lifetime.Singleton);
-    builder.RegisterAbstractState<FooStateBase, FooState>(Lifetime.Singleton);
+      // Singleton version of registering, not recommended in general use
+      
+      builder.RegisterStateMachine<IStateMachine, BarStateMachine>(Lifetime.Singleton);
+      builder.RegisterState<BarState>(Lifetime.Singleton);
+      builder.RegisterState<IBarState, BarState>(Lifetime.Singleton);
 }
 ```
 You can always skip the extensions and register directly if you need custom behavior.
@@ -1087,56 +1076,45 @@ Scripting Define Symbols (Player Settings -> Player -> Scripting Define Symbols)
 
 #### Zenject Usage
 
-To use it, convert `Zenject.DiContainer` to `UniState.ITypeResolver` by calling the extension `ToTypeResolver()` and
-pass it to the state machine.
+No extra setup is required - simply resolve the state machine from the DI container and invoke its Execute method.
 
 ```csharp
-// Zenject container / sub container
-Zenject.DiContainer container;
+    public class GameEntryPoint : IStartable
+    {
+        private readonly IStateMachine _stateMachine;
 
-// Convert Zenject.DiContainer to ITypeResolver.TypeResolver
-var typeResolver = container.ToTypeResolver();
+        public GameEntryPoint(IStateMachine stateMachine)
+        {
+            _stateMachine = stateMachine;
+        }
 
-// Create state machine with Zenject support
-var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(typeResolver);
+        public void Start()
+        {
+            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+        }
+    }
 ```
 
 #### Zenject Registering
 
 All state machines, states and their dependencies should be registered in DI container.
-For convenient registering of states and state machines, special extension methods are available. The main ones
-are `BindStateMachine` and `BindState`, which bind both the classes themselves and all interfaces implemented by
-these classes.
-
-However, if you need to implement a transition into a state or launch a state machine via a base/abstract class, you
-should use `BindAbstractStateMachine` and `BindAbstractState`.
+For convenient registering of states and state machines, special extension methods are available.
 
 Here's an example code:
 ```csharp
 private void BindStates(DiContainer container)
 {
-    // Use this registration creating state machine via class or interface.
-    // For example: StateMachineHelper.CreateStateMachine<BarStateMachine>(...) 
-    // For example: StateMachineHelper.CreateStateMachine<IBarStateMachine>(...) 
-    container.BindStateMachine<BarStateMachine>();
-    
-    // Use this registration creating state machine via base/abstract class.
-    // For example: StateMachineHelper.CreateStateMachine<FooStateMachineBase>(...) 
-    container.BindAbstractStateMachine<FooStateMachineBase, FooStateMachine>();
-
-    // Use this registration for transitions to class or interface.
-    // For example: Transition.GoTo<BarState>() or Transition.GoTo<IBarState>()
+     // Use these bindings in general use
+     
+    container.BindStateMachine<IStateMachine, BarStateMachine>();
     container.BindState<BarState>();
+    container.BindState<IBarState, BarState>();
     
-    // Use this registration for transitions to base/abstract class.
-    // For example: Transition.GoTo<FooStateBase>()
-    container.BindAbstractState<FooStateBase, FooState>();
+    // Singleton version of bindings, not recommended in general use
     
-    // Singleton version of states, not recommended in general use, but can be handy in some cases
-    container.BindStateMachineAsSingle<BarStateMachine>();
-    container.BindAbstractStateMachineAsSingle<FooStateMachineBase, FooStateMachine>();
+    container.BindStateMachineAsSingle<IStateMachine, BarStateMachine>();
     container.BindStateAsSingle<BarState>();
-    container.BindAbstractStateAsSingle<FooStateBase, FooState>();
+    container.BindStateAsSingle<IBarState, BarState>();
 }
 ```
 
