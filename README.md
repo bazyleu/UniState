@@ -116,7 +116,7 @@ available [here](#state-creating).
 
 **Step 3:** Configure Dependency Injection (DI) by registering the state machine and states in the DI container. 
 ```csharp
-builder.RegisterStateMachine<StateMachine>();
+builder.RegisterStateMachine<IStateMachine, StateMachine>();
 builder.RegisterState<MainMenuState>();
 builder.RegisterState<GameplayState>();
 ```
@@ -126,13 +126,17 @@ Additional information on DI configuration is available [here](#integrations).
 ```csharp
     public class Game
     {
-        private IObjectResolver _objectResolver;
-        private CancellationTokenSource _ctx;
+        // Note that you must resolve the interface but not the implementation
+        private readonly IStateMachine _stateMachine;
 
-        public async void Run()
+        public Game(IStateMachine stateMachine)
         {
-            var stateMachine =  StateMachineHelper.CreateStateMachine<StateMachine>(_objectResolver.ToTypeResolver());
-            await stateMachine.Execute<MainMenuState>(_ctx.Token);
+            _stateMachine = stateMachine;
+        }
+
+        public void Start()
+        {
+            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
         }
     }
 ```
@@ -940,19 +944,16 @@ StartGameState.
 ```csharp
     public class DiceEntryPoint : IStartable
     {
-        private readonly IObjectResolver _objectResolver;
+        private readonly IStateMachine _stateMachine;
 
-        public DiceEntryPoint(IObjectResolver objectResolver)
+        public DiceEntryPoint(IStateMachine stateMachine)
         {
-            _objectResolver = objectResolver;
+            _stateMachine = stateMachine;
         }
 
         public void Start()
         {
-            var stateMachine = StateMachineHelper.CreateStateMachine<StateMachine>(
-                _objectResolver.ToTypeResolver());
-
-            stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
         }
     }
 ```
@@ -961,6 +962,8 @@ StartGameState.
 
 DiceScope is a LifetimeScope that registers the state machine and all states.
 The helper extensions RegisterStateMachine and RegisterState is used for registering.
+Note that for a state machine you must register an interface (or abstract class) and an implementation, and resolve the
+interface, not the implementation.
 
 ```csharp
     public class DiceScope : LifetimeScope
@@ -969,7 +972,7 @@ The helper extensions RegisterStateMachine and RegisterState is used for registe
         {
             builder.RegisterEntryPoint<DiceEntryPoint>();
 
-            builder.RegisterStateMachine<StateMachine>();
+            builder.RegisterStateMachine<IStateMachine, StateMachine>();
 
             builder.RegisterState<StartGameState>();
             builder.RegisterState<RollDiceState>();
