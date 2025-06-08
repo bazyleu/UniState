@@ -51,7 +51,7 @@ pattern or be used to address specific tasks.
     * [State Machine](#state-machine)
         + [Creating a State Machine](#creating-a-state-machine)
         + [Running a State Machine](#running-a-state-machine)
-        + [Creating and Running a State Machine Inside States](#creating-and-running-a-state-machine-inside-states)
+        + [Launching Nested State Machines](#launching-nested-state-machines)
         + [State Machine History](#state-machine-history)
         + [State Machine Error Handling](#state-machine-error-handling)
             - [General Error-Handling Principles](#general-error-handling-principles)
@@ -583,24 +583,37 @@ concurrent execution.
 You can determine whether the machine is already running by checking property **`IsExecuting`**.
 
 
-#### Creating and Running a State Machine Inside States
+#### Launching Nested State Machines
 
-Any state can create and run a state machine within itself using the `StateMachineFactory` property. This is the
-recommended method for creating a state machine inside a state.
+Any state can launch any number of nested state machines.  
+Simply inject the machines through the state’s constructor, no additional action required.
 
 ```csharp
-ITypeResolver _newContext;
-
-public UniTask<StateTransitionInfo> Execute(CancellationToken token)
+public class RootGameplayState : StateBase
 {
-    var stateMachine = StateMachineFactory.Create<StateMachine>();
-    await stateMachine.Execute<FooState>(cts.Token);
+    private readonly IStateMachine _uiMachine;
+    private readonly IStateMachine _logicMachine;
 
-    var stateMachineWithNewContext = StateMachineFactory.Create<StateMachine>(_newContext);
-    await stateMachineWithNewContext.Execute<FooState>(cts.Token);
-    ...
+    public GameplayState(IStateMachine uiMachine,
+                         IStateMachine logicMachine)
+    {
+        _uiMachine = uiMachine;
+        _logicMachine = _logicMachine;
+    }
+
+    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    {
+        // Run UI-related flow in parallel
+        _uiMachine.Execute<UiRootState>(token).Forget();
+
+        // Run logic and await completion
+        await _logicMachine.Execute<LogicRootState>(token);
+
+        return Transition.GoBack();
+    }
 }
 ```
+
 
 #### State Machine History
 
