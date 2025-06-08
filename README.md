@@ -1000,23 +1000,20 @@ Congratulations! You won this game!
 
 ### Upgrading from Versions < 1.5.0
 
-The 1.5.0 release removes several helper APIs and unifies state-machine usage. The table below lists each breaking change and its direct replacement.
+The 1.5.0 release removes several helper APIs and unifies state-machine usage. The table below lists each breaking
+change and its direct replacement.
 
-| Removed API | Use Instead                                                    | Notes |
-|-------------|----------------------------------------------------------------|-------|
-| `StateMachineHelper` | Resolve the state machine via DI and call `Execute`            | Helper no longer required. |
-| `StateMachineFactory` | Inject the state machine directly via interface into the state | Helper no longer required. |
-| `IExecutableStateMachine` | `IStateMachine`                                                | Single interface for all operations. |
-| `RegisterAbstractState` / `BindAbstractState` and variants | `RegisterState<TBase, TImpl>` / `BindState<TBase, TImpl>`      | Same functionality without the *Abstract* prefix. |
+| Removed API                                                | Use Instead                                                                       | Notes                                             |
+|------------------------------------------------------------|-----------------------------------------------------------------------------------|---------------------------------------------------|
+| `StateMachineHelper`                                       | Inject the state machine directly via interface into the state and call `Execute` | Helper no longer required.                        |
+| `StateMachineFactory`                                      | Inject the state machine directly via interface into the state and call `Execute` | Helper no longer required.                        |
+| `IExecutableStateMachine`                                  | `IStateMachine`                                                                   | Single interface for all operations.              |
+| `RegisterAbstractState` / `BindAbstractState` and variants | `RegisterState<TBase, TImpl>` / `BindState<TBase, TImpl>`                         | Same functionality without the *Abstract* prefix. |
 
 1. **Register and inject state machines by the `IStateMachine` (or your own) interface.**
-2. Replace factory/utility calls** (`StateMachineHelper`, `StateMachineFactory`) with direct DI resolution.
-3. Update container bindings** to the two-parameter `RegisterState` / `BindState` overloads.
-4. Remove references to `IExecutableStateMachine`;** use `IStateMachine` everywhere.
-
-After applying these steps the project will compile and run on UniState ≥ 1.5.0.
-
-
+2. Replace factory/utility calls (`StateMachineHelper`, `StateMachineFactory`) with state machine interface injection.
+3. Update container bindings to the two-parameter `RegisterState` / `BindState` overloads.
+4. Remove references to `IExecutableStateMachine`, use `IStateMachine` everywhere.
 
 ## Integrations
 
