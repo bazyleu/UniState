@@ -3,7 +3,7 @@ using UniState;
 using VContainer;
 using VContainer.Unity;
 
-namespace Examples.Infrastructure
+namespace Examples.Infrastructure.VContainer
 {
     public class DiceScope : LifetimeScope
     {
