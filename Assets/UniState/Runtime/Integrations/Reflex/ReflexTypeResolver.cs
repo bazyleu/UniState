@@ -1,3 +1,5 @@
+#if UNISTATE_REFLEX_SUPPORT
+
 using System;
 using Reflex.Core;
 
@@ -15,3 +17,5 @@ namespace UniState
 		public object Resolve(Type type) => _container.Resolve(type);
 	}
 }
+
+#endif

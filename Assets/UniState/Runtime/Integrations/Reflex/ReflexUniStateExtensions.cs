@@ -1,3 +1,5 @@
+#if UNISTATE_REFLEX_SUPPORT
+
 namespace UniState
 {
 	public static class ReflexUniStateExtensions
@@ -6,3 +8,5 @@ namespace UniState
 			new ReflexTypeResolver(container);
 	}
 }
+
+#endif

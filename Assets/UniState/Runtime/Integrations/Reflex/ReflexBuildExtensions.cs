@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if UNISTATE_REFLEX_SUPPORT
+
+using System;
 using Reflex.Core;
 
 namespace UniState
@@ -132,3 +134,5 @@ namespace UniState
         }
     }
 }
+
+#endif
