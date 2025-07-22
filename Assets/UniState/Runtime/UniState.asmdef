@@ -1,29 +1,30 @@
 {
-  "name": "UniState",
-  "rootNamespace": "",
-  "references": [
-    "UniTask",
-    "VContainer",
-    "Zenject"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [
-    {
-      "name": "jp.hadashikick.vcontainer",
-      "expression": "",
-      "define": "UNISTATE_VCONTAINER_SUPPORT"
-    },
-    {
-      "name": "com.svermeulen.extenject",
-      "expression": "",
-      "define": "UNISTATE_ZENJECT_SUPPORT"
-    }
-  ],
-  "noEngineReferences": false
+    "name": "UniState",
+    "rootNamespace": "",
+    "references": [
+        "UniTask",
+        "VContainer",
+        "Zenject",
+        "Reflex"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "jp.hadashikick.vcontainer",
+            "expression": "",
+            "define": "UNISTATE_VCONTAINER_SUPPORT"
+        },
+        {
+            "name": "com.svermeulen.extenject",
+            "expression": "",
+            "define": "UNISTATE_ZENJECT_SUPPORT"
+        }
+    ],
+    "noEngineReferences": false
 }
