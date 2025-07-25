@@ -1137,6 +1137,8 @@ private void BindStates(DiContainer container)
 
 > **Note:** The Reflex integration is experimental, not fully tested, and subject to change.
 
+GitHub: [Reflex](https://github.com/gustavopsantos/Reflex)
+
 #### Reflex Preparation
 
 If Reflex is installed via UPM, you can skip this step and proceed directly to the [Reflex Usage](#reflex-usage)
