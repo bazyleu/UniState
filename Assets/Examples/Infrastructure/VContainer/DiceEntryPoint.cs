@@ -2,10 +2,9 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Examples.States;
 using UniState;
-using VContainer;
 using VContainer.Unity;
 
-namespace Examples.Infrastructure
+namespace Examples.Infrastructure.VContainer
 {
     public class DiceEntryPoint : IStartable
     {

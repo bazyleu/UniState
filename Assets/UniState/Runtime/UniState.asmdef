@@ -4,7 +4,8 @@
   "references": [
     "UniTask",
     "VContainer",
-    "Zenject"
+    "Zenject",
+    "Reflex"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
@@ -23,6 +24,11 @@
       "name": "com.svermeulen.extenject",
       "expression": "",
       "define": "UNISTATE_ZENJECT_SUPPORT"
+    },
+    {
+      "name": "com.gustavopsantos.reflex",
+      "expression": "",
+      "define": "UNISTATE_REFLEX_SUPPORT"
     }
   ],
   "noEngineReferences": false
