@@ -28,8 +28,6 @@ pattern or be used to address specific tasks.
 
 ## Table of Contents
 
-## Table of Contents
-
 <!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
 
 - [Getting Started](#getting-started)
@@ -80,6 +78,10 @@ pattern or be used to address specific tasks.
         + [Zenject Preparation](#zenject-preparation)
         + [Zenject Usage](#zenject-usage)
         + [Zenject Registering](#zenject-registering)
+    * [Reflex](#reflex)
+        + [Reflex Preparation](#reflex-preparation)
+        + [Reflex Usage](#reflex-usage)
+        + [Reflex Registering](#reflex-registering)
 - [License](#license)
 
 <!-- TOC end -->
@@ -1128,6 +1130,78 @@ private void BindStates(DiContainer container)
     container.BindStateMachineAsSingle<IStateMachine, BarStateMachine>();
     container.BindStateAsSingle<BarState>();
     container.BindStateAsSingle<IBarState, BarState>();
+}
+```
+
+### Reflex
+
+> **Note:** The Reflex integration is experimental, not fully tested, and subject to change.
+
+GitHub: [Reflex](https://github.com/gustavopsantos/Reflex)
+
+#### Reflex Preparation
+
+If Reflex is installed via UPM, you can skip this step and proceed directly to the [Reflex Usage](#reflex-usage)
+section.
+
+If Reflex is not installed via UPM, manually add the `UNISTATE_REFLEX_SUPPORT` define symbol to your Scripting Define
+Symbols (Player Settings -> Player -> Scripting Define Symbols).
+
+#### Reflex Usage
+
+No additional setup is required after registering. Simply resolve the state machine from the Reflex DI container and
+invoke its `Execute` method.
+
+Here's an example:
+
+```csharp
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Examples.States;
+using UniState;
+
+namespace Examples.Infrastructure.Reflex
+{
+    public class DiceEntryPoint
+    {
+        private readonly IStateMachine _stateMachine;
+
+        public DiceEntryPoint(IStateMachine stateMachine) =>  _stateMachine = stateMachine;
+
+        public void Start()
+        {
+            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+        }
+    }
+}
+```
+
+#### Reflex Registering
+
+All state machines, states, and their dependencies should be registered in the DI container using Reflex's
+`ContainerBuilder`. Special extension methods have been provided for convenient registration.
+
+Here's example code demonstrating the available extension methods:
+
+```csharp
+using Reflex.Core;
+using UniState;
+
+private void RegisterStates(ContainerBuilder builder)
+{
+    // Recommended usage for general cases
+
+    builder.AddStateMachine<IStateMachine, BarStateMachine>();
+    builder.AddState<BarState>();
+    builder.AddState<IBarState, BarState>();
+    builder.AddState(typeof(BarState));
+
+    // Singleton version (use cautiously, not recommended in most cases)
+
+    builder.AddSingletonStateMachine<IStateMachine, BarStateMachine>();
+    builder.AddSingletonState<BarState>();
+    builder.AddSingletonState<IBarState, BarState>();
+    builder.AddSingletonState(typeof(BarState));
 }
 ```
 
