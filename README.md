@@ -714,10 +714,10 @@ public class BarStateMachine : StateMachine
 
 During the lifetime of UniState state machine may raise state-machine-specific exceptions:
 
-* **`AlreadyExecutingException`** — derived from `InvalidOperationException`. Thrown when `Execute()` is called while the
+* **`AlreadyExecutingException`** - derived from `InvalidOperationException`. Thrown when `Execute()` is called while the
   state machine is already executing, preventing a second concurrent run and indicating an incorrect lifecycle invocation.
 
-* **`NoSubStatesException`** — derived from `InvalidOperationException`. Thrown by `DefaultCompositeState` if its
+* **`NoSubStatesException`** - derived from `InvalidOperationException`. Thrown by `DefaultCompositeState` if its
   `Execute()` method starts without any SubStates being present.
 
 #### Built-in Support for DI Scopes
@@ -729,7 +729,7 @@ A state machine uses the **container scope in which it was registered**:
 * Registered in the root container → its context is the root.
 * Registered in a child container → its context is that child.
 
-All states created by the machine—and every dependency those states request—are resolved through this context.
+All states created by the machine - and every dependency those states request - are resolved through this context.
 
 To switch the context at runtime call **`SetResolver(ITypeResolver)`** with a resolver obtained from any container or sub-container:
 ```csharp
@@ -859,7 +859,7 @@ internal class BarSubState : SubStateBase<DefaultCompositeState>
 #### Overview
 
 In this hands‑on tutorial you will create a tiny, self‑playing **dice game** that demonstrates the simple UniState
-workflow — from defining states to wiring everything together with **VContainer**.
+workflow - from defining states to wiring everything together with **VContainer**.
 
 > **Goal**  
 > Roll a six‑sided die until the value is 5 or 6.\
@@ -985,7 +985,7 @@ interface, not the implementation.
 
 Create a new Unity scene (e.g., DiceGameScene).
 Add an empty GameObject and attach the DiceScope component.
-Press Play — all interaction happens in the Console:
+Press Play - all interaction happens in the Console:
 
 ```csharp
 Welcome to the game! Your game will be loaded in 2 seconds!
@@ -1191,17 +1191,15 @@ private void RegisterStates(ContainerBuilder builder)
 {
     // Recommended usage for general cases
 
-    builder.AddStateMachine<IStateMachine, BarStateMachine>();
-    builder.AddState<BarState>();
-    builder.AddState<IBarState, BarState>();
+    builder.AddStateMachine(typeof(StateMachine), typeof(IStateMachine));
     builder.AddState(typeof(BarState));
-
+    builder.AddState(typeof(BarState), typeof(IBarState));
+    
     // Singleton version (use cautiously, not recommended in most cases)
 
-    builder.AddSingletonStateMachine<IStateMachine, BarStateMachine>();
-    builder.AddSingletonState<BarState>();
-    builder.AddSingletonState<IBarState, BarState>();
+    builder.AddSingletonStateMachine(typeof(StateMachine), typeof(IStateMachine));
     builder.AddSingletonState(typeof(BarState));
+    builder.AddSingletonState(typeof(BarState), typeof(IBarState));
 }
 ```
 
