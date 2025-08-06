@@ -5,7 +5,7 @@
     "name": "Dzmitry Bazyleu",
     "url": "https://www.linkedin.com/in/dzmitry-bazyleu/"
   },
-  "version": "1.6.0",
+  "version": "1.7.0",
   "unity": "2021.3",
   "description": "UniState is a modern, high-performance, scalable state machine package for Unity.",
   "keywords": [
