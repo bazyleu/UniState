@@ -3,7 +3,7 @@
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.gustavopsantos.reflex": "https://github.com/gustavopsantos/reflex.git?path=/Assets/Reflex/#11.0.0",
     "com.svermeulen.extenject": "https://github.com/Mathijs-Bakker/Extenject.git?path=UnityProject/Assets/Plugins/Zenject/Source",
-    "com.unity.ide.rider": "3.0.15",
+    "com.unity.ide.rider": "3.0.36",
     "com.unity.render-pipelines.universal": "12.1.7",
     "com.unity.test-framework": "1.1.31",
     "com.unity.ugui": "1.0.0",

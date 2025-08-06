@@ -37,19 +37,21 @@ namespace UniState
             builder.RegisterStateMachine<TInterface, TStateMachine>(Lifetime.Transient);
         }
 
-        public static void RegisterState<TState>(this IContainerBuilder builder) =>
+        public static void RegisterState<TState>(this IContainerBuilder builder)
+            where TState : IExecutableState =>
             builder.RegisterState<TState>(Lifetime.Transient);
 
-        public static void RegisterState<TState>(this IContainerBuilder builder, Lifetime lifetime) =>
+        public static void RegisterState<TState>(this IContainerBuilder builder, Lifetime lifetime)
+            where TState : IExecutableState =>
             builder.Register<TState>(lifetime).AsSelf().AsImplementedInterfaces();
 
         public static void RegisterState<TInterface, TState>(this IContainerBuilder builder)
-            where TState : TInterface =>
+            where TState : TInterface, IExecutableState =>
             builder.RegisterState<TInterface, TState>(Lifetime.Transient);
 
         public static void RegisterState<TInterface, TState>(this IContainerBuilder builder,
             Lifetime lifetime)
-            where TState : TInterface =>
+            where TState : TInterface, IExecutableState =>
             builder.Register<TInterface, TState>(lifetime);
     }
 }
