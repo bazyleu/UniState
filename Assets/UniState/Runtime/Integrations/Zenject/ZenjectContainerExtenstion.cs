@@ -18,21 +18,23 @@ namespace UniState
             where TInterface : IStateMachine => container.BindStateMachineInternal<TInterface, TStateMachine>(true);
 
         public static ConcreteIdArgConditionCopyNonLazyBinder BindState<TState>(
-            this DiContainer container) =>
+            this DiContainer container)
+            where TState : IExecutableState =>
             container.BindInterfacesAndSelfTo<TState>().AsTransient();
 
         public static ConcreteIdArgConditionCopyNonLazyBinder BindStateAsSingle<TState>(
-            this DiContainer container) =>
+            this DiContainer container)
+            where TState : IExecutableState =>
             container.BindInterfacesAndSelfTo<TState>().AsSingle();
 
         public static ConcreteIdArgConditionCopyNonLazyBinder BindState<TInterface, TState>(
             this DiContainer container)
-            where TState : TInterface =>
+            where TState : TInterface, IExecutableState =>
             container.Bind<TInterface>().To<TState>().AsTransient();
 
         public static ConcreteIdArgConditionCopyNonLazyBinder BindStateAsSingle<TInterface, TState>(
             this DiContainer container)
-            where TState : TInterface =>
+            where TState : TInterface, IExecutableState =>
             container.Bind<TInterface>().To<TState>().AsSingle();
 
         private static void BindStateMachineInternal<TInterface, TStateMachine>(
@@ -43,7 +45,7 @@ namespace UniState
         {
             if (typeof(TInterface) == typeof(TStateMachine))
                 throw new ArgumentException(
-                    $"RegisterStateMachine<{typeof(TInterface).Name}>: Type parameters must differ : use BindStateMachine<Interface, Implementation>() where Implementation implements Interface.\");");
+                    $"BindStateMachine<{typeof(TInterface).Name}>: Type parameters must differ : use BindStateMachine<Interface, Implementation>() where Implementation implements Interface.\");");
 
             var interfaceBinder = container.Bind<TInterface>().FromMethod(ctx =>
             {
