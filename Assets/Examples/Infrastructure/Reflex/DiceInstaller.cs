@@ -8,12 +8,13 @@ namespace Examples.Infrastructure.Reflex
 {
     public class DiceInstaller : MonoBehaviour, IInstaller
     {
-        [Inject] private readonly DiceEntryPoint _entryPoint;
-        
+        [Inject]
+        private readonly DiceEntryPoint _entryPoint;
+
         public void InstallBindings(ContainerBuilder builder)
         {
-            builder.AddStateMachine<IStateMachine, StateMachine>();
-            
+            builder.AddStateMachine(typeof(StateMachine), typeof(IStateMachine));
+
             builder.AddState(typeof(LostState));
             builder.AddState(typeof(RollDiceState));
             builder.AddState(typeof(StartGameState));
