@@ -9,8 +9,8 @@ namespace UniState
 
     public class DefaultCompositeState<TPayload> : CompositeStateBase<TPayload>
     {
-        public override UniTask<StateTransitionInfo> Execute(CancellationToken token) => SubStates.Execute(token);
-        public override UniTask Initialize(CancellationToken token) => SubStates.Initialize(token);
-        public override UniTask Exit(CancellationToken token) => SubStates.Exit(token);
+        public override UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token) => SubStates.ExecuteAsync(token);
+        public override UniTask InitializeAsync(CancellationToken token) => SubStates.InitializeAsync(token);
+        public override UniTask ExitAsync(CancellationToken token) => SubStates.ExitAsync(token);
     }
 }

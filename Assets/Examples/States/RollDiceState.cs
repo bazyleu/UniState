@@ -9,7 +9,7 @@ namespace Examples.States
 {
     public class RollDiceState : StateBase
     {
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             Debug.Log("Need to roll 5+. Rolling the dice...");
 

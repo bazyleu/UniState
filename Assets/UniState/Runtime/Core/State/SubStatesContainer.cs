@@ -23,10 +23,10 @@ namespace UniState
         public void SetTransitionFacade(IStateTransitionFacade transitionFacade) =>
             _subStates.ForEach(s => s.SetTransitionFacade(transitionFacade));
 
-        public UniTask Initialize(CancellationToken token) =>
-            UniTask.WhenAll(List.Select(s => s.Initialize(token)).ToArray());
+        public UniTask InitializeAsync(CancellationToken token) =>
+            UniTask.WhenAll(List.Select(s => s.InitializeAsync(token)).ToArray());
 
-        public async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             if (List.Count == 0)
             {
@@ -38,7 +38,7 @@ namespace UniState
             var ctx = CancellationTokenSource.CreateLinkedTokenSource(token);
             try
             {
-                var first = await UniTask.WhenAny(List.Select(s => s.Execute(ctx.Token)).ToArray());
+                var first = await UniTask.WhenAny(List.Select(s => s.ExecuteAsync(ctx.Token)).ToArray());
                 result = first.result;
             }
             finally
@@ -50,8 +50,8 @@ namespace UniState
             return result;
         }
 
-        public UniTask Exit(CancellationToken token) =>
-            UniTask.WhenAll(List.Select(s => s.Exit(token)).ToArray());
+        public UniTask ExitAsync(CancellationToken token) =>
+            UniTask.WhenAll(List.Select(s => s.ExitAsync(token)).ToArray());
 
         public void Dispose() => _subStates.ForEach(s => s.Dispose());
     }

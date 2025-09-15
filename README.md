@@ -97,7 +97,7 @@ Details on installation are available [here](#installation).
 ```csharp
 public class MainMenuState : StateBase
 {
-    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
     {
         // Add your state logic here
         return Transition.GoTo<GameplayState>();
@@ -106,7 +106,7 @@ public class MainMenuState : StateBase
 
 public class GameplayState : StateBase
 {
-    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
     {
         // Add your state logic here
         return Transition.GoBack();
@@ -138,7 +138,7 @@ Additional information on DI configuration is available [here](#integrations).
 
         public void Start()
         {
-            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+            _stateMachine.ExecuteAsync<StartGameState>(CancellationToken.None).Forget();
         }
     }
 ```
@@ -239,13 +239,13 @@ outside the scope of UniState.
     {
         private ISimplePopupView _view;
     
-        public override async UniTask Initialize(CancellationToken token) 
+        public override async UniTask InitializeAsync(CancellationToken token) 
         {
             _view = LoadPopupView(token);
             Disposables.Add(UnloadShopView);
         }
     
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             await _view.Show(token);
             await _view.WaitForClick(token);
@@ -253,7 +253,7 @@ outside the scope of UniState.
             return Transition.GoBack();
         }
         
-        public override async UniTask Exit(CancellationToken token)
+        public override async UniTask ExitAsync(CancellationToken token)
         {
             await _view.Hide(token);
         }
@@ -280,7 +280,7 @@ state machine, ensuring they are properly cleaned up after the state machine exi
     // When the StateMachine completes its execution, RootShopPopupState finishes and releases its resources.
     public class RootShopPopupState : StateBase
     {
-        public override async UniTask Initialize(CancellationToken token) 
+        public override async UniTask InitializeAsync(CancellationToken token) 
         {
             // Load ShopView (a Unity GameObject) and create an IDisposable handler that 
             // will unload the GameObject after Disposing. 
@@ -289,13 +289,13 @@ state machine, ensuring they are properly cleaned up after the state machine exi
             Disposables.Add(disposable);
         }
     
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             var stateMachine = StateMachineFactory.Create<StateMachine>();
             
             // Run the internal state machine for ShopPopup.
             // In all states inside this state machine, all resources allocated in this state will be available.
-            await stateMachine.Execute<ShopPopupIdleState>(cts.Token);
+            await stateMachine.ExecuteAsync<ShopPopupIdleState>(cts.Token);
 
             return Transition.GoBack();
         }
@@ -319,7 +319,7 @@ state machine, ensuring they are properly cleaned up after the state machine exi
              _view = view;
         }
     
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             var action = await _view.Show(token);
             
@@ -349,7 +349,7 @@ cases, `StateBase` will suffice.
 // Simple State Inheritance
 public class FooState : StateBase
 {
-    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
     {
         // State logic here
     }
@@ -358,7 +358,7 @@ public class FooState : StateBase
 // State with Parameters
 public class FooStateWithPayload : StateBase<FooPayload>
 {
-    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
     {
         // Get payload
         FooPayload payload = Payload; 
@@ -370,17 +370,17 @@ public class FooStateWithPayload : StateBase<FooPayload>
 //Custom State Implementation
 public class CustomFooState : IState<MyParams>
 {
-    public async UniTask Initialize(CancellationToken token) 
+    public async UniTask InitializeAsync(CancellationToken token) 
     {
         // Initialization logic
     }
 
-    public async UniTask<StateTransitionInfo> Execute(MyParams payload, CancellationToken token) 
+    public async UniTask<StateTransitionInfo> ExecuteAsync(MyParams payload, CancellationToken token) 
     {
         // Execution logic with payload
     }
 
-    public async UniTask Exit(CancellationToken token)
+    public async UniTask ExitAsync(CancellationToken token)
     {
         // Exit logic
     }
@@ -439,7 +439,7 @@ options are:
 ```csharp
 public class ExampleState : StateBase
 {
-    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
     {
         var transition = await DoSomeAsyncLogic(token);
 
@@ -487,7 +487,7 @@ public class LoadingState : StateBase<ILoadingScreenView>
 {
     private CancellationTokenSource _loadingCts;
 
-    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
     {
         // State's disposable references
         _loadingCts = CancellationTokenSource.CreateLinkedTokenSource(token);
@@ -527,7 +527,7 @@ This attribute has the following parameters:
   it. This behavior can be useful for states that represent 'loading', there is no point of returning to loading.
 
 - **InitializeOnStateTransition** (default value: false): When enabled, the initialization of the state will begin
-  before exiting the previous state. Technically, this means `Initialize()` of the state will be called before `Exit()`
+  before exiting the previous state. Technically, this means `InitializeAsync()` of the state will be called before `ExitAsync()`
   of the previous state. This behavior can be useful for seamless transitions in complex animations, where the state
   represents only part of the animation.
 
@@ -587,14 +587,14 @@ To use a state machine, resolve it through its interface and invoke `Execute<TIn
 desired entry state.
 
 ```csharp
-await stateMachine.Execute<FooState>(cts.Token);
+await stateMachine.ExecuteAsync<FooState>(cts.Token);
 
 var payload = new BarPayload();
-await stateMachine.Execute<BarState>(payload, cts.Token);
+await stateMachine.ExecuteAsync<BarState>(payload, cts.Token);
 ```
 
 A state machine supports only one active execution flow.  
-Calling `Execute()` again while the current run has not finished raises **`AlreadyExecutingException`** to prevent
+Calling `ExecuteAsync()` again while the current run has not finished raises **`AlreadyExecutingException`** to prevent
 concurrent execution.
 
 You can determine whether the machine is already running by checking property **`IsExecuting`**.
@@ -618,13 +618,13 @@ public class RootGameplayState : StateBase
         _logicMachine = _logicMachine;
     }
 
-    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
     {
         // Run UI-related flow in parallel
-        _uiMachine.Execute<UiRootState>(token).Forget();
+        _uiMachine.ExecuteAsync<UiRootState>(token).Forget();
 
         // Run logic and await completion
-        await _logicMachine.Execute<LogicRootState>(token);
+        await _logicMachine.ExecuteAsync<LogicRootState>(token);
 
         return Transition.GoBack();
     }
@@ -693,18 +693,18 @@ public class FooStateMachine : StateMachine
 }
 ```
 
-If an exception is encountered in a state’s `Initialize()` or `Exit()` methods, the state machine will continue working.
-However, if an exception occurs in the state’s `Execute()` method, the state machine defaults to a
+If an exception is encountered in a state's `InitializeAsync()` or `ExitAsync()` methods, the state machine will continue working.
+However, if an exception occurs in the state's `ExecuteAsync()` method, the state machine defaults to a
 `GoBack()` operation, as though `Transition.GoBack()` were returned. You can override this behavior by customizing
 `BuildRecoveryTransition`, which receives an `IStateTransitionFactory` to specify any desired transition for error
 recovery.
 
-When an exception occurs in `Execute()`, `HandleError` will be invoked first, followed by `BuildRecoveryTransition`.
+When an exception occurs in `ExecuteAsync()`, `HandleError` will be invoked first, followed by `BuildRecoveryTransition`.
 
 ```csharp
 public class BarStateMachine : StateMachine
 {
-       // If exception occurs in the state in the Execute() method, the state machine will go to the ErrorPopupState.
+       // If exception occurs in the state in the ExecuteAsync() method, the state machine will go to the ErrorPopupState.
        protected override StateTransitionInfo BuildRecoveryTransition(IStateTransitionFactory transitionFactory)
             => transitionFactory.CreateStateTransition<ErrorPopupState>();
 }
@@ -714,11 +714,11 @@ public class BarStateMachine : StateMachine
 
 During the lifetime of UniState state machine may raise state-machine-specific exceptions:
 
-* **`AlreadyExecutingException`** - derived from `InvalidOperationException`. Thrown when `Execute()` is called while the
+* **`AlreadyExecutingException`** - derived from `InvalidOperationException`. Thrown when `ExecuteAsync()` is called while the
   state machine is already executing, preventing a second concurrent run and indicating an incorrect lifecycle invocation.
 
 * **`NoSubStatesException`** - derived from `InvalidOperationException`. Thrown by `DefaultCompositeState` if its
-  `Execute()` method starts without any SubStates being present.
+  `ExecuteAsync()` method starts without any SubStates being present.
 
 #### Built-in Support for DI Scopes
 
@@ -803,7 +803,7 @@ An example of `ITypeResolver` without DI framework and state machine running:
 
             stateMachine.SetResolver(resolver);
 
-            await stateMachine.Execute<FooState>(CancellationToken.None);
+            await stateMachine.ExecuteAsync<FooState>(CancellationToken.None);
         }
     }
 }
@@ -876,7 +876,7 @@ Each state inherits from **`StateBase`** and returns a transition that drives th
 ```csharp
     internal class StartGameState : StateBase
     {
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             Debug.Log("Welcome to the game! Your game will be loaded in 2 seconds!");
             await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: token);
@@ -888,7 +888,7 @@ Each state inherits from **`StateBase`** and returns a transition that drives th
 ```csharp
     public class RollDiceState : StateBase
     {
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             Debug.Log("Need to roll 5+. Rolling the dice...");
             await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: token);
@@ -906,7 +906,7 @@ Each state inherits from **`StateBase`** and returns a transition that drives th
 ```csharp
     public class LostState : StateBase
     {
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             Debug.Log("You lost. You will have a another chance in...");
 
@@ -926,7 +926,7 @@ Each state inherits from **`StateBase`** and returns a transition that drives th
 ```csharp
     public class WinState : StateBase
     {
-        public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             Debug.Log("Congratulations! You won this game!");
             
@@ -952,7 +952,7 @@ StartGameState.
 
         public void Start()
         {
-            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+            _stateMachine.ExecuteAsync<StartGameState>(CancellationToken.None).Forget();
         }
     }
 ```
@@ -1007,8 +1007,8 @@ change and its direct replacement.
 
 | Removed API                                                | Use Instead                                                                       | Notes                                             |
 |------------------------------------------------------------|-----------------------------------------------------------------------------------|---------------------------------------------------|
-| `StateMachineHelper`                                       | Inject the state machine directly via interface into the state and call `Execute` | Helper no longer required.                        |
-| `StateMachineFactory`                                      | Inject the state machine directly via interface into the state and call `Execute` | Helper no longer required.                        |
+| `StateMachineHelper`                                       | Inject the state machine directly via interface into the state and call `ExecuteAsync` | Helper no longer required.                        |
+| `StateMachineFactory`                                      | Inject the state machine directly via interface into the state and call `ExecuteAsync` | Helper no longer required.                        |
 | `IExecutableStateMachine`                                  | `IStateMachine`                                                                   | Single interface for all operations.              |
 | `RegisterAbstractState` / `BindAbstractState` and variants | `RegisterState<TBase, TImpl>` / `BindState<TBase, TImpl>`                         | Same functionality without the *Abstract* prefix. |
 
@@ -1016,6 +1016,41 @@ change and its direct replacement.
 2. Replace factory/utility calls (`StateMachineHelper`, `StateMachineFactory`) with state machine interface injection.
 3. Update container bindings to the two-parameter `RegisterState` / `BindState` overloads.
 4. Remove references to `IExecutableStateMachine`, use `IStateMachine` everywhere.
+
+### Upgrading from Versions < 1.8.0
+
+The 1.8.0 release introduces proper .NET async naming conventions by adding "Async" suffix to all asynchronous methods. This is a breaking change that requires updating method names throughout your codebase.
+
+| Old Method Name           | New Method Name           | Context                    |
+|---------------------------|---------------------------|----------------------------|
+| `Execute()`               | `ExecuteAsync()`          | State Machine & State      |
+| `Initialize()`            | `InitializeAsync()`       | State                      |
+| `Exit()`                  | `ExitAsync()`             | State                      |
+
+**Migration Steps:**
+
+1. **Update State Machine calls**: Replace all `stateMachine.Execute<>()` calls with `stateMachine.ExecuteAsync<>()`
+2. **Update State implementations**:
+   - Override `ExecuteAsync()` instead of `Execute()`
+   - Override `InitializeAsync()` instead of `Initialize()` (if used)
+   - Override `ExitAsync()` instead of `Exit()` (if used)
+3. **Update custom state implementations**: If implementing `IState<>` directly, update method signatures
+4. **Search and replace**: Use IDE find/replace to update method calls throughout your project
+
+**Example migration:**
+```csharp
+// Before (< 1.8.0)
+public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+{
+    // state logic
+}
+
+// After (>= 1.8.0)
+public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
+{
+    // state logic
+}
+```
 
 ## Integrations
 
@@ -1049,7 +1084,7 @@ No extra setup is required - simply resolve the state machine from the DI contai
 
         public void Start()
         {
-            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+            _stateMachine.ExecuteAsync<StartGameState>(CancellationToken.None).Forget();
         }
     }
 ```
@@ -1105,7 +1140,7 @@ No extra setup is required - simply resolve the state machine from the DI contai
 
         public void Start()
         {
-            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+            _stateMachine.ExecuteAsync<StartGameState>(CancellationToken.None).Forget();
         }
     }
 ```
@@ -1170,7 +1205,7 @@ namespace Examples.Infrastructure.Reflex
 
         public void Start()
         {
-            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+            _stateMachine.ExecuteAsync<StartGameState>(CancellationToken.None).Forget();
         }
     }
 }

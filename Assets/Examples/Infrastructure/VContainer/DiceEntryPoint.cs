@@ -17,7 +17,7 @@ namespace Examples.Infrastructure.VContainer
 
         public void Start()
         {
-            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+            _stateMachine.ExecuteAsync<StartGameState>(CancellationToken.None).Forget();
         }
     }
 }
