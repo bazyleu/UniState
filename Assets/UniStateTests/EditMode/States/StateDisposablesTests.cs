@@ -12,6 +12,14 @@ namespace UniStateTests.EditMode.Common
     [TestFixture]
     internal class StateDisposablesTests: ZenjectTestsBase
     {
+        internal class TestStateMachine : StateMachine
+        {
+            protected override void HandleError(StateMachineErrorData errorData)
+            {
+                // Do nothing
+            }
+        }
+
         private class DisposablesState : StateBase<IList<IDisposable>>
         {
             public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
@@ -62,7 +70,7 @@ namespace UniStateTests.EditMode.Common
 
         protected override void SetupBindings(DiContainer container)
         {
-            container.BindStateMachine<IStateMachine, StateMachine>();
+            container.BindStateMachine<IStateMachine, TestStateMachine>();
             container.BindState<DisposablesState>();
             container.BindState<ExceptionDisposableState>();
         }
