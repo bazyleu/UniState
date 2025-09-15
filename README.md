@@ -656,9 +656,8 @@ In UniState, state machine error handling can be customized to control how excep
 primary mechanism for this is the `HandleError()` method, which you can override in your custom state machine. This
 method is called whenever an exception occurs, allowing you to define specific logic to handle errors.
 
-Exceptions are caught and processed internally without propagating further, except for `OperationCanceledException`,
-which will stop the state machine. `StateMachineErrorData` provides metadata related to exceptions, and
-`StateMachineErrorData.State` may be `null` if `StateMachineErrorType` is set to `StateMachineFail`.
+By default, `HandleError()` writes every captured exception to the Unity Console via `UnityEngine.Debug.LogError`.
+Override this method if you need custom logic for exceptions.
 
 ```csharp
 public class BarStateMachine : StateMachine
@@ -669,6 +668,11 @@ public class BarStateMachine : StateMachine
     }
 }
 ```
+
+Exceptions are first logged to the Unity Console through `Debug.LogError`, then processed internally without propagating
+further (the only exception is `OperationCanceledException`, which still stops the state machine).
+`StateMachineErrorData` provides metadata related to exceptions, and
+`StateMachineErrorData.State` may be `null` if `StateMachineErrorType` is set to `StateMachineFail`.
 
 To halt state machine execution after an exception, include a `throw` statement in `HandleError()`:
 In the example provided, the state machine will terminate after encountering a second exception within the same state in a row.
