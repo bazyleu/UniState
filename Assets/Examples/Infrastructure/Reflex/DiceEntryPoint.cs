@@ -13,7 +13,7 @@ namespace Examples.Infrastructure.Reflex
 
         public void Start()
         {
-            _stateMachine.Execute<StartGameState>(CancellationToken.None).Forget();
+            _stateMachine.ExecuteAsync<StartGameState>(CancellationToken.None).Forget();
         }
     }
 }

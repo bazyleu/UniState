@@ -6,8 +6,8 @@ namespace UniState
 {
     public interface IExecutableState : IDisposable
     {
-        UniTask Initialize(CancellationToken token);
-        UniTask<StateTransitionInfo> Execute(CancellationToken token);
-        UniTask Exit(CancellationToken token);
+        UniTask InitializeAsync(CancellationToken token);
+        UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token);
+        UniTask ExitAsync(CancellationToken token);
     }
 }

@@ -8,7 +8,7 @@ namespace Examples.States
 {
     internal class StartGameState : StateBase
     {
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             Debug.Log("Welcome to the game! You game will be loaded in 2 seconds!");
 

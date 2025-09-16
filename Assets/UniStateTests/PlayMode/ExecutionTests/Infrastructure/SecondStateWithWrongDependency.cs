@@ -17,7 +17,7 @@ namespace UniStateTests.PlayMode.Execution.Infrastructure
             _logger = logger;
         }
 
-        public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             _logger.LogStep("SecondStateWithWrongDependency",
                 _machineTestHelper.CurrentStateMachine.IsExecuting.ToString());

@@ -14,14 +14,14 @@ namespace Benchmarks.UniStateFixtures
             _benchmarkHelper = benchmarkHelper;
         }
 
-        public override UniTask Initialize(CancellationToken token)
+        public override UniTask InitializeAsync(CancellationToken token)
         {
             _benchmarkHelper.InitializeWasInvoked();
 
             return UniTask.CompletedTask;
         }
 
-        public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             _benchmarkHelper.ExecuteWasInvoked();
 
@@ -30,7 +30,7 @@ namespace Benchmarks.UniStateFixtures
                 : Transition.GoTo<FooState>());
         }
 
-        public override UniTask Exit(CancellationToken token)
+        public override UniTask ExitAsync(CancellationToken token)
         {
             _benchmarkHelper.ExitWasInvoked();
 
