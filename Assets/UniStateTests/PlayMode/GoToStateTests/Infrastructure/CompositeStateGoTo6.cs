@@ -20,7 +20,7 @@ namespace UniStateTests.PlayMode.GoToStateTests.Infrastructure
             _logger = logger;
         }
 
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             _logger.LogStep("SubStateGoTo6First", "Execute");
 
@@ -40,7 +40,7 @@ namespace UniStateTests.PlayMode.GoToStateTests.Infrastructure
             _logger = logger;
         }
 
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             await UniTask.Yield(token);
 
