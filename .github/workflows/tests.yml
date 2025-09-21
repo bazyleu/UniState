@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 env:
@@ -49,9 +52,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-test-project-${{ matrix.targetPlatform }}-${{ matrix.unityVersion }}
+          key: Library-${{ matrix.unityVersion }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-test-project-
+            Library-${{ matrix.unityVersion }}-
             Library-
 
       - name: Run tests
@@ -64,3 +67,11 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           artifactsPath: ${{ matrix.testMode }}-artifacts
           unityVersion: ${{ matrix.unityVersion }}
+          testMode: ${{ matrix.testMode }}
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Test results (${{ matrix.testMode }}-${{ matrix.unityVersion }})
+          path: ${{ matrix.testMode }}-artifacts
