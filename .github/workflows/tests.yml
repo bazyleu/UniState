@@ -25,9 +25,8 @@ jobs:
           - EditMode
           - PlayMode
         unityVersion:
-            - 2022.3.22f1
-            - 2023.2.15f1
-            - 6000.0.22f1
+            - 2023.3.42f1
+            - 6000.0.23f1
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
