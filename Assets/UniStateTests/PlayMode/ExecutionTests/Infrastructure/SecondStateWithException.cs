@@ -17,14 +17,14 @@ namespace UniStateTests.PlayMode.Execution.Infrastructure
             _logger = logger;
         }
 
-        public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             _logger.LogStep("SecondStateWithException", _machineTestHelper.CurrentStateMachine.IsExecuting.ToString());
 
             return UniTask.FromResult(Transition.GoToExit());
         }
 
-        public override UniTask Exit(CancellationToken token)
+        public override UniTask ExitAsync(CancellationToken token)
         {
             throw new Exception("test exception");
         }

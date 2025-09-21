@@ -7,7 +7,7 @@ namespace Examples.States
 {
     public class WinState : StateBase
     {
-        public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             Debug.Log("Congratulations! You won this game!");
 

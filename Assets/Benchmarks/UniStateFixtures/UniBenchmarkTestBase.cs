@@ -21,7 +21,7 @@ namespace Benchmarks.UniStateFixtures
 
             stateMachine.SetResolver(resolver);
 
-            await stateMachine.Execute<FooState>(CancellationToken.None);
+            await stateMachine.ExecuteAsync<FooState>(CancellationToken.None);
         }
 
         public void Clear()

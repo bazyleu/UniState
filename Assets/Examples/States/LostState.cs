@@ -8,7 +8,7 @@ namespace Examples.States
 {
     public class LostState : StateBase
     {
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             Debug.Log("You lost. You will have a another chance in...");
 
