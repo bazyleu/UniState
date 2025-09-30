@@ -22,7 +22,7 @@ namespace UniStateTests.EditMode.Common
 
         private class DisposablesState : StateBase<IList<IDisposable>>
         {
-            public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
+            public override UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
             {
                 Disposables.AddRange(Payload);
 
@@ -32,9 +32,9 @@ namespace UniStateTests.EditMode.Common
 
         private class ExceptionDisposableState : DisposablesState
         {
-            public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
+            public override UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
             {
-                _ = base.Execute(token);
+                _ = base.ExecuteAsync(token);
 
                 throw new("Test exception");
             }
@@ -65,7 +65,7 @@ namespace UniStateTests.EditMode.Common
             where TState: DisposablesState
         {
             var stateMachine = Container.Resolve<IStateMachine>();
-            stateMachine.Execute<TState, IList<IDisposable>>(disposables, default).GetAwaiter().GetResult();
+            stateMachine.ExecuteAsync<TState, IList<IDisposable>>(disposables, default).GetAwaiter().GetResult();
         }
 
         protected override void SetupBindings(DiContainer container)

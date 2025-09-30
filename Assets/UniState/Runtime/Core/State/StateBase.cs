@@ -18,14 +18,14 @@ namespace UniState
         protected IStateTransitionFacade Transition { get; private set; }
         protected List<IDisposable> Disposables => _disposables ??= new(4);
 
-        public abstract UniTask<StateTransitionInfo> Execute(CancellationToken token);
+        public abstract UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token);
 
-        public virtual UniTask Initialize(CancellationToken token)
+        public virtual UniTask InitializeAsync(CancellationToken token)
         {
             return UniTask.CompletedTask;
         }
 
-        public virtual UniTask Exit(CancellationToken token)
+        public virtual UniTask ExitAsync(CancellationToken token)
         {
             return UniTask.CompletedTask;
         }

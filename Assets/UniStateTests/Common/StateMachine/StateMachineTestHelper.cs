@@ -12,7 +12,7 @@ namespace UniStateTests.Common
             where TState : class, IState<EmptyPayload>
         {
             var stateMachine = typeResolver.Resolve<TStateMachine>();
-            await stateMachine.Execute<TState>(cancellationToken);
+            await stateMachine.ExecuteAsync<TState>(cancellationToken);
 
             stateMachine.Verify();
         }

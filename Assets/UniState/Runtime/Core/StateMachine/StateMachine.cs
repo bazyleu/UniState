@@ -19,12 +19,12 @@ namespace UniState
             _transitionFactory = new StateTransitionFactory(resolver);
         }
 
-        public virtual async UniTask Execute<TState>(CancellationToken token) where TState : class, IState<EmptyPayload>
+        public virtual async UniTask ExecuteAsync<TState>(CancellationToken token) where TState : class, IState<EmptyPayload>
         {
             await ExecuteInternal(_transitionFactory.CreateStateTransition<TState>(), token);
         }
 
-        public virtual async UniTask Execute<TState, TPayload>(TPayload payload, CancellationToken token)
+        public virtual async UniTask ExecuteAsync<TState, TPayload>(TPayload payload, CancellationToken token)
             where TState : class, IState<TPayload>
         {
             await ExecuteInternal(_transitionFactory.CreateStateTransition<TState, TPayload>(payload), token);
@@ -60,9 +60,9 @@ namespace UniState
 
             try
             {
-                await InitializeSafe(activeStateMetadata.State, token);
+                await InitializeSafeAsync(activeStateMetadata.State, token);
 
-                var transitionInfo = await ExecuteSafe(activeStateMetadata.State, token);
+                var transitionInfo = await ExecuteSafeAsync(activeStateMetadata.State, token);
 
                 ProcessTransitionInfo(transitionInfo, activeStateMetadata.TransitionInfo, nextStateMetadata);
 
@@ -70,23 +70,23 @@ namespace UniState
                 {
                     if (nextStateMetadata.BehaviourData.InitializeOnStateTransition)
                     {
-                        await InitializeSafe(nextStateMetadata.State, token);
-                        await ExitAndDisposeSafe(activeStateMetadata.State, token);
+                        await InitializeSafeAsync(nextStateMetadata.State, token);
+                        await ExitAndDisposeSafeAsync(activeStateMetadata.State, token);
                     }
                     else
                     {
-                        await ExitAndDisposeSafe(activeStateMetadata.State, token);
-                        await InitializeSafe(nextStateMetadata.State, token);
+                        await ExitAndDisposeSafeAsync(activeStateMetadata.State, token);
+                        await InitializeSafeAsync(nextStateMetadata.State, token);
                     }
 
                     activeStateMetadata.CopyData(nextStateMetadata);
 
-                    transitionInfo = await ExecuteSafe(activeStateMetadata.State, token);
+                    transitionInfo = await ExecuteSafeAsync(activeStateMetadata.State, token);
 
                     ProcessTransitionInfo(transitionInfo, activeStateMetadata.TransitionInfo, nextStateMetadata);
                 }
 
-                await ExitAndDisposeSafe(activeStateMetadata.State, token);
+                await ExitAndDisposeSafeAsync(activeStateMetadata.State, token);
                 activeStateMetadata.Clear();
             }
             catch (OperationCanceledException)
@@ -154,13 +154,13 @@ namespace UniState
             return null;
         }
 
-        private async UniTask<StateTransitionInfo> ExecuteSafe(IExecutableState state, CancellationToken token)
+        private async UniTask<StateTransitionInfo> ExecuteSafeAsync(IExecutableState state, CancellationToken token)
         {
             try
             {
                 token.ThrowIfCancellationRequested();
 
-                return await state.Execute(token);
+                return await state.ExecuteAsync(token);
             }
             catch (OperationCanceledException)
             {
@@ -174,12 +174,12 @@ namespace UniState
             return BuildRecoveryTransition(_transitionFactory);
         }
 
-        private async UniTask InitializeSafe(IExecutableState state, CancellationToken token)
+        private async UniTask InitializeSafeAsync(IExecutableState state, CancellationToken token)
         {
             try
             {
                 token.ThrowIfCancellationRequested();
-                await state.Initialize(token);
+                await state.InitializeAsync(token);
             }
             catch (OperationCanceledException)
             {
@@ -191,12 +191,12 @@ namespace UniState
             }
         }
 
-        private async UniTask ExitAndDisposeSafe(IExecutableState state, CancellationToken token)
+        private async UniTask ExitAndDisposeSafeAsync(IExecutableState state, CancellationToken token)
         {
             try
             {
                 token.ThrowIfCancellationRequested();
-                await state.Exit(token);
+                await state.ExitAsync(token);
             }
             catch (OperationCanceledException)
             {

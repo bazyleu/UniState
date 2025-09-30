@@ -16,14 +16,14 @@ namespace UniStateTests.PlayMode.StateBehaviorAttributeTests.Infrastructure
             _testHelper = testHelper;
         }
 
-        public override async UniTask Initialize(CancellationToken token)
+        public override async UniTask InitializeAsync(CancellationToken token)
         {
             await UniTask.Yield(token);
 
             _logger.LogStep("FirstState", $"Initialize");
         }
 
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             await UniTask.Yield(token);
 
@@ -39,7 +39,7 @@ namespace UniStateTests.PlayMode.StateBehaviorAttributeTests.Infrastructure
             return Transition.GoTo<NoReturnState>();
         }
 
-        public override async UniTask Exit(CancellationToken token)
+        public override async UniTask ExitAsync(CancellationToken token)
         {
             await UniTask.Yield(token);
 

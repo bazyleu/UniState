@@ -15,14 +15,14 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
             _logger = logger;
         }
 
-        public override UniTask Initialize(CancellationToken token)
+        public override UniTask InitializeAsync(CancellationToken token)
         {
             _logger.LogStep("StateThrowTwoException", $"Initialize");
 
             throw new Exception("Initialize exception");
         }
 
-        public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+        public override async UniTask<StateTransitionInfo> ExecuteAsync(CancellationToken token)
         {
             await UniTask.Yield(token);
 
@@ -31,7 +31,7 @@ namespace UniStateTests.PlayMode.RecoveryTransitionTests.Infrastructure
             return Transition.GoTo<StateWithFailExecution>();
         }
 
-        public override UniTask Exit(CancellationToken token)
+        public override UniTask ExitAsync(CancellationToken token)
         {
             _logger.LogStep("StateThrowTwoException", $"Exit");
 
