@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UniStateTests.Common;
 
-namespace UniStateTests.EditMode.Common
+namespace UniStateTests.EditMode.Disposables
 {
     [TestFixture]
     public class StepsLoggerTests

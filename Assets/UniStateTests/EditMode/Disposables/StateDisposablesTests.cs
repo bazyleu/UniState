@@ -7,7 +7,7 @@ using UniState;
 using UniStateTests.Common;
 using Zenject;
 
-namespace UniStateTests.EditMode.Common
+namespace UniStateTests.EditMode.Disposables
 {
     [TestFixture]
     internal class StateDisposablesTests: ZenjectTestsBase
