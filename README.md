@@ -483,6 +483,13 @@ Disposables are a part of `StateBase` that allow users to tie `IDisposable` refe
 lifetime, guaranteeing disposal and delegate execution on state's `Dispose`, without overriding the method
 
 ```csharp
+// Available API
+Disposables.Add(fooDisposable);
+Disposables.Add(() => Unsubscribe());
+Disposables.Add(fooDisposable, barDisposable);
+Disposables.ThenAdd(fooDisposable).ThenAdd(barDisposable).ThenAdd(() => Unsubscribe());
+
+// Example Usage
 public class LoadingState : StateBase<ILoadingScreenView>
 {
     private CancellationTokenSource _loadingCts;
