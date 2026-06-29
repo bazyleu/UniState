@@ -38,7 +38,7 @@ namespace UniState
             var tasks = new UniTask[_subStates.Count];
             for (var i = 0; i < _subStates.Count; i++)
             {
-                tasks[i] = _subStates[i].Initialize(token);
+                tasks[i] = InitializeSubState(_subStates[i], token);
             }
 
             return UniTask.WhenAll(tasks);
@@ -48,10 +48,15 @@ namespace UniState
         {
             if (_subStates.Count == 0)
             {
-                throw new NoSubStatesException();
+                var exception = new NoSubStatesException();
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.NoSubStates(exception);
+#endif
+                throw exception;
             }
 
             StateTransitionInfo result;
+            var winnerIndex = -1;
 
             var ctx = CancellationTokenSource.CreateLinkedTokenSource(token);
             try
@@ -59,15 +64,19 @@ namespace UniState
                 var tasks = new UniTask<StateTransitionInfo>[_subStates.Count];
                 for (var i = 0; i < _subStates.Count; i++)
                 {
-                    tasks[i] = _subStates[i].Execute(ctx.Token);
+                    tasks[i] = ExecuteSubState(_subStates[i], ctx.Token);
                 }
 
                 var first = await UniTask.WhenAny(tasks);
+                winnerIndex = first.winArgumentIndex;
                 result = first.result;
             }
             finally
             {
                 ctx.Cancel();
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.SubStatesCancelled(_subStates, winnerIndex);
+#endif
                 ctx.Dispose();
             }
 
@@ -79,7 +88,7 @@ namespace UniState
             var tasks = new UniTask[_subStates.Count];
             for (var i = 0; i < _subStates.Count; i++)
             {
-                tasks[i] = _subStates[i].Exit(token);
+                tasks[i] = ExitSubState(_subStates[i], token);
             }
 
             return UniTask.WhenAll(tasks);
@@ -91,15 +100,30 @@ namespace UniState
 
             for (var i = 0; i < _subStates.Count; i++)
             {
+#if UNISTATE_DEBUG_TREE
+                var debugScope = UniStateDebugRegistry.BeginStatePhase(_subStates[i], DebugStatePhase.Dispose);
+#endif
                 try
                 {
                     _subStates[i].Dispose();
+#if UNISTATE_DEBUG_TREE
+                    UniStateDebugRegistry.EndStatePhase(_subStates[i], DebugStatePhase.Dispose);
+#endif
                 }
                 catch (Exception e)
                 {
+#if UNISTATE_DEBUG_TREE
+                    UniStateDebugRegistry.Error(_subStates[i], StateMachineErrorType.StateDisposing, e);
+#endif
                     exceptions ??= new List<Exception>();
                     exceptions.Add(e);
                 }
+#if UNISTATE_DEBUG_TREE
+                finally
+                {
+                    debugScope.Dispose();
+                }
+#endif
             }
 
             if (exceptions == null)
@@ -113,6 +137,110 @@ namespace UniState
             }
 
             throw new AggregateException("One or more substate dispose operations failed.", exceptions);
+        }
+
+        private async UniTask InitializeSubState(IState<TPayload> state, CancellationToken token)
+        {
+#if UNISTATE_DEBUG_TREE
+            var debugScope = UniStateDebugRegistry.BeginStatePhase(state, DebugStatePhase.Initialize);
+#endif
+            try
+            {
+                await state.Initialize(token);
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.EndStatePhase(state, DebugStatePhase.Initialize);
+#endif
+            }
+            catch (OperationCanceledException)
+            {
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.StateCancelled(state);
+#endif
+                throw;
+            }
+            catch (Exception e)
+            {
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.Error(state, StateMachineErrorType.StateInitializing, e);
+#endif
+                throw;
+            }
+#if UNISTATE_DEBUG_TREE
+            finally
+            {
+                debugScope.Dispose();
+            }
+#endif
+        }
+
+        private async UniTask<StateTransitionInfo> ExecuteSubState(IState<TPayload> state, CancellationToken token)
+        {
+#if UNISTATE_DEBUG_TREE
+            var debugScope = UniStateDebugRegistry.BeginStatePhase(state, DebugStatePhase.Execute);
+#endif
+            try
+            {
+                var result = await state.Execute(token);
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.EndStatePhase(state, DebugStatePhase.Execute);
+                UniStateDebugRegistry.SubStateCompleted(state, result);
+#endif
+                return result;
+            }
+            catch (OperationCanceledException)
+            {
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.StateCancelled(state);
+#endif
+                throw;
+            }
+            catch (Exception e)
+            {
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.Error(state, StateMachineErrorType.StateExecuting, e);
+#endif
+                throw;
+            }
+#if UNISTATE_DEBUG_TREE
+            finally
+            {
+                debugScope.Dispose();
+            }
+#endif
+        }
+
+        private async UniTask ExitSubState(IState<TPayload> state, CancellationToken token)
+        {
+#if UNISTATE_DEBUG_TREE
+            var debugScope = UniStateDebugRegistry.BeginStatePhase(state, DebugStatePhase.Exit);
+#endif
+            try
+            {
+                await state.Exit(token);
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.EndStatePhase(state, DebugStatePhase.Exit);
+#endif
+            }
+            catch (OperationCanceledException)
+            {
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.StateCancelled(state);
+#endif
+                throw;
+            }
+            catch (Exception e)
+            {
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.Error(state, StateMachineErrorType.StateExiting, e);
+#endif
+                throw;
+            }
+#if UNISTATE_DEBUG_TREE
+            finally
+            {
+                debugScope.Dispose();
+            }
+#endif
         }
     }
 }

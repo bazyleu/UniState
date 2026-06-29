@@ -9,17 +9,19 @@ namespace UniState
 
         private readonly ITypeResolver _resolver;
         private readonly IStateTransitionFacade _transitionFacade;
+        private readonly StateMachine _ownerMachine;
 
-        public StateTransitionFactory(ITypeResolver resolver)
+        public StateTransitionFactory(ITypeResolver resolver, StateMachine ownerMachine = null)
         {
             _resolver = resolver;
+            _ownerMachine = ownerMachine;
             _transitionFacade = new StateTransitionFacade(this);
         }
 
         public StateTransitionInfo CreateStateTransition<TState, TPayload>(TPayload payload)
             where TState : class, IState<TPayload>
         {
-            var factory = new StateFactory<TState, TPayload>(_resolver);
+            var factory = new StateFactory<TState, TPayload>(_resolver, _ownerMachine);
 
             factory.Setup(payload, _transitionFacade);
 
@@ -34,7 +36,7 @@ namespace UniState
         public StateTransitionInfo CreateStateTransition<TState>()
             where TState : class, IState<EmptyPayload>
         {
-            var factory = new StateFactory<TState, EmptyPayload>(_resolver);
+            var factory = new StateFactory<TState, EmptyPayload>(_resolver, _ownerMachine);
 
             factory.Setup(EmptyPayload.Instance, _transitionFacade);
 

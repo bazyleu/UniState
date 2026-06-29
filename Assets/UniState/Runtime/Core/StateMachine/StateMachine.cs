@@ -17,7 +17,10 @@ namespace UniState
 
         public virtual void SetResolver(ITypeResolver resolver)
         {
-            _transitionFactory = new StateTransitionFactory(resolver);
+            _transitionFactory = new StateTransitionFactory(resolver, this);
+#if UNISTATE_DEBUG_TREE
+            UniStateDebugRegistry.RegisterMachine(this, resolver, MaxHistorySize);
+#endif
         }
 
         public virtual async UniTask Execute<TState>(CancellationToken token) where TState : class, IState<EmptyPayload>
@@ -53,10 +56,21 @@ namespace UniState
         {
             if (_isExecuting)
             {
-                throw new AlreadyExecutingException();
+                var exception = new AlreadyExecutingException();
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.MachineAlreadyExecuting(this, exception);
+#endif
+                throw exception;
             }
 
+#if UNISTATE_DEBUG_TREE
+            UniStateDebugRegistry.MachineExecuteRequested(this, initialTransition);
+#endif
+
             Initialize();
+#if UNISTATE_DEBUG_TREE
+            var debugFinishStatus = DebugMachineStatus.Completed;
+#endif
 
             var activeStateMetadata = new StateWithMetadata();
             var nextStateMetadata = new StateWithMetadata();
@@ -77,7 +91,7 @@ namespace UniState
 
                 transitionInfo = await ExecuteSafe(activeStateMetadata.State, token);
 
-                ProcessTransitionInfo(transitionInfo, activeStateMetadata.TransitionInfo, nextStateMetadata);
+                ProcessTransitionInfo(transitionInfo, activeStateMetadata, nextStateMetadata);
 
                 while (!nextStateMetadata.IsEmpty && !token.IsCancellationRequested)
                 {
@@ -106,7 +120,7 @@ namespace UniState
 
                     transitionInfo = await ExecuteSafe(activeStateMetadata.State, token);
 
-                    ProcessTransitionInfo(transitionInfo, activeStateMetadata.TransitionInfo, nextStateMetadata);
+                    ProcessTransitionInfo(transitionInfo, activeStateMetadata, nextStateMetadata);
                 }
 
                 var exitedState = activeStateMetadata.State;
@@ -124,10 +138,16 @@ namespace UniState
             }
             catch (OperationCanceledException)
             {
+#if UNISTATE_DEBUG_TREE
+                debugFinishStatus = DebugMachineStatus.Cancelled;
+#endif
                 throw;
             }
             catch (Exception e)
             {
+#if UNISTATE_DEBUG_TREE
+                debugFinishStatus = DebugMachineStatus.Failed;
+#endif
                 ProcessError(new StateMachineErrorData(e, StateMachineErrorType.StateMachineFail));
             }
             finally
@@ -160,15 +180,24 @@ namespace UniState
 
                 if (disposeException != null)
                 {
+#if UNISTATE_DEBUG_TREE
+                    debugFinishStatus = DebugMachineStatus.Failed;
+                    UniStateDebugRegistry.MachineFinished(this, debugFinishStatus);
+#endif
                     ExceptionDispatchInfo.Capture(disposeException).Throw();
                 }
+
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.MachineFinished(this, debugFinishStatus);
+#endif
             }
         }
 
         private void ProcessTransitionInfo(StateTransitionInfo nextTransition,
-            StateTransitionInfo previousTransition,
+            StateWithMetadata previousStateMetadata,
             StateWithMetadata stateWithMetadata)
         {
+            var previousTransition = previousStateMetadata.TransitionInfo;
             stateWithMetadata.Clear();
 
             if (nextTransition.Transition == TransitionType.Exit)
@@ -183,6 +212,9 @@ namespace UniState
             if (transitionToState && previousTransition.CanBeAddedToHistory())
             {
                 _history.Push(previousTransition);
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.HistoryPushed(this, previousStateMetadata.State, previousTransition);
+#endif
             }
 
             if (item != null)
@@ -195,69 +227,126 @@ namespace UniState
         {
             if (nextTransition.GoBackToType == null)
             {
-                return _history.Pop();
+                var info = _history.Pop();
+#if UNISTATE_DEBUG_TREE
+                if (info == null)
+                {
+                    UniStateDebugRegistry.HistoryMissed(this, null);
+                }
+                else
+                {
+                    UniStateDebugRegistry.HistoryPopped(this);
+                }
+#endif
+                return info;
             }
 
             while (_history.Count() > 0)
             {
                 var info = _history.Pop();
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.HistoryPopped(this);
+#endif
                 if (nextTransition.GoBackToType == info.Creator?.StateType)
                 {
                     return info;
                 }
             }
 
+#if UNISTATE_DEBUG_TREE
+            UniStateDebugRegistry.HistoryMissed(this, nextTransition.GoBackToType);
+#endif
             return null;
         }
 
         private async UniTask<StateTransitionInfo> ExecuteSafe(IExecutableState state, CancellationToken token)
         {
+#if UNISTATE_DEBUG_TREE
+            var debugScope = UniStateDebugRegistry.BeginStatePhase(this, state, DebugStatePhase.Execute);
+#endif
             try
             {
                 token.ThrowIfCancellationRequested();
 
-                return await state.Execute(token);
+                var result = await state.Execute(token);
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.EndStatePhase(state, DebugStatePhase.Execute);
+#endif
+                return result;
             }
             catch (OperationCanceledException)
             {
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.StateCancelled(state);
+#endif
                 throw;
             }
             catch (Exception e)
             {
                 ProcessError(new StateMachineErrorData(e, StateMachineErrorType.StateExecuting, state));
             }
+#if UNISTATE_DEBUG_TREE
+            finally
+            {
+                debugScope.Dispose();
+            }
+#endif
 
             return BuildRecoveryTransition(_transitionFactory);
         }
 
         private async UniTask InitializeSafe(IExecutableState state, CancellationToken token)
         {
+#if UNISTATE_DEBUG_TREE
+            var debugScope = UniStateDebugRegistry.BeginStatePhase(this, state, DebugStatePhase.Initialize);
+#endif
             try
             {
                 token.ThrowIfCancellationRequested();
                 await state.Initialize(token);
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.EndStatePhase(state, DebugStatePhase.Initialize);
+#endif
             }
             catch (OperationCanceledException)
             {
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.StateCancelled(state);
+#endif
                 throw;
             }
             catch (Exception e)
             {
                 ProcessError(new StateMachineErrorData(e, StateMachineErrorType.StateInitializing, state));
             }
+#if UNISTATE_DEBUG_TREE
+            finally
+            {
+                debugScope.Dispose();
+            }
+#endif
         }
 
         private async UniTask ExitAndDisposeSafe(StateWithMetadata metadata, CancellationToken token)
         {
             var state = metadata.State;
 
+#if UNISTATE_DEBUG_TREE
+            var debugScope = UniStateDebugRegistry.BeginStatePhase(this, state, DebugStatePhase.Exit);
+#endif
             try
             {
                 token.ThrowIfCancellationRequested();
                 await state.Exit(token);
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.EndStatePhase(state, DebugStatePhase.Exit);
+#endif
             }
             catch (OperationCanceledException)
             {
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.StateCancelled(state);
+#endif
                 throw;
             }
             catch (Exception e)
@@ -266,6 +355,9 @@ namespace UniState
             }
             finally
             {
+#if UNISTATE_DEBUG_TREE
+                debugScope.Dispose();
+#endif
                 DisposeSafe(metadata);
             }
         }
@@ -274,18 +366,42 @@ namespace UniState
         {
             var state = metadata.State;
 
+#if UNISTATE_DEBUG_TREE
+            var debugScope = UniStateDebugRegistry.BeginStatePhase(this, state, DebugStatePhase.Dispose);
+#endif
             try
             {
                 metadata.Dispose();
+#if UNISTATE_DEBUG_TREE
+                UniStateDebugRegistry.EndStatePhase(state, DebugStatePhase.Dispose);
+#endif
             }
             catch (Exception e)
             {
                 ProcessError(new StateMachineErrorData(e, StateMachineErrorType.StateDisposing, state));
             }
+#if UNISTATE_DEBUG_TREE
+            finally
+            {
+                debugScope.Dispose();
+            }
+#endif
         }
 
-        private void ProcessError(StateMachineErrorData errorData) => HandleError(errorData);
+        private void ProcessError(StateMachineErrorData errorData)
+        {
+#if UNISTATE_DEBUG_TREE
+            UniStateDebugRegistry.Error(this, errorData);
+#endif
+            HandleError(errorData);
+        }
 
-        private void ProcessStateChanged(StateMachineStateChangedData changeData) => HandleStateChanged(changeData);
+        private void ProcessStateChanged(StateMachineStateChangedData changeData)
+        {
+#if UNISTATE_DEBUG_TREE
+            UniStateDebugRegistry.StateChanged(this, changeData);
+#endif
+            HandleStateChanged(changeData);
+        }
     }
 }
