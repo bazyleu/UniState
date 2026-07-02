@@ -1,11 +1,11 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace UniState
 {
     public class StateTransitionFactory : IStateTransitionFactory
     {
-        private static readonly Dictionary<Type, StateBehaviourData> BehaviourDataCache = new();
+        private static readonly ConcurrentDictionary<Type, StateBehaviourData> BehaviourDataCache = new();
 
         private readonly ITypeResolver _resolver;
         private readonly IStateTransitionFacade _transitionFacade;

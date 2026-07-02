@@ -4,6 +4,7 @@ namespace UniState
     {
         Started,
         Changed,
-        Exited
+        Exited,
+        Canceled
     }
 }

@@ -22,12 +22,16 @@ namespace UniState
 
         public virtual async UniTask Execute<TState>(CancellationToken token) where TState : class, IState<EmptyPayload>
         {
+            ThrowIfResolverNotSet();
+
             await ExecuteInternal(_transitionFactory.CreateStateTransition<TState>(), token);
         }
 
         public virtual async UniTask Execute<TState, TPayload>(TPayload payload, CancellationToken token)
             where TState : class, IState<TPayload>
         {
+            ThrowIfResolverNotSet();
+
             await ExecuteInternal(_transitionFactory.CreateStateTransition<TState, TPayload>(payload), token);
         }
 
@@ -43,9 +47,26 @@ namespace UniState
         {
         }
 
+        private void ThrowIfResolverNotSet()
+        {
+            if (_transitionFactory == null)
+            {
+                throw new InvalidOperationException(
+                    "Resolver is not set. Call SetResolver() before Execute() or register the state machine via a DI integration.");
+            }
+        }
+
         private void Initialize()
         {
-            _history = new LimitedStack<StateTransitionInfo>(MaxHistorySize);
+            if (_history == null || _history.MaxSize != MaxHistorySize)
+            {
+                _history = new LimitedStack<StateTransitionInfo>(MaxHistorySize);
+            }
+            else
+            {
+                _history.Clear();
+            }
+
             _isExecuting = true;
         }
 
@@ -124,13 +145,26 @@ namespace UniState
                     StateMachineStateChangeType.Exited));
                 activeStateMetadata.Clear();
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
+                NotifyCanceled(activeStateMetadata, transitionInfo);
+
                 throw;
+            }
+            catch (HandlerFailedException e)
+            {
+                ExceptionDispatchInfo.Capture(e.InnerException).Throw();
             }
             catch (Exception e)
             {
-                ProcessError(new StateMachineErrorData(e, StateMachineErrorType.StateMachineFail));
+                try
+                {
+                    ProcessError(new StateMachineErrorData(e, StateMachineErrorType.StateMachineFail));
+                }
+                catch (HandlerFailedException handlerException)
+                {
+                    ExceptionDispatchInfo.Capture(handlerException.InnerException).Throw();
+                }
             }
             finally
             {
@@ -139,6 +173,10 @@ namespace UniState
                 try
                 {
                     DisposeSafe(nextStateMetadata);
+                }
+                catch (HandlerFailedException e)
+                {
+                    disposeException ??= e.InnerException;
                 }
                 catch (Exception e)
                 {
@@ -150,6 +188,10 @@ namespace UniState
                 try
                 {
                     DisposeSafe(activeStateMetadata);
+                }
+                catch (HandlerFailedException e)
+                {
+                    disposeException ??= e.InnerException;
                 }
                 catch (Exception e)
                 {
@@ -220,7 +262,7 @@ namespace UniState
 
                 return await state.Execute(token);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
                 throw;
             }
@@ -239,7 +281,7 @@ namespace UniState
                 token.ThrowIfCancellationRequested();
                 await state.Initialize(token);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
                 throw;
             }
@@ -258,7 +300,7 @@ namespace UniState
                 token.ThrowIfCancellationRequested();
                 await state.Exit(token);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
                 throw;
             }
@@ -286,8 +328,51 @@ namespace UniState
             }
         }
 
-        private void ProcessError(StateMachineErrorData errorData) => HandleError(errorData);
+        private void NotifyCanceled(StateWithMetadata activeStateMetadata, StateTransitionInfo requestedTransition)
+        {
+            try
+            {
+                ProcessStateChanged(new StateMachineStateChangedData(
+                    activeStateMetadata.TransitionInfo?.Creator?.StateType,
+                    null,
+                    activeStateMetadata.TransitionInfo,
+                    null,
+                    requestedTransition,
+                    StateMachineStateChangeType.Canceled));
+            }
+            catch (Exception e)
+            {
+                try
+                {
+                    ProcessError(new StateMachineErrorData(e, StateMachineErrorType.StateMachineFail));
+                }
+                catch (Exception)
+                {
+                    // Cancellation must propagate even if user callbacks throw here.
+                }
+            }
+        }
+
+        private void ProcessError(StateMachineErrorData errorData)
+        {
+            try
+            {
+                HandleError(errorData);
+            }
+            catch (Exception e)
+            {
+                throw new HandlerFailedException(e);
+            }
+        }
 
         private void ProcessStateChanged(StateMachineStateChangedData changeData) => HandleStateChanged(changeData);
+
+        private sealed class HandlerFailedException : Exception
+        {
+            public HandlerFailedException(Exception innerException)
+                : base(innerException.Message, innerException)
+            {
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 
 namespace UniState
 {
@@ -27,13 +28,37 @@ namespace UniState
 
         public static void Dispose(this List<IDisposable> disposables)
         {
-            if (disposables?.Count > 0)
+            if (disposables == null || disposables.Count == 0)
             {
-                for (var i = disposables.Count - 1; i >= 0; i--)
+                return;
+            }
+
+            List<Exception> exceptions = null;
+
+            for (var i = disposables.Count - 1; i >= 0; i--)
+            {
+                try
                 {
                     disposables[i]?.Dispose();
                 }
+                catch (Exception e)
+                {
+                    exceptions ??= new List<Exception>();
+                    exceptions.Add(e);
+                }
             }
+
+            if (exceptions == null)
+            {
+                return;
+            }
+
+            if (exceptions.Count == 1)
+            {
+                ExceptionDispatchInfo.Capture(exceptions[0]).Throw();
+            }
+
+            throw new AggregateException("One or more disposables failed.", exceptions);
         }
     }
 }
