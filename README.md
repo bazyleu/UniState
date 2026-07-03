@@ -89,7 +89,7 @@ pattern or be used to address specific tasks.
         + [Step 3: Configure VContainer](#step-3-configure-vcontainer)
         + [Step 4: Set up the scene](#step-4-set-up-the-scene)
 - [Upgrade Guide](#upgrade-guide)
-    * [Upgrading from Version < 1.11.0](#upgrading-from-version--1110)
+    * [Upgrading from Versions < 1.11.0](#upgrading-from-versions--1110)
     * [Upgrading from Versions < 1.5.0](#upgrading-from-versions--150)
 - [Integrations](#integrations)
     * [VContainer](#vcontainer)
@@ -1681,7 +1681,7 @@ Congratulations! You won this game!
 
 ## Upgrade Guide
 
-### Upgrading from Version < 1.12.0
+### Upgrading from Versions < 1.12.0
 
 Version 1.12.0 changes how the state machine treats `OperationCanceledException`.
 
