@@ -88,6 +88,8 @@ pattern or be used to address specific tasks.
         + [Step 2: Create entry point](#step-2-create-entry-point)
         + [Step 3: Configure VContainer](#step-3-configure-vcontainer)
         + [Step 4: Set up the scene](#step-4-set-up-the-scene)
+- [Upgrade Guide](#upgrade-guide)
+    * [Upgrading from Versions < 1.11.0](#upgrading-from-versions--1110)
     * [Upgrading from Versions < 1.5.0](#upgrading-from-versions--150)
 - [Integrations](#integrations)
     * [VContainer](#vcontainer)
@@ -249,7 +251,7 @@ outside the scope of UniState.
 
 ```csharp
     // Popup prefab (MonoBehaviour, view)
-    public class SimplePopupView : ISimplePopupView, MonoBehaviour
+    public class SimplePopupView : MonoBehaviour, ISimplePopupView
     {
         //...
     }
@@ -1058,6 +1060,10 @@ lifetime, guaranteeing disposal and delegate execution on state's `Dispose`, wit
 This is the recommended way to clean up resources because `StateBase` keeps disposal safe if the same state instance is
 disposed more than once by UniState and a DI container.
 
+Disposal is exception-safe: if one of the registered disposables throws, the remaining ones are still disposed (in
+reverse registration order), and the failure is reported to the state machine's `HandleError()` as
+`StateMachineErrorType.StateDisposing` (multiple failures are combined into an `AggregateException`).
+
 ```csharp
 // Available API
 Disposables.Add(fooDisposable);
@@ -1084,7 +1090,7 @@ public class LoadingState : StateBase<ILoadingScreenView>
         {
             await Payload.PretendToWork(_loadingCts.Token);
         }
-        catch (OperationCancelledException) when (!token.IsCancellationRequested)
+        catch (OperationCanceledException) when (!token.IsCancellationRequested)
         {
             return Transition.GoBack();
         }
@@ -1218,7 +1224,7 @@ public class RootGameplayState : StateBase
 #### State Machine History
 
 The state machine maintains a history of transitions between states, allowing for the use of `Transition.GoBack()`. The
-size of this history can be customized through the `StateMachineLongHistory.MaxHistorySize` property (default value is
+size of this history can be customized by overriding the `StateMachine.MaxHistorySize` property (default value is
 15). If more transitions occur than the history size, only the most recent transitions will be retained, with no
 overhead or errors resulting from the limit.
 
@@ -1251,7 +1257,7 @@ public class ObservedStateMachine : StateMachine
 
 The hook receives `StateMachineStateChangedData` with the following data:
 
-* `ChangeType` - `Started`, `Changed`, or `Exited`.
+* `ChangeType` - `Started`, `Changed`, `Exited`, or `Canceled`.
 * `PreviousStateType` and `CurrentStateType` - state types before and after the change. One side is `null` when the state
   machine starts or exits.
 * `PreviousTransition` and `CurrentTransition` - transition metadata for the previous and current state.
@@ -1259,7 +1265,11 @@ The hook receives `StateMachineStateChangedData` with the following data:
 
 `Started` is reported after the initial state's `Initialize()` completes and before its `Execute()` starts. `Changed` is
 reported after the previous state has exited and disposed and after the current state has initialized. `Exited` is
-reported after the last state has exited and disposed.
+reported after the last state has exited and disposed. `Canceled` is reported as the terminal event when execution is
+canceled through the cancellation token passed to `Execute()`; in this case `CurrentStateType` is `null`,
+`PreviousStateType` is the state that was active when cancellation was observed, and `RequestedTransition` is the last
+transition returned by a state, or `null` if cancellation happened before the first `Execute()` completed (`Canceled`
+may even be the only reported event if cancellation happens before `Started`).
 
 `StateMachineStateChangedData` is a readonly value type and contains state types rather than state instances. This keeps
 the hook lightweight and prevents observers from accidentally keeping disposed states alive. If the hook throws an
@@ -1287,14 +1297,23 @@ public class BarStateMachine : StateMachine
 }
 ```
 
-Exceptions are processed internally without propagating further (the only exception is `OperationCanceledException`,
-which still stops the state machine). By default this means logging to the Unity Console through `Debug.LogError`.
-`StateMachineErrorData` provides metadata related to exceptions, and
+Exceptions are processed internally without propagating further. By default this means logging to the Unity Console
+through `Debug.LogError`. `StateMachineErrorData` provides metadata related to exceptions, and
 `StateMachineErrorData.State` may be `null` if `StateMachineErrorType` is set to `StateMachineFail`.
 If a state or substate throws during `Dispose()`, the error is reported as `StateMachineErrorType.StateDisposing`.
 Multiple substate dispose failures are reported as an `AggregateException`.
 
-To halt state machine execution after an exception, include a `throw` statement in `HandleError()`:
+The only exception that is not routed to `HandleError()` is a genuine cancellation: an `OperationCanceledException`
+observed while the token passed to `Execute()` is canceled. See
+[Cancellation Behavior](#cancellation-behavior) for details. An `OperationCanceledException` raised while the machine's
+token is *not* canceled (for example, one that leaked from a state's internal linked token source or a third-party
+timeout) is treated as a regular error: it goes through `HandleError()` and the standard recovery flow instead of
+silently stopping the machine.
+
+To halt state machine execution after an exception, include a `throw` statement in `HandleError()`. The machine stops,
+all created states are disposed, and the thrown exception propagates to the `await stateMachine.Execute()` caller, so
+an aborted run is distinguishable from a normal exit. `HandleError()` is invoked once per error; an exception thrown
+from `HandleError()` itself is not reported back into `HandleError()` again.
 In the example provided, the state machine will terminate after encountering a second exception within the same state in a row.
 
 ```csharp
@@ -1308,7 +1327,7 @@ public class FooStateMachine : StateMachine
 
         if (stateType != null && _lastErrorState == stateType)
         {
-            // Stop state mahine execution and throw an exception out
+            // Stop state machine execution and throw an exception out
             throw new Exception($"Second exception in same state.", errorData.Exception);
         }
 
@@ -1333,6 +1352,20 @@ public class BarStateMachine : StateMachine
             => transitionFactory.CreateStateTransition<ErrorPopupState>();
 }
 ```
+
+##### Cancellation Behavior
+
+Canceling the token passed to `Execute()` aborts the run:
+
+* The active state's `Execute()` receives the cancellation through its token as usual.
+* `Exit()` of the active state is **not** called - cancellation is an abortive shutdown, only `Dispose()` is guaranteed
+  for every created state.
+* The `HandleStateChanged()` hook receives a terminal `Canceled` event.
+* The `OperationCanceledException` propagates out of `Execute()` to the caller; it is not passed to `HandleError()`.
+
+Keep in mind that if the machine was started with `Execute(...).Forget()`, UniTask silently swallows
+`OperationCanceledException` by default, so nothing is logged when the flow is canceled - this is regular UniTask
+behavior for canceled forgotten tasks.
 
 ##### State Machine Specific Exceptions
 
@@ -1362,6 +1395,11 @@ var newResolver = container.ToTypeResolver();
 
 stateMachine.SetResolver(newResolver);
 ```
+
+`SetResolver()` can be called at any time, including while the machine is executing: states created after the call are
+resolved through the new context, while states that already exist keep the context they were created with. If a state
+machine is created manually (without a DI integration), `SetResolver()` must be called before `Execute()` - otherwise
+`Execute()` throws an `InvalidOperationException`.
 
 #### Custom Type Resolvers
 
@@ -1452,14 +1490,32 @@ from `SubStateBase` or implement the `ISubState` interface for greater customiza
 the parent composite state as a generic parameter, e.g., `FooSubState : SubStateBase<BarCompositeState>`. In all other
 aspects, it functions like a regular state.
 
+Sub states are linked to their composite state by the type used in the transition. `Transition.GoTo<TState>()` resolves
+`ISubState<TState, TPayload>` from the container, so the generic parameter of `SubStateBase<T>` must match the type used
+in `GoTo`. If you open a composite state through an interface (e.g. `Transition.GoTo<IFooState>()`), declare its sub
+states with the same interface (`SubStateBase<IFooState>`); sub states declared with the concrete type
+(`SubStateBase<FooCompositeState>`) will not be found in that case, and `DefaultCompositeState` will throw
+`NoSubStatesException`.
+
 #### Default Composite State
 
 A ready-to-use implementation for a composite state that propagates `Initialize`, `Execute`, and `Exit` methods to all
-SubStates within it. The result of the `Execute` method will be the first completed `Execute` method among all sub
-states.
+SubStates within it. The result of the `Execute` method will be the transition returned by the first sub state to
+complete its `Execute` method.
+
+Once the first sub state completes, the remaining sub states are canceled through the token passed to their `Execute()`
+and the composite state waits for all of them to finish before returning. This guarantees that `Exit()`/`Dispose()` of a
+sub state never runs in parallel with its still-executing `Execute()`, even for sub states that do not react to
+cancellation promptly.
+
+Errors never disappear silently: if any sub state fails in `Initialize`, `Execute`, or `Exit`, the composite state still
+waits for all remaining sub states to finish that phase, then rethrows the failure (multiple failures are combined into
+an `AggregateException`) so it reaches the state machine's `HandleError()`. If one sub state completes `Execute`
+successfully while another one fails, the error takes priority: the returned transition is discarded and the exception
+is delivered to `HandleError()`, followed by the standard recovery flow.
 
 If you use `DefaultCompositeState` and it is executed without any SubStates, its `Execute` method will throw
-an `InvalidOperationException`.
+a `NoSubStatesException`.
 
 To use `DefaultCompositeState`, simply inherit your composite state from it. Here's an example:
 ```csharp
@@ -1622,6 +1678,61 @@ Need to roll 5+. Rolling the dice...
 Dice is 6
 Congratulations! You won this game!
 ```
+
+## Upgrade Guide
+
+### Upgrading from Versions < 1.12.0
+
+Version 1.12.0 changes how the state machine treats `OperationCanceledException`.
+
+Previously, *any* `OperationCanceledException` thrown from a state stopped the state machine as if it had been
+canceled - even when the exception came from an unrelated token (an internal timeout, a linked token source, a
+third-party API). `HandleError()` was not called, so such shutdowns were silent and easy to miss.
+
+Starting with 1.12.0, only the state machine's own token (the one passed to `Execute()`) counts as cancellation:
+
+* **Machine token canceled**: the run stops, the `HandleStateChanged()` hook receives a terminal `Canceled`
+  notification, and `OperationCanceledException` propagates to the `Execute()` caller. See
+  [Cancellation Behavior](#cancellation-behavior).
+* **Any other `OperationCanceledException`** is handled like a regular state error: it is routed to `HandleError()`
+  and the machine continues with the recovery transition (`GoBack()` by default, see
+  [State Machine Error Handling](#state-machine-error-handling)).
+
+Consider a state that guards a long operation with its own timeout:
+
+```csharp
+public class LoadingState : StateBase
+{
+    public override async UniTask<StateTransitionInfo> Execute(CancellationToken token)
+    {
+        // Internal timeout, linked to the state machine token
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+        timeoutCts.CancelAfter(TimeSpan.FromSeconds(10));
+
+        await LoadDataAsync(timeoutCts.Token);
+
+        return Transition.GoTo<MenuState>();
+    }
+}
+```
+
+When the timeout fires, `LoadDataAsync` throws `OperationCanceledException` while the state machine token is still
+alive:
+
+* **Before 1.12.0**: the state machine silently stopped, exactly as if it had been canceled from outside.
+* **1.12.0 and later**: `HandleError()` is called with `StateMachineErrorType.StateExecuting`, then the machine
+  recovers via `BuildRecoveryTransition()` and keeps running.
+
+If you relied on throwing `OperationCanceledException` from inside a state to stop the whole machine, cancel the
+state machine token instead, or return `Transition.GoToExit()`.
+
+Other behavioral changes in 1.12.0:
+
+* Exceptions thrown from `Disposables` no longer prevent the remaining items from being disposed: everything is
+  disposed, then the first error is rethrown (or an `AggregateException` if there were several).
+* A failing substate no longer interrupts its siblings: all substates of a composite state complete `Initialize()`,
+  `Execute()` and `Exit()`, and every collected error is reported instead of being lost.
+* An exception thrown from `HandleError()` stops the machine and reaches the `Execute()` caller exactly once.
 
 ### Upgrading from Versions < 1.5.0
 

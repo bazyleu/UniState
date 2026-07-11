@@ -94,5 +94,39 @@ namespace UniStateTests.EditMode.Disposables
         {
             Assert.DoesNotThrow(() => DisposableListExtensions.Dispose(null));
         }
+
+        [Test]
+        public void Dispose_WhenItemThrows_DisposesRemainingAndRethrows()
+        {
+            var callOrder = new List<int>();
+            var disposables = new List<IDisposable>
+            {
+                new DisposableSpy(() => callOrder.Add(1)),
+                new DisposableSpy(() => throw new InvalidOperationException("Dispose failure")),
+                new DisposableSpy(() => callOrder.Add(3))
+            };
+
+            var exception = Assert.Throws<InvalidOperationException>(() => disposables.Dispose());
+
+            Assert.AreEqual("Dispose failure", exception.Message);
+            CollectionAssert.AreEqual(new[] { 3, 1 }, callOrder);
+        }
+
+        [Test]
+        public void Dispose_WhenMultipleItemsThrow_ThrowsAggregateException()
+        {
+            var disposedCount = 0;
+            var disposables = new List<IDisposable>
+            {
+                new DisposableSpy(() => throw new InvalidOperationException("First failure")),
+                new DisposableSpy(() => disposedCount++),
+                new DisposableSpy(() => throw new InvalidOperationException("Second failure"))
+            };
+
+            var exception = Assert.Throws<AggregateException>(() => disposables.Dispose());
+
+            Assert.AreEqual(2, exception.InnerExceptions.Count);
+            Assert.AreEqual(1, disposedCount);
+        }
     }
 }

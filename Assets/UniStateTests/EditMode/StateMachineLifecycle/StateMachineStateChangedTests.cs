@@ -67,6 +67,42 @@ namespace UniStateTests.EditMode.StateMachineLifecycle
         }
 
         [Test]
+        public void Execute_WhenTokenCanceled_ReportsCanceledChange()
+        {
+            var resolver = new TestResolver();
+            var stateMachine = new TrackingStateMachine();
+            stateMachine.SetResolver(resolver);
+
+            using var cts = new CancellationTokenSource();
+            resolver.CancelScenario.Source = cts;
+
+            var canceled = false;
+
+            try
+            {
+                stateMachine.Execute<CancelingState>(cts.Token).GetAwaiter().GetResult();
+            }
+            catch (OperationCanceledException)
+            {
+                canceled = true;
+            }
+
+            Assert.IsTrue(canceled);
+            Assert.False(stateMachine.IsExecuting);
+
+            Assert.AreEqual(2, stateMachine.Changes.Count);
+
+            Assert.AreEqual(StateMachineStateChangeType.Started, stateMachine.Changes[0].ChangeType);
+            Assert.AreEqual(typeof(CancelingState), stateMachine.Changes[0].CurrentStateType);
+
+            Assert.AreEqual(StateMachineStateChangeType.Canceled, stateMachine.Changes[1].ChangeType);
+            Assert.AreEqual(typeof(CancelingState), stateMachine.Changes[1].PreviousStateType);
+            Assert.IsNull(stateMachine.Changes[1].CurrentStateType);
+            Assert.IsNull(stateMachine.Changes[1].CurrentTransition);
+            Assert.IsNull(stateMachine.Changes[1].RequestedTransition);
+        }
+
+        [Test]
         public void Execute_WhenStateChangedHandlerThrows_ClearsExecutionStatus()
         {
             var stateMachine = new ThrowingStateChangedStateMachine();
@@ -146,6 +182,8 @@ namespace UniStateTests.EditMode.StateMachineLifecycle
         {
             private readonly BackScenario _backScenario = new();
 
+            public CancelScenario CancelScenario { get; } = new();
+
             public object Resolve(Type type)
             {
                 if (type == typeof(FirstState))
@@ -166,6 +204,11 @@ namespace UniStateTests.EditMode.StateMachineLifecycle
                 if (type == typeof(BackSecondState))
                 {
                     return new BackSecondState();
+                }
+
+                if (type == typeof(CancelingState))
+                {
+                    return new CancelingState(CancelScenario);
                 }
 
                 throw new InvalidOperationException(type.FullName);
@@ -208,6 +251,29 @@ namespace UniStateTests.EditMode.StateMachineLifecycle
         private sealed class BackScenario
         {
             public int FirstStateExecutions { get; set; }
+        }
+
+        private sealed class CancelScenario
+        {
+            public CancellationTokenSource Source { get; set; }
+        }
+
+        private sealed class CancelingState : StateBase
+        {
+            private readonly CancelScenario _scenario;
+
+            public CancelingState(CancelScenario scenario)
+            {
+                _scenario = scenario;
+            }
+
+            public override UniTask<StateTransitionInfo> Execute(CancellationToken token)
+            {
+                _scenario.Source.Cancel();
+                token.ThrowIfCancellationRequested();
+
+                return UniTask.FromResult(Transition.GoToExit());
+            }
         }
 
         private sealed class BackFirstState : StateBase

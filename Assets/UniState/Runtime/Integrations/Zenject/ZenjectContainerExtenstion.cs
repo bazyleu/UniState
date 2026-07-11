@@ -45,7 +45,7 @@ namespace UniState
         {
             if (typeof(TInterface) == typeof(TStateMachine))
                 throw new ArgumentException(
-                    $"BindStateMachine<{typeof(TInterface).Name}>: Type parameters must differ : use BindStateMachine<Interface, Implementation>() where Implementation implements Interface.\");");
+                    $"BindStateMachine<{typeof(TInterface).Name}>: Type parameters must differ: use BindStateMachine<Interface, Implementation>() where Implementation implements Interface.");
 
             var interfaceBinder = container.Bind<TInterface>().FromMethod(ctx =>
             {

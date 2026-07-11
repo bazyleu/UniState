@@ -38,8 +38,14 @@ namespace UniState
 
         public override void Dispose()
         {
-            base.Dispose();
-            _subStatesContainer.Dispose();
+            try
+            {
+                base.Dispose();
+            }
+            finally
+            {
+                _subStatesContainer.Dispose();
+            }
         }
     }
 }

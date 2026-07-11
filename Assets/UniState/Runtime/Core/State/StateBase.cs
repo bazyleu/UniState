@@ -39,8 +39,10 @@ namespace UniState
 
         public virtual void Dispose()
         {
-            _disposables.Dispose();
+            var disposables = _disposables;
             _disposables = null;
+
+            disposables.Dispose();
         }
     }
 }

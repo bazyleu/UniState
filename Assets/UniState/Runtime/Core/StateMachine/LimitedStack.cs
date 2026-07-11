@@ -4,17 +4,19 @@ namespace UniState
 {
     public class LimitedStack<T>
     {
-        private readonly  T[] _items;
+        private readonly T[] _items;
         private readonly int _maxSize;
         private int _topIndex = 0;
         private int _bottomIndex = 0;
 
         private bool HasSize => _maxSize > 0;
 
+        public int MaxSize => _maxSize;
+
         public LimitedStack(int maxSize)
         {
             _maxSize = maxSize;
-            _items = new T[_maxSize];
+            _items = maxSize > 0 ? new T[maxSize] : Array.Empty<T>();
         }
 
         public int Count() => _topIndex - _bottomIndex;
@@ -65,38 +67,31 @@ namespace UniState
             return result;
         }
 
+        public void Clear()
+        {
+            if (HasSize)
+            {
+                Array.Clear(_items, 0, _maxSize);
+            }
+
+            _topIndex = 0;
+            _bottomIndex = 0;
+        }
+
         public T[] ToArray()
         {
-            var res = new T[Count()];
+            var count = Count();
 
-            if (_bottomIndex == _topIndex)
+            if (count == 0)
             {
                 return Array.Empty<T>();
             }
 
-            if (_topIndex < _maxSize)
-            {
-                Array.Copy(_items, res, Count());
-            }
-            else
-            {
-                var remainderSize = _maxSize - (_bottomIndex % _maxSize);
+            var res = new T[count];
 
-                Array.Copy(
-                    sourceArray: _items,
-                    sourceIndex: _bottomIndex % _maxSize,
-                    destinationArray: res,
-                    destinationIndex: 0,
-                    length: remainderSize
-                );
-
-                Array.Copy(
-                    sourceArray: _items,
-                    sourceIndex: 0,
-                    destinationArray: res,
-                    destinationIndex: remainderSize,
-                    length: _topIndex % _maxSize
-                );
+            for (var i = 0; i < count; i++)
+            {
+                res[i] = _items[(_bottomIndex + i) % _maxSize];
             }
 
             return res;

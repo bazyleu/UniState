@@ -30,6 +30,27 @@ namespace UniStateTests.PlayMode.SubStateTests
                 await RunAndVerify<IStateMachineMultipleSubStateDisposeFailure, MultipleDisposeFailureCompositeState>();
             });
 
+        [UnityTest]
+        public IEnumerator RunCompositeState_SlowSubStateIgnoresCancellation_ExecuteFinishesBeforeDispose() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                await RunAndVerify<IStateMachineCompositeDrain, DrainCompositeState>();
+            });
+
+        [UnityTest]
+        public IEnumerator RunCompositeState_LosingSubStateThrowsAfterWinner_HandlesStateExecutingError() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                await RunAndVerify<IStateMachineCompositeLoserFailure, LoserFailureCompositeState>();
+            });
+
+        [UnityTest]
+        public IEnumerator RunCompositeState_SubStateInitializeThrows_WaitsAllInitializeBeforeError() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                await RunAndVerify<IStateMachineCompositeInitFailure, InitFailureCompositeState>();
+            });
+
         protected override void SetupBindings(ContainerBuilder builder)
         {
             base.SetupBindings(builder);
@@ -41,6 +62,15 @@ namespace UniStateTests.PlayMode.SubStateTests
             builder.RegisterStateMachine(
                 typeof(StateMachineMultipleSubStateDisposeFailure),
                 typeof(IStateMachineMultipleSubStateDisposeFailure));
+            builder.RegisterStateMachine(
+                typeof(StateMachineCompositeDrain),
+                typeof(IStateMachineCompositeDrain));
+            builder.RegisterStateMachine(
+                typeof(StateMachineCompositeLoserFailure),
+                typeof(IStateMachineCompositeLoserFailure));
+            builder.RegisterStateMachine(
+                typeof(StateMachineCompositeInitFailure),
+                typeof(IStateMachineCompositeInitFailure));
 
             builder.RegisterState(typeof(StateInitial));
             builder.RegisterState(typeof(StateFinal));
@@ -56,6 +86,16 @@ namespace UniStateTests.PlayMode.SubStateTests
             builder.RegisterState(typeof(MultipleFirstThrowingDisposeSubState));
             builder.RegisterState(typeof(MultipleSecondThrowingDisposeSubState));
             builder.RegisterState(typeof(MultipleSuccessfulDisposeSubState));
+
+            builder.RegisterState(typeof(DrainCompositeState));
+            builder.RegisterState(typeof(DrainWinnerSubState));
+            builder.RegisterState(typeof(DrainSlowLoserSubState));
+            builder.RegisterState(typeof(LoserFailureCompositeState));
+            builder.RegisterState(typeof(FailureWinnerSubState));
+            builder.RegisterState(typeof(ThrowingLoserSubState));
+            builder.RegisterState(typeof(InitFailureCompositeState));
+            builder.RegisterState(typeof(FailingInitSubState));
+            builder.RegisterState(typeof(SlowInitSubState));
         }
     }
 }

@@ -40,11 +40,35 @@ namespace UniStateTests.EditMode.Disposables
             }
         }
 
+        private class ManualDisposablesState : StateBase
+        {
+            public void AddDisposable(Action action) => Disposables.Add(action);
+
+            public override UniTask<StateTransitionInfo> Execute(CancellationToken token) =>
+                UniTask.FromResult(Transition.GoToExit());
+        }
+
         [Test]
         public void Dispose_DisposesInternalList() => CheckDisposeIsCalled<DisposablesState>();
 
         [Test]
         public void Execute_WithException_DisposesInternalList() => CheckDisposeIsCalled<ExceptionDisposableState>();
+
+        [Test]
+        public void Dispose_WhenDisposableThrows_DisposesRemainingAndSecondDisposeIsNoOp()
+        {
+            var disposeCount = 0;
+            var state = new ManualDisposablesState();
+
+            state.AddDisposable(() => disposeCount++);
+            state.AddDisposable(() => throw new InvalidOperationException("Dispose failure"));
+
+            Assert.Throws<InvalidOperationException>(() => state.Dispose());
+            Assert.AreEqual(1, disposeCount);
+
+            Assert.DoesNotThrow(() => state.Dispose());
+            Assert.AreEqual(1, disposeCount);
+        }
 
         private void CheckDisposeIsCalled<TState>()
             where TState : DisposablesState
