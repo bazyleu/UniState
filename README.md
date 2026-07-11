@@ -182,7 +182,7 @@ That's it! Your first UniState project is set up. You can find a more detailed w
 You can add `https://github.com/bazyleu/UniState.git?path=Assets/UniState` to Package Manager.
 
 It is a good practice to specify target version, UniState uses the `*.*.*` release tag so you can specify a version
-like `#1.11.0`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.11.0`.
+like `#1.12.0`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.12.0`.
 You can find latest version number [here](https://github.com/bazyleu/UniState/releases).
 
 ![image](https://github.com/user-attachments/assets/120e6750-1f33-44f7-99c8-a3e7fa166d21)
