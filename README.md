@@ -88,6 +88,7 @@ pattern or be used to address specific tasks.
         + [Step 2: Create entry point](#step-2-create-entry-point)
         + [Step 3: Configure VContainer](#step-3-configure-vcontainer)
         + [Step 4: Set up the scene](#step-4-set-up-the-scene)
+- [Changelog](#changelog)
 - [Upgrade Guide](#upgrade-guide)
     * [Upgrading from Versions < 1.11.0](#upgrading-from-versions--1110)
     * [Upgrading from Versions < 1.5.0](#upgrading-from-versions--150)
@@ -1678,6 +1679,12 @@ Need to roll 5+. Rolling the dice...
 Dice is 6
 Congratulations! You won this game!
 ```
+
+## Changelog
+
+All notable changes are recorded in [CHANGELOG.md](CHANGELOG.md): one section per release, newest first, with
+unreleased changes collected on top. Breaking changes are marked explicitly there, and those that require code
+changes on your side are explained in the [Upgrade Guide](#upgrade-guide) below.
 
 ## Upgrade Guide
 
