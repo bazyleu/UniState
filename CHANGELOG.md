@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.12.1]
+
+### Changed
+- Default `StateMachine.HandleError` logs the exception through `Debug.LogException` instead of `Debug.LogError`
+
+
 ## [1.12.0]
 
 ### Added

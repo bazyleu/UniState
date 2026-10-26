@@ -183,7 +183,7 @@ That's it! Your first UniState project is set up. You can find a more detailed w
 You can add `https://github.com/bazyleu/UniState.git?path=Assets/UniState` to Package Manager.
 
 It is a good practice to specify target version, UniState uses the `*.*.*` release tag so you can specify a version
-like `#1.12.0`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.12.0`.
+like `#1.12.1`. For example `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.12.1`.
 You can find latest version number [here](https://github.com/bazyleu/UniState/releases).
 
 ![image](https://github.com/user-attachments/assets/120e6750-1f33-44f7-99c8-a3e7fa166d21)
@@ -192,7 +192,7 @@ You can find latest version number [here](https://github.com/bazyleu/UniState/re
 ### Option 2: Add via manifest.json
 
 You can add `"com.bazyleu.unistate": "https://github.com/bazyleu/UniState.git?path=Assets/UniState"` (or with version
-tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.9.0`) to `Packages/manifest.json`.
+tag `https://github.com/bazyleu/UniState.git?path=Assets/UniState#1.12.1`) to `Packages/manifest.json`.
 
 ## Performance
 
@@ -1285,7 +1285,7 @@ In UniState, state machine error handling can be customized to control how excep
 primary mechanism for this is the `HandleError()` method, which you can override in your custom state machine. This
 method is called whenever an exception occurs, allowing you to define specific logic to handle errors.
 
-By default, `HandleError()` writes every captured exception to the Unity Console via `UnityEngine.Debug.LogError`.
+By default, `HandleError()` writes every captured exception to the Unity Console via `UnityEngine.Debug.LogException`.
 Override this method if you need custom logic for exceptions.
 
 ```csharp
@@ -1299,7 +1299,7 @@ public class BarStateMachine : StateMachine
 ```
 
 Exceptions are processed internally without propagating further. By default this means logging to the Unity Console
-through `Debug.LogError`. `StateMachineErrorData` provides metadata related to exceptions, and
+through `Debug.LogException`. `StateMachineErrorData` provides metadata related to exceptions, and
 `StateMachineErrorData.State` may be `null` if `StateMachineErrorType` is set to `StateMachineFail`.
 If a state or substate throws during `Dispose()`, the error is reported as `StateMachineErrorType.StateDisposing`.
 Multiple substate dispose failures are reported as an `AggregateException`.
