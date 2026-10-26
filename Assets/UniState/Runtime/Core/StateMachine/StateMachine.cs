@@ -37,7 +37,7 @@ namespace UniState
 
         protected virtual void HandleError(StateMachineErrorData errorData)
         {
-            UnityEngine.Debug.LogError(errorData.Exception);
+            UnityEngine.Debug.LogException(errorData.Exception);
         }
 
         protected virtual StateTransitionInfo BuildRecoveryTransition(IStateTransitionFactory transitionFactory) =>
